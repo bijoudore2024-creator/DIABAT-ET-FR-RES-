@@ -180,7 +180,7 @@
         min-height: 0;
     }
     .sidebar-nav {
-        padding: 0.6rem;
+        padding: 0.6rem 0.6rem 2.2rem;
         display: flex; flex-direction: column; gap: 2px;
         height: 100%;
         overflow-y: auto;
@@ -222,7 +222,7 @@
     }
     .sidebar-link {
         display: flex; align-items: center; gap: 12px;
-        padding: 11px 12px;
+        padding: 9px 12px;
         border-radius: 9px;
         color: var(--header-text-muted);
         background: none; border: none;
@@ -237,7 +237,7 @@
     .sidebar-link:hover { background: rgba(255,255,255,0.05); color: var(--header-text); }
     .sidebar-link.active { background: rgba(34,139,34,0.14); color: var(--accent-soft); }
     .sidebar-sep { height: 1px; background: var(--header-line); margin: 8px 12px; }
-    .sidebar-group-label { padding: 10px 16px 4px; font-size: 0.72em; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted); opacity: 0.7; }
+    .sidebar-group-label { padding: 7px 16px 2px; font-size: 0.7em; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted); opacity: 0.7; }
     .placeholder-panel {
         border: 1px dashed var(--line);
         border-radius: 12px;
@@ -2147,6 +2147,7 @@ function applyRolePermissions() {
     });
     const usersPanel = document.getElementById('usersPanel');
     if (usersPanel) usersPanel.style.display = isAdmin() ? '' : 'none';
+    if (typeof updateSidebarScrollHint === 'function') setTimeout(updateSidebarScrollHint, 0);
 }
 
 async function fetchOrCreateProfile(user, fallbackName) {
