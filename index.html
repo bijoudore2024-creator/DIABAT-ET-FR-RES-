@@ -4,6 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Diabaté et Frères Sarl - Gestion Pharmacie</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0a3d22">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Pharmacie Diabaté">
+<link rel="apple-touch-icon" href="icon-192.png">
 <link rel="icon" type="image/png" href="data:image/png;base64,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">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -377,6 +384,52 @@
         align-items: center;
         justify-content: center;
         padding: 20px;
+    }
+
+    /* ---------- Assistant IA locale (LM Studio) ---------- */
+    .ai-chat-toggle {
+        position: fixed; right: 18px; bottom: 18px; z-index: 300;
+        width: 54px; height: 54px; border-radius: 50%; border: none;
+        background: linear-gradient(180deg, var(--header-bg-2), var(--header-bg));
+        color: var(--accent-soft); cursor: pointer;
+        display: flex; align-items: center; justify-content: center;
+        box-shadow: 0 8px 20px rgba(10,61,34,0.35);
+        transition: transform 0.15s;
+    }
+    .ai-chat-toggle:hover { transform: scale(1.05); }
+    .ai-chat-toggle svg { width: 24px; height: 24px; }
+    .ai-chat-panel {
+        display: none;
+        position: fixed; right: 18px; bottom: 84px; z-index: 300;
+        width: min(360px, calc(100vw - 36px));
+        height: min(520px, calc(100vh - 140px));
+        background: var(--panel); border: 1px solid var(--line); border-radius: 16px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+        flex-direction: column; overflow: hidden;
+    }
+    .ai-chat-panel.open { display: flex; }
+    .ai-chat-header {
+        background: linear-gradient(180deg, var(--header-bg-2), var(--header-bg));
+        color: var(--header-text); padding: 12px 14px;
+        display: flex; align-items: center; justify-content: space-between;
+        font-family: 'Fraunces', serif; font-weight: 600; font-size: 0.98em;
+    }
+    .ai-chat-sub { font-family: 'Work Sans', sans-serif; font-weight: 400; font-size: 0.7em; color: var(--header-text-muted); display: block; }
+    .ai-chat-close { background: none; border: none; color: var(--header-text); cursor: pointer; font-size: 1.1em; padding: 2px 6px; }
+    .ai-chat-messages { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+    .ai-chat-msg { max-width: 85%; padding: 9px 12px; border-radius: 12px; font-size: 0.87em; line-height: 1.45; white-space: pre-wrap; }
+    .ai-chat-msg.user { align-self: flex-end; background: var(--accent); color: #fff; border-bottom-right-radius: 3px; }
+    .ai-chat-msg.assistant { align-self: flex-start; background: var(--panel-2); border: 1px solid var(--line); border-bottom-left-radius: 3px; }
+    .ai-chat-msg.error { align-self: center; background: var(--danger-bg); color: var(--danger); font-size: 0.82em; text-align: center; }
+    .ai-chat-msg.thinking { align-self: flex-start; color: var(--text-muted); font-style: italic; }
+    .ai-chat-not-configured { padding: 12px 14px; font-size: 0.85em; color: var(--text-muted); border-top: 1px solid var(--line); text-align: center; }
+    .ai-chat-link { background: none; border: none; color: var(--accent-dim); text-decoration: underline; cursor: pointer; font-size: 1em; padding: 0; }
+    .ai-chat-input-row { display: flex; gap: 8px; padding: 10px; border-top: 1px solid var(--line); }
+    .ai-chat-input-row input { margin: 0; flex: 1; }
+    .ai-chat-input-row .btn { padding: 9px 14px; }
+    @media (max-width: 480px) {
+        .ai-chat-panel { right: 10px; bottom: 78px; }
+        .ai-chat-toggle { right: 12px; bottom: 12px; }
     }
     .action-modal-overlay.open { display: flex; }
     .action-modal {
@@ -1033,6 +1086,10 @@
         margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--line);
         font-size: 0.72em; color: var(--text-muted); text-align: center; line-height: 1.5;
     }
+    .auth-dev-credit {
+        margin-top: 10px; font-size: 0.66em; color: var(--text-muted);
+        text-align: center; opacity: 0.75; letter-spacing: 0.02em;
+    }
 
     /* ---------- Badge utilisateur + statut sync (header) ---------- */
     .sync-status {
@@ -1151,6 +1208,7 @@
             <button id="authSwitchBtn" onclick="toggleAuthMode()">Créer un compte</button>
         </div>
         <p class="auth-offline-note" id="authOfflineNote"></p>
+        <p class="auth-dev-credit">Développé par HABATECH · 627 54 19 25</p>
     </div>
 </div>
 
@@ -2181,6 +2239,36 @@
             </details>
         </div>
 
+        <div class="fin-panel" style="margin-top:20px;">
+            <h3 style="margin-top:0;">Assistant IA locale (LM Studio)</h3>
+            <p style="color:var(--text-muted); font-size:0.9em; margin-top:-8px;">
+                Connecte l'application à un serveur LM Studio (local ou sur un autre ordinateur du réseau) pour activer l'assistant IA. L'assistant peut répondre à des questions générales et consulter le stock, les ventes et les créances clients pour donner des réponses précises.
+            </p>
+            <div id="settAiStatus" style="margin:10px 0; padding:10px 14px; border-radius:8px; font-size:0.9em;"></div>
+            <label style="display:block; font-size:0.85em; color:var(--text-muted); margin-bottom:4px;">Adresse du serveur LM Studio</label>
+            <input type="text" id="settAiUrl" placeholder="http://localhost:1234/v1 ou http://192.168.1.10:1234/v1">
+            <label style="display:block; font-size:0.85em; color:var(--text-muted); margin:10px 0 4px;">Nom du modèle chargé dans LM Studio</label>
+            <input type="text" id="settAiModel" placeholder="ex : llama-3.1-8b-instruct">
+            <label style="display:flex; align-items:center; gap:8px; font-size:0.9em; color:var(--text-muted); margin-top:10px;">
+                <input type="checkbox" id="settAiIncludeData" style="width:auto;"> Autoriser l'IA à consulter les données de la pharmacie (stock, ventes, clients)
+            </label>
+            <div style="display:flex; gap:10px; margin-top:12px; flex-wrap:wrap;">
+                <button class="btn btn-success" onclick="saveAiConfig()" style="width:auto;">Enregistrer</button>
+                <button class="btn" onclick="testAiConnection()" style="width:auto;">Tester la connexion</button>
+                <button class="btn" onclick="clearAiConfig()" style="width:auto;">Déconnecter / Effacer</button>
+            </div>
+            <details style="margin-top:16px;">
+                <summary style="cursor:pointer; color:var(--text-muted); font-size:0.9em;">Comment configurer LM Studio ?</summary>
+                <ol style="font-size:0.85em; color:var(--text-muted); line-height:1.7;">
+                    <li>Installe et ouvre <strong>LM Studio</strong> sur un ordinateur (télécharge un modèle, ex : Llama 3.1 8B Instruct)</li>
+                    <li>Dans l'onglet <em>Local Server</em>, clique sur "Start Server" (par défaut sur le port 1234)</li>
+                    <li>Si l'application est ouverte sur le <strong>même ordinateur</strong> que LM Studio, utilise <code>http://localhost:1234/v1</code></li>
+                    <li>Si l'application est ouverte sur un <strong>autre appareil</strong> du réseau (téléphone, autre PC), utilise l'adresse IP locale de l'ordinateur qui fait tourner LM Studio, ex : <code>http://192.168.1.10:1234/v1</code> — assure-toi que le pare-feu autorise les connexions entrantes sur ce port</li>
+                    <li>Renseigne le nom exact du modèle chargé (visible en haut de LM Studio), puis clique sur "Tester la connexion"</li>
+                </ol>
+            </details>
+        </div>
+
         <div class="fin-panel" id="dangerZonePanel" style="display:none; margin-top:20px; border-color: rgba(224,99,106,0.4);">
             <h3 style="margin-top:0; color:var(--danger);">⚠ Zone de danger</h3>
             <p style="color:var(--text-muted); font-size:0.9em; margin-top:-8px;">
@@ -2235,6 +2323,25 @@
             <button class="btn btn-sms" id="saleActionSmsBtn">✉️ Envoyer par SMS</button>
         </div>
         <button class="action-modal-close" onclick="closeSaleActionModal()">Fermer</button>
+    </div>
+</div>
+
+<!-- Assistant IA locale (LM Studio) -->
+<button id="aiChatToggle" class="ai-chat-toggle" onclick="toggleAiChat()" aria-label="Assistant IA" title="Assistant IA">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+</button>
+<div id="aiChatPanel" class="ai-chat-panel">
+    <div class="ai-chat-header">
+        <span>🤖 Assistant IA <span class="ai-chat-sub" id="aiChatModelLabel"></span></span>
+        <button class="ai-chat-close" onclick="toggleAiChat()" aria-label="Fermer">✕</button>
+    </div>
+    <div id="aiChatMessages" class="ai-chat-messages"></div>
+    <div id="aiChatNotConfigured" class="ai-chat-not-configured" style="display:none;">
+        Assistant non configuré. Ouvre <button class="ai-chat-link" onclick="openTab(15); toggleAiChat();">Paramètres</button> pour connecter LM Studio.
+    </div>
+    <div class="ai-chat-input-row">
+        <input type="text" id="aiChatInput" placeholder="Pose ta question..." onkeydown="if(event.key==='Enter'){sendAiChatMessage();}">
+        <button class="btn btn-primary" id="aiChatSendBtn" onclick="sendAiChatMessage()" style="width:auto;">Envoyer</button>
     </div>
 </div>
 
@@ -2480,7 +2587,7 @@ async function fetchOrCreateProfile(user, fallbackName) {
                 });
             if (insertErr) {
                 console.error('Erreur d\'insertion du profil :', insertErr);
-                alert('Impossible de créer ton profil (' + (insertErr.message || 'erreur inconnue') + '). Contacte HABATECH avec ce message.');
+                alert('Impossible de créer ton profil (' + (insertErr.message || 'erreur inconnue') + '). Contacte HABATECH (627 54 19 25) avec ce message.');
                 throw insertErr;
             }
             const { data: reread, error: rereadErr } = await supabaseClient
@@ -2712,7 +2819,7 @@ async function handleAuthSubmit() {
     errBox.classList.remove('show');
 
     if (!SUPABASE_CONFIGURED) {
-        errBox.textContent = 'La synchronisation multi-appareils n\'est pas encore configurée sur cette copie de l\'application. Contacte la personne qui gère HABATECH pour l\'activer.';
+        errBox.textContent = 'La synchronisation multi-appareils n\'est pas encore configurée sur cette copie de l\'application. Contacte HABATECH (627 54 19 25) pour l\'activer.';
         errBox.classList.add('show');
         return;
     }
@@ -2996,7 +3103,8 @@ if (!Array.isArray(data.expenses)) data.expenses = [];
 if (!Array.isArray(data.creditPayments)) data.creditPayments = [];
 if (typeof data.logo !== 'string') data.logo = '';
 if (!data.settings || typeof data.settings !== 'object') data.settings = {};
-if (!data.settings.pharmacy) data.settings.pharmacy = { nom: 'Diabaté & Frères Sarl', adresse: '', telephone: '', email: '', rccm: '' };
+if (!data.settings.pharmacy) data.settings.pharmacy = { nom: 'Diabaté & Frères Sarl', adresse: 'Grande gare routière, Siguiri, Guinée', telephone: '628 60 81 44', email: '', rccm: '' };
+if (!data.settings.ai || typeof data.settings.ai !== 'object') data.settings.ai = { url: '', model: '', includeData: true };
 if (typeof data.settings.lowStockThreshold !== 'number') data.settings.lowStockThreshold = 20;
 if (typeof data.settings.expiryAlertDays !== 'number') data.settings.expiryAlertDays = 90;
 
@@ -3138,6 +3246,12 @@ function renderSettingsTab() {
     document.getElementById('settSupabaseUrl').value = (SUPABASE_URL === DEFAULT_SUPABASE_URL) ? '' : SUPABASE_URL;
     document.getElementById('settSupabaseKey').value = (SUPABASE_ANON_KEY === DEFAULT_SUPABASE_ANON_KEY) ? '' : SUPABASE_ANON_KEY;
 
+    const ai = data.settings.ai || {};
+    document.getElementById('settAiUrl').value = ai.url || '';
+    document.getElementById('settAiModel').value = ai.model || '';
+    document.getElementById('settAiIncludeData').checked = ai.includeData !== false;
+    renderAiStatus();
+
     renderSettingsLogo();
     renderSupabaseStatus();
     applyRolePermissions();
@@ -3164,6 +3278,182 @@ function renderSupabaseStatus() {
         el.style.background = 'var(--warn-bg)';
         el.style.color = 'var(--warn)';
         el.textContent = '○ Non configuré — l\'application fonctionne en local sur cet appareil uniquement.';
+    }
+}
+
+// ---------- Assistant IA locale (LM Studio) ----------
+function renderAiStatus() {
+    const el = document.getElementById('settAiStatus');
+    if (!el) return;
+    const ai = data.settings.ai || {};
+    if (ai.url && ai.model) {
+        el.style.background = 'var(--ok-bg)';
+        el.style.color = 'var(--ok)';
+        el.textContent = `✓ Configuré — ${ai.model} sur ${ai.url}`;
+    } else {
+        el.style.background = 'var(--warn-bg)';
+        el.style.color = 'var(--warn)';
+        el.textContent = '○ Non configuré — l\'assistant IA est indisponible tant que l\'adresse et le modèle ne sont pas renseignés.';
+    }
+    const modelLabel = document.getElementById('aiChatModelLabel');
+    if (modelLabel) modelLabel.textContent = ai.model ? `— ${ai.model}` : '';
+}
+
+function saveAiConfig() {
+    const url = document.getElementById('settAiUrl').value.trim().replace(/\/+$/, '');
+    const model = document.getElementById('settAiModel').value.trim();
+    const includeData = document.getElementById('settAiIncludeData').checked;
+    data.settings.ai = { url, model, includeData };
+    saveData();
+    renderAiStatus();
+    alert('Configuration de l\'assistant IA enregistrée.');
+}
+
+function clearAiConfig() {
+    data.settings.ai = { url: '', model: '', includeData: true };
+    document.getElementById('settAiUrl').value = '';
+    document.getElementById('settAiModel').value = '';
+    document.getElementById('settAiIncludeData').checked = true;
+    saveData();
+    renderAiStatus();
+}
+
+async function testAiConnection() {
+    const url = document.getElementById('settAiUrl').value.trim().replace(/\/+$/, '');
+    const model = document.getElementById('settAiModel').value.trim();
+    if (!url || !model) { alert('Renseigne l\'adresse du serveur et le nom du modèle avant de tester.'); return; }
+    try {
+        const res = await fetch(url + '/chat/completions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                model,
+                messages: [{ role: 'user', content: 'Réponds uniquement "OK" pour confirmer que tu fonctionnes.' }],
+                max_tokens: 10,
+                temperature: 0
+            })
+        });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const json = await res.json();
+        const reply = json.choices?.[0]?.message?.content || '(réponse vide)';
+        alert('✓ Connexion réussie.\nRéponse du modèle : ' + reply.trim());
+    } catch (err) {
+        alert('✗ Connexion échouée : ' + err.message + '\n\nVérifie que LM Studio est lancé, que le serveur local est démarré, et que l\'adresse (IP/port) est correcte et accessible depuis cet appareil.');
+    }
+}
+
+// Construit un résumé compact des données réelles de la pharmacie,
+// injecté dans le prompt système pour que l'assistant puisse répondre
+// à des questions concrètes (stock, ventes, créances...).
+function buildPharmacyContext() {
+    const p = data.settings.pharmacy || {};
+    const lines = [];
+    lines.push(`Pharmacie : ${p.nom || 'Diabaté & Frères Sarl'} — ${p.adresse || 'Siguiri, Guinée'}`);
+    lines.push(`Date actuelle : ${new Date().toLocaleDateString('fr-FR')}`);
+
+    // Stock : produits en rupture, stock faible, ou proches de la péremption
+    const outOfStock = data.products.filter(pr => pr.stock <= 0);
+    const lowStock = data.products.filter(pr => pr.stock > 0 && pr.stock <= (data.settings.lowStockThreshold || 20));
+    const nearExpiry = data.products.filter(pr => pr.expiry && daysUntil(pr.expiry) <= (data.settings.expiryAlertDays || 90) && daysUntil(pr.expiry) >= 0);
+    lines.push(`\nStock total : ${data.products.length} produits référencés.`);
+    if (outOfStock.length) lines.push(`Ruptures de stock (${outOfStock.length}) : ` + outOfStock.slice(0, 20).map(pr => pr.name).join(', '));
+    if (lowStock.length) lines.push(`Stock faible (${lowStock.length}) : ` + lowStock.slice(0, 20).map(pr => `${pr.name} (${pr.stock})`).join(', '));
+    if (nearExpiry.length) lines.push(`Proches péremption (${nearExpiry.length}) : ` + nearExpiry.slice(0, 20).map(pr => `${pr.name} (${formatDate(pr.expiry)})`).join(', '));
+
+    // Liste complète des produits en stock (nom, stock, prix) — utile pour "combien de X en stock ?"
+    lines.push('\nListe des produits en stock (nom : quantité, prix) :');
+    lines.push(data.products.slice(0, 300).map(pr => `${pr.name} : ${pr.stock} u., ${formatGNF(pr.price)}`).join(' | '));
+
+    // Ventes récentes (7 derniers jours)
+    const weekAgo = new Date(); weekAgo.setDate(weekAgo.getDate() - 7);
+    const recentSales = data.sales.filter(s => new Date(s.date) >= weekAgo);
+    const revenue7d = recentSales.reduce((s, sale) => s + sale.total, 0);
+    lines.push(`\nVentes des 7 derniers jours : ${recentSales.length} vente(s), chiffre d'affaires ${formatGNF(revenue7d)}.`);
+
+    // Créances clients
+    const debtors = data.clients.filter(c => (c.credit || 0) > 0);
+    const totalDebt = debtors.reduce((s, c) => s + c.credit, 0);
+    if (debtors.length) {
+        lines.push(`\nClients avec créance (${debtors.length}), total dû ${formatGNF(totalDebt)} : ` + debtors.slice(0, 20).map(c => `${c.name} (${formatGNF(c.credit)})`).join(', '));
+    }
+
+    return lines.join('\n');
+}
+
+let aiChatHistory = [];
+
+function toggleAiChat() {
+    const panel = document.getElementById('aiChatPanel');
+    const ai = data.settings.ai || {};
+    const notConfigured = document.getElementById('aiChatNotConfigured');
+    const isOpening = !panel.classList.contains('open');
+    panel.classList.toggle('open');
+    if (isOpening) {
+        const configured = !!(ai.url && ai.model);
+        notConfigured.style.display = configured ? 'none' : 'block';
+        document.getElementById('aiChatInput').disabled = !configured;
+        document.getElementById('aiChatSendBtn').disabled = !configured;
+        renderAiStatus();
+        if (configured && aiChatHistory.length === 0) {
+            appendAiChatMessage('assistant', 'Bonjour ! Je suis l\'assistant de la pharmacie. Je peux répondre à tes questions générales, ou consulter le stock, les ventes et les créances si besoin. Comment puis-je t\'aider ?');
+        }
+        document.getElementById('aiChatInput')?.focus();
+    }
+}
+
+function appendAiChatMessage(role, text) {
+    const container = document.getElementById('aiChatMessages');
+    const div = document.createElement('div');
+    div.className = 'ai-chat-msg ' + role;
+    div.textContent = text;
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+    return div;
+}
+
+async function sendAiChatMessage() {
+    const input = document.getElementById('aiChatInput');
+    const text = input.value.trim();
+    if (!text) return;
+    const ai = data.settings.ai || {};
+    if (!ai.url || !ai.model) return;
+
+    appendAiChatMessage('user', text);
+    aiChatHistory.push({ role: 'user', content: text });
+    input.value = '';
+    input.disabled = true;
+    document.getElementById('aiChatSendBtn').disabled = true;
+
+    const thinkingEl = appendAiChatMessage('thinking', 'L\'assistant réfléchit…');
+
+    const systemPrompt = ai.includeData
+        ? `Tu es l'assistant de gestion de la pharmacie Diabaté & Frères Sarl à Siguiri, Guinée. Réponds en français, de façon claire et concise. Voici les données actuelles de la pharmacie, utilise-les pour répondre précisément quand la question s'y prête :\n\n${buildPharmacyContext()}`
+        : `Tu es l'assistant de la pharmacie Diabaté & Frères Sarl à Siguiri, Guinée. Réponds en français, de façon claire et concise.`;
+
+    try {
+        const res = await fetch(ai.url + '/chat/completions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                model: ai.model,
+                messages: [{ role: 'system', content: systemPrompt }, ...aiChatHistory.slice(-12)],
+                temperature: 0.4,
+                max_tokens: 600
+            })
+        });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const json = await res.json();
+        const reply = json.choices?.[0]?.message?.content?.trim() || '(réponse vide)';
+        thinkingEl.remove();
+        appendAiChatMessage('assistant', reply);
+        aiChatHistory.push({ role: 'assistant', content: reply });
+    } catch (err) {
+        thinkingEl.remove();
+        appendAiChatMessage('error', 'Impossible de joindre le serveur LM Studio (' + err.message + '). Vérifie la connexion dans Paramètres.');
+    } finally {
+        input.disabled = false;
+        document.getElementById('aiChatSendBtn').disabled = false;
+        input.focus();
     }
 }
 
@@ -6547,9 +6837,11 @@ function normalizePhoneGN(raw) {
 
 function buildReceiptText(sale) {
     const d = new Date(sale.date);
+    const p = data.settings.pharmacy || {};
     const lines = [];
-    lines.push('*Diabaté & Frères Sarl*');
-    lines.push('Pharmacie · Siguiri, Guinée');
+    lines.push(`*${p.nom || 'Diabaté & Frères Sarl'}*`);
+    if (p.adresse) lines.push(p.adresse);
+    if (p.telephone) lines.push(`Tél : ${p.telephone}`);
     lines.push('');
     lines.push(`Reçu du ${d.toLocaleDateString('fr-FR')} à ${d.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'})}`);
     if (sale.clientName) lines.push(`Client : ${sale.clientName}`);
@@ -6608,6 +6900,7 @@ function closeSaleActionModal() {
 
 function printReceipt(sale) {
     const d = new Date(sale.date);
+    const p = data.settings.pharmacy || {};
     const ref = 'R' + d.getFullYear().toString().slice(-2) + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0')
         + '-' + String(d.getHours()).padStart(2, '0') + String(d.getMinutes()).padStart(2, '0') + String(d.getSeconds()).padStart(2, '0');
     const itemsHtml = sale.items.map(i => `
@@ -6704,8 +6997,8 @@ function printReceipt(sale) {
             </style>
         </head>
         <body>
-            <h2>Diabaté &amp; Frères Sarl</h2>
-            <p class="center tagline">Pharmacie · Siguiri, Guinée</p>
+            <h2>${p.nom || 'Diabaté &amp; Frères Sarl'}</h2>
+            <p class="center tagline">${p.adresse || 'Siguiri, Guinée'}${p.telephone ? ' · Tél : ' + p.telephone : ''}</p>
             <div class="rule"></div>
             <p class="doc-label">Reçu de vente</p>
             <div class="ref-box">
@@ -6794,6 +7087,15 @@ renderSupplierSelects();
 renderGuardPharmacySelect();
 injectShortcutBar(0);
 initAuth();
+
+// ---------- Enregistrement du Service Worker (installation + hors-ligne) ----------
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').catch(err => {
+            console.warn('Service Worker non enregistré :', err);
+        });
+    });
+}
 </script>
 </body>
 </html>
