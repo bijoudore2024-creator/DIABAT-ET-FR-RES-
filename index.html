@@ -837,6 +837,22 @@
     .stat-tile.teal { --tile-accent: var(--teal); --tile-glyph-bg: var(--teal-bg); }
     .stat-tile.red { --tile-accent: var(--danger); --tile-glyph-bg: var(--danger-bg); }
 
+    /* Cartes stat en ligne (icône + texte), utilisées dans l'onglet Finances */
+    .stat-tile { display: flex; flex-direction: column; }
+    .stat-tile.stat-tile-row-layout { flex-direction: row; align-items: flex-start; gap: 12px; }
+    .stat-icon {
+        width: 42px; height: 42px; border-radius: 10px;
+        display: flex; align-items: center; justify-content: center;
+        flex-shrink: 0; background: var(--obsidian-2); color: var(--accent-dim);
+    }
+    .stat-icon svg { width: 20px; height: 20px; }
+    .stat-icon-green { background: var(--ok-bg); color: var(--ok); }
+    .stat-icon-blue { background: var(--blue-bg); color: var(--blue); }
+    .stat-icon-red { background: var(--danger-bg); color: var(--danger); }
+    .stat-text { flex: 1; min-width: 0; }
+    .stat-text .stat-value { margin: 0 0 3px; font-size: 1.3em; }
+    .stat-text .stat-label { display: block; margin-bottom: 2px; }
+
     .alerts-panel {
         background: linear-gradient(180deg, #ffffff, var(--panel));
         border: 1px solid var(--line);
@@ -2005,6 +2021,9 @@
             <input type="date" id="finStart" onchange="renderFinances(true)">
             <span style="color:var(--text-muted);">→</span>
             <input type="date" id="finEnd" onchange="renderFinances(true)">
+            <select id="finCategoryFilter" onchange="renderFinances()" style="max-width:200px;">
+                <option value="">Toutes les catégories</option>
+            </select>
         </div>
 
         <div class="stat-grid" id="financeCards"></div>
@@ -3551,6 +3570,17 @@ function renderCategoryList() {
     dl.innerHTML = categories.map(c => `<option value="${c}">`).join('');
     populateBrowseCategoryFilter();
     renderBrowseProducts();
+    populateFinanceCategoryFilter();
+}
+
+function populateFinanceCategoryFilter() {
+    const select = document.getElementById('finCategoryFilter');
+    if (!select) return;
+    const current = select.value;
+    const categories = [...new Set(data.products.map(p => p.category).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+    select.innerHTML = '<option value="">Toutes les catégories</option>' +
+        categories.map(c => `<option value="${c}">${c}</option>`).join('');
+    if (current && categories.includes(current)) select.value = current;
 }
 
 function populateCatalogCategoryFilter() {
@@ -4791,18 +4821,37 @@ function renderFinances(clearPreset) {
     }
     const start = document.getElementById('finStart').value || null;
     const end = document.getElementById('finEnd').value || null;
+    const categoryFilter = document.getElementById('finCategoryFilter')?.value || '';
 
     if (!start && !end) {
         const allBtn = document.querySelectorAll('#finPresets .btn')[3];
         if (allBtn && !clearPreset) allBtn.classList.add('active');
     }
 
-    const salesInPeriod = data.sales.filter(s => dateInRange(s.date, start, end));
+    const productCategory = code => (data.products.find(p => p.code === code) || {}).category || '';
+
+    const salesInPeriod = data.sales
+        .filter(s => dateInRange(s.date, start, end))
+        .map(s => categoryFilter
+            ? { ...s, items: s.items.filter(it => productCategory(it.code) === categoryFilter) }
+            : s
+        )
+        .map(s => categoryFilter
+            ? { ...s, total: s.items.reduce((sum, it) => sum + it.price * it.qty, 0) }
+            : s
+        )
+        .filter(s => !categoryFilter || s.items.length > 0);
     const revenue = salesInPeriod.reduce((s, sale) => s + sale.total, 0);
     const creditSales = salesInPeriod.filter(s => s.paidOnCredit).reduce((s, sale) => s + sale.total, 0);
     const cashSales = revenue - creditSales;
 
-    const purchasesInPeriod = data.commandes.filter(c => c.status === 'recue' && dateInRange(c.receivedDate, start, end));
+    const purchasesInPeriod = data.commandes
+        .filter(c => c.status === 'recue' && dateInRange(c.receivedDate, start, end))
+        .map(c => categoryFilter
+            ? { ...c, items: c.items.filter(it => productCategory(it.code) === categoryFilter) }
+            : c
+        )
+        .filter(c => !categoryFilter || c.items.length > 0);
     const purchasesCost = purchasesInPeriod.reduce((sum, c) => sum + c.items.reduce((s, it) => s + it.qty * it.unitCost, 0), 0);
 
     const expensesInPeriod = data.expenses.filter(e => dateInRange(e.date, start, end));
@@ -4813,23 +4862,23 @@ function renderFinances(clearPreset) {
 
     const netColor = netResult >= 0 ? 'green' : 'red';
     document.getElementById('financeCards').innerHTML = `
-        <div class="stat-tile green">
+        <div class="stat-tile stat-tile-row-layout green">
             <div class="stat-icon stat-icon-green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12h8"/><path d="M12 8v8"/></svg></div>
             <div class="stat-text">
                 <div class="stat-value">${formatGNF(revenue)}</div>
                 <div class="stat-label">Chiffre d'affaires</div>
-                <div class="stat-sub">${salesInPeriod.length} vente(s) sur la période</div>
+                <div class="stat-sub">${salesInPeriod.length} vente(s)${categoryFilter ? ' — ' + categoryFilter : ' sur la période'}</div>
             </div>
         </div>
-        <div class="stat-tile blue">
+        <div class="stat-tile stat-tile-row-layout blue">
             <div class="stat-icon stat-icon-blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="4" rx="1"/><path d="M5 8v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8"/><path d="M10 12h4"/></svg></div>
             <div class="stat-text">
                 <div class="stat-value">${formatGNF(purchasesCost)}</div>
                 <div class="stat-label">Achats (coût)</div>
-                <div class="stat-sub">${purchasesInPeriod.length} commande(s) reçue(s)</div>
+                <div class="stat-sub">${purchasesInPeriod.length} commande(s)${categoryFilter ? ' — ' + categoryFilter : ' reçue(s)'}</div>
             </div>
         </div>
-        <div class="stat-tile red">
+        <div class="stat-tile stat-tile-row-layout red">
             <div class="stat-icon stat-icon-red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v13"/><path d="M8 11l4 4 4-4"/><path d="M4 21h16"/></svg></div>
             <div class="stat-text">
                 <div class="stat-value">${formatGNF(totalExpenses)}</div>
@@ -4837,7 +4886,7 @@ function renderFinances(clearPreset) {
                 <div class="stat-sub">${expensesInPeriod.length} dépense(s) enregistrée(s)</div>
             </div>
         </div>
-        <div class="stat-tile ${netColor}">
+        <div class="stat-tile stat-tile-row-layout ${netColor}">
             <div class="stat-icon stat-icon-${netColor}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg></div>
             <div class="stat-text">
                 <div class="stat-value">${formatGNF(netResult)}</div>
