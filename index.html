@@ -238,6 +238,31 @@
     .sidebar-link.active { background: rgba(34,139,34,0.14); color: var(--accent-soft); }
     .sidebar-sep { height: 1px; background: var(--header-line); margin: 8px 12px; }
     .sidebar-group-label { padding: 7px 16px 2px; font-size: 0.7em; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted); opacity: 0.7; }
+
+    .shortcut-bar {
+        display: flex; gap: 8px; overflow-x: auto; -webkit-overflow-scrolling: touch;
+        padding: 4px 2px 12px; margin-bottom: 12px;
+        border-bottom: 1px solid var(--line);
+        scrollbar-width: none;
+    }
+    .shortcut-bar::-webkit-scrollbar { display: none; }
+    .shortcut-chip {
+        flex-shrink: 0;
+        display: flex; align-items: center; gap: 6px;
+        padding: 7px 14px;
+        border-radius: 999px;
+        border: 1px solid var(--line);
+        background: var(--card-bg, #fff);
+        color: var(--text);
+        font-family: 'Work Sans', sans-serif;
+        font-size: 0.82em;
+        font-weight: 500;
+        cursor: pointer;
+        white-space: nowrap;
+        transition: background 0.15s, border-color 0.15s;
+    }
+    .shortcut-chip:hover { background: rgba(34,139,34,0.08); border-color: var(--accent, #228B22); }
+    .shortcut-chip span { font-size: 1em; line-height: 1; }
     .placeholder-panel {
         border: 1px dashed var(--line);
         border-radius: 12px;
@@ -2116,6 +2141,52 @@ const TAB_ROLES = {
 };
 const ROLE_LABELS = { admin: 'Admin', pharmacien: 'Pharmacien', caissier: 'Caissier' };
 
+// Libellés + icônes courtes pour la barre de raccourcis rapides (même ordre que le menu).
+const TAB_INFO = {
+    0:  { label: 'Tableau de bord', icon: '🏠' },
+    6:  { label: 'Produits',        icon: '📦' },
+    1:  { label: 'Stock',           icon: '📊' },
+    8:  { label: 'Lots',            icon: '🗂️' },
+    7:  { label: 'Périmés',         icon: '⚠️' },
+    2:  { label: 'Ventes',          icon: '🛒' },
+    11: { label: 'Ordonnances',     icon: '📋' },
+    9:  { label: 'Clients',         icon: '👥' },
+    4:  { label: 'Achats',          icon: '🛍️' },
+    10: { label: 'Fournisseurs',    icon: '🏭' },
+    12: { label: 'Gardes',          icon: '💧' },
+    5:  { label: 'Traçabilité',     icon: '🕒' },
+    13: { label: 'Alertes',         icon: '🔔' },
+    3:  { label: 'Rapports',        icon: '📈' },
+    14: { label: 'Finances',        icon: '💰' },
+    15: { label: 'Paramètres',      icon: '⚙️' }
+};
+const TAB_ORDER = [0, 6, 1, 8, 7, 2, 11, 9, 4, 10, 12, 5, 13, 3, 14, 15];
+
+function renderShortcutBar(currentTab) {
+    const others = TAB_ORDER.filter(function (n) { return n !== currentTab && canAccessTab(n); });
+    if (others.length === 0) return '';
+    const chips = others.map(function (n) {
+        const info = TAB_INFO[n];
+        return '<button class="shortcut-chip" onclick="openTab(' + n + ')">' +
+                    '<span>' + info.icon + '</span>' + info.label +
+               '</button>';
+    }).join('');
+    return '<div class="shortcut-bar">' + chips + '</div>';
+}
+
+function injectShortcutBar(n) {
+    const panel = document.getElementById('tab' + n);
+    if (!panel) return;
+    let bar = panel.querySelector(':scope > .shortcut-bar');
+    const html = renderShortcutBar(n);
+    if (!html) { if (bar) bar.remove(); return; }
+    if (bar) {
+        bar.outerHTML = html;
+    } else {
+        panel.insertAdjacentHTML('afterbegin', html);
+    }
+}
+
 function getUserRole() {
     return (currentUser && currentUser.role) ? currentUser.role : 'admin'; // mode local (pas de Supabase) = accès total
 }
@@ -2148,6 +2219,11 @@ function applyRolePermissions() {
     const usersPanel = document.getElementById('usersPanel');
     if (usersPanel) usersPanel.style.display = isAdmin() ? '' : 'none';
     if (typeof updateSidebarScrollHint === 'function') setTimeout(updateSidebarScrollHint, 0);
+    const activePanel = document.querySelector('.tab-content.active');
+    if (activePanel) {
+        const activeN = parseInt(activePanel.id.replace('tab', ''), 10);
+        injectShortcutBar(activeN);
+    }
 }
 
 async function fetchOrCreateProfile(user, fallbackName) {
@@ -2783,6 +2859,7 @@ function openTab(n) {
     document.querySelectorAll('.sidebar-link').forEach(a => a.classList.remove('active'));
     const panel = document.getElementById('tab' + n);
     if (panel) panel.classList.add('active');
+    injectShortcutBar(n);
     const topBtn = document.querySelectorAll('.tab-button')[n];
     if (topBtn) topBtn.classList.add('active');
     const sideBtn = document.querySelector('.sidebar-link[data-tab="' + n + '"]');
@@ -6116,6 +6193,7 @@ renderCommandeCards();
 renderClientSelect();
 renderSupplierSelects();
 renderGuardPharmacySelect();
+injectShortcutBar(0);
 initAuth();
 </script>
 </body>
