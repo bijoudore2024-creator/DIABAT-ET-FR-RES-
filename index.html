@@ -1378,6 +1378,27 @@
             <button class="btn" onclick="exportStockCSV()" style="width:auto;">⬇ Exporter le stock (CSV)</button>
             <button class="btn" onclick="printStockReport()" style="width:auto;">🖨 Imprimer</button>
         </div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin:12px 0 4px;">
+            <select id="stockFilterCategory" onchange="renderStockTable()" style="max-width:200px;">
+                <option value="">Toutes les catégories</option>
+            </select>
+            <select id="stockFilterSupplier" onchange="renderStockTable()" style="max-width:200px;">
+                <option value="">Tous les fournisseurs</option>
+            </select>
+            <select id="stockFilterStatus" onchange="renderStockTable()" style="max-width:200px;">
+                <option value="all">Tous les statuts</option>
+                <option value="expiry_soon">Expire bientôt (≤ 30 j)</option>
+                <option value="low">Stock bas</option>
+                <option value="ok">Normal</option>
+            </select>
+            <select id="stockSort" onchange="renderStockTable()" style="max-width:200px;">
+                <option value="name">Trier : Nom (A→Z)</option>
+                <option value="stock_asc">Trier : Stock (plus bas)</option>
+                <option value="expiry_asc">Trier : Péremption (plus proche)</option>
+                <option value="price_desc">Trier : Prix (plus élevé)</option>
+            </select>
+            <button class="btn" onclick="resetStockFilters()" style="width:auto;">↺ Réinitialiser</button>
+        </div>
 
         <div id="addProductForm" style="display:none; background: var(--panel-2); border: 1px solid var(--line); padding:18px; border-radius:10px; margin:15px 0;">
             <h3 id="productFormTitle" style="margin-top:0;">Nouveau produit</h3>
@@ -1470,6 +1491,22 @@
                 <button class="btn" onclick="exportSalesCSV()" style="width:auto;">⬇ Exporter les ventes (CSV)</button>
                 <button class="btn" onclick="printSalesReport()" style="width:auto;">🖨 Imprimer</button>
             </div>
+        </div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin:10px 0 16px;">
+            <input type="date" id="salesFilterStart" onchange="renderReports()" style="max-width:170px;">
+            <input type="date" id="salesFilterEnd" onchange="renderReports()" style="max-width:170px;">
+            <select id="salesFilterPayment" onchange="renderReports()" style="max-width:200px;">
+                <option value="all">Tous les paiements</option>
+                <option value="cash">Comptant uniquement</option>
+                <option value="credit">Crédit uniquement</option>
+            </select>
+            <select id="salesFilterMinAmount" onchange="renderReports()" style="max-width:200px;">
+                <option value="0">Montant min. : aucun</option>
+                <option value="50000">≥ 50 000 GNF</option>
+                <option value="100000">≥ 100 000 GNF</option>
+                <option value="500000">≥ 500 000 GNF</option>
+            </select>
+            <button class="btn" onclick="resetSalesFilters()" style="width:auto;">↺ Réinitialiser</button>
         </div>
         <table class="responsive-table">
             <thead><tr><th>Date</th><th>Client</th><th>Articles</th><th>Total</th><th></th></tr></thead>
@@ -1634,11 +1671,31 @@
     </div>
     <div id="tab9" class="tab-content">
         <h2>Clients</h2>
-        <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:16px;">
+        <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:10px;">
             <input type="text" id="clientSearch" placeholder="Rechercher : nom, téléphone, adresse…" oninput="renderClientsTable()" style="flex:1; min-width:220px;">
             <button class="btn btn-primary" onclick="openAddClientForm()" style="width:auto;">+ Nouveau client</button>
             <button class="btn" onclick="exportClientsCSV()" style="width:auto;">⬇ Exporter (CSV)</button>
+            <button class="btn" onclick="exportCreditPaymentsCSV()" style="width:auto;">⬇ Journal des règlements (CSV)</button>
             <button class="btn" onclick="printClientsReport()" style="width:auto;">🖨 Imprimer</button>
+        </div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:16px;">
+            <select id="clientDebtFilter" onchange="renderClientsTable()" style="max-width:220px;">
+                <option value="all">Tous les clients</option>
+                <option value="debtors">Clients endettés uniquement</option>
+                <option value="clean">Sans dette uniquement</option>
+            </select>
+            <select id="clientMinDebt" onchange="renderClientsTable()" style="max-width:220px;">
+                <option value="0">Dette min. : aucune</option>
+                <option value="50000">Dette min. : ≥ 50 000 GNF</option>
+                <option value="100000">Dette min. : ≥ 100 000 GNF</option>
+                <option value="500000">Dette min. : ≥ 500 000 GNF</option>
+            </select>
+            <select id="clientSort" onchange="renderClientsTable()" style="max-width:220px;">
+                <option value="name">Trier : Nom (A→Z)</option>
+                <option value="debt_desc">Trier : Dette (plus élevée)</option>
+                <option value="debt_asc">Trier : Dette (plus faible)</option>
+                <option value="purchases_desc">Trier : Nb achats (plus élevé)</option>
+            </select>
         </div>
 
         <div id="addClientForm" style="display:none; background: var(--panel-2); border: 1px solid var(--line); padding:18px; border-radius:10px; margin:15px 0;">
@@ -2059,6 +2116,38 @@
                 </ol>
             </details>
         </div>
+
+        <div class="fin-panel" id="dangerZonePanel" style="display:none; margin-top:20px; border-color: rgba(224,99,106,0.4);">
+            <h3 style="margin-top:0; color:var(--danger);">⚠ Zone de danger</h3>
+            <p style="color:var(--text-muted); font-size:0.9em; margin-top:-8px;">
+                Supprime définitivement toutes les données de test (produits, stock, ventes, clients, ordonnances, fournisseurs, commandes, gardes, finances, mouvements) pour repartir avec une base vide, prête pour la production. Les paramètres de la pharmacie (nom, logo, seuils, connexion Supabase) et les comptes utilisateurs sont conservés.
+            </p>
+            <p style="color:var(--danger); font-weight:600; font-size:0.9em;">Cette action est irréversible et ne peut pas être annulée.</p>
+            <button class="btn btn-danger" onclick="openResetToProductionModal()" style="width:auto; padding:9px 18px;">🗑 Réinitialiser pour passer en production</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de confirmation pour la réinitialisation production -->
+<div id="resetProdModal" style="display:none; position:fixed; inset:0; z-index:600; background:rgba(0,0,0,0.6); align-items:center; justify-content:center; padding:20px;">
+    <div style="background:var(--panel, #fff); border-radius:14px; padding:24px; max-width:440px; width:100%; border:1px solid var(--line);">
+        <h3 style="margin-top:0; color:var(--danger);">⚠ Confirmer la réinitialisation</h3>
+        <p style="font-size:0.92em;">Tu es sur le point de <strong>supprimer définitivement</strong> :</p>
+        <ul style="font-size:0.88em; color:var(--text-muted); line-height:1.7;">
+            <li>Tous les produits et le stock</li>
+            <li>Toutes les ventes et mouvements</li>
+            <li>Tous les clients et leurs dettes</li>
+            <li>Toutes les ordonnances</li>
+            <li>Tous les fournisseurs et commandes</li>
+            <li>Toutes les gardes et alertes liées</li>
+            <li>Toutes les dépenses et le journal des règlements</li>
+        </ul>
+        <p style="font-size:0.9em;">Pour confirmer, tape exactement <strong>REINITIALISER</strong> ci-dessous :</p>
+        <input type="text" id="resetProdConfirmInput" placeholder="REINITIALISER" style="margin:8px 0 14px;">
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <button class="btn btn-danger" onclick="confirmResetToProduction()" style="width:auto;">Supprimer définitivement</button>
+            <button class="btn" onclick="closeResetToProductionModal()" style="width:auto;">Annuler</button>
+        </div>
     </div>
 </div>
 
@@ -2251,7 +2340,9 @@ function injectShortcutBar(n) {
 }
 
 function getUserRole() {
-    return (currentUser && currentUser.role) ? currentUser.role : 'pdg'; // mode local (pas de Supabase) = accès total
+    if (!SUPABASE_CONFIGURED) return 'pdg'; // mode local (pas de Supabase) = accès total
+    if (currentUser && currentUser.role) return currentUser.role;
+    return null; // compte connecté mais sans rôle assigné (en attente) : aucun accès tant que non validé
 }
 function isAdmin() {
     // Conservé pour compat interne : "a un rôle de direction complet" (Finances incluses) = PDG.
@@ -2287,6 +2378,8 @@ function applyRolePermissions() {
     });
     const usersPanel = document.getElementById('usersPanel');
     if (usersPanel) usersPanel.style.display = canManageUsers() ? '' : 'none';
+    const dangerZone = document.getElementById('dangerZonePanel');
+    if (dangerZone) dangerZone.style.display = canManageUsers() ? '' : 'none';
     if (typeof updateSidebarScrollHint === 'function') setTimeout(updateSidebarScrollHint, 0);
     const activePanel = document.querySelector('.tab-content.active');
     if (activePanel) {
@@ -2821,6 +2914,7 @@ function loadData() {
         guardPartners: [],
         guardSchedule: [],
         expenses: [],
+        creditPayments: [],
         logo: '',
         settings: {}
     };
@@ -2835,6 +2929,7 @@ if (!Array.isArray(data.suppliers)) data.suppliers = [];
 if (!Array.isArray(data.guardPartners)) data.guardPartners = [];
 if (!Array.isArray(data.guardSchedule)) data.guardSchedule = [];
 if (!Array.isArray(data.expenses)) data.expenses = [];
+if (!Array.isArray(data.creditPayments)) data.creditPayments = [];
 if (typeof data.logo !== 'string') data.logo = '';
 if (!data.settings || typeof data.settings !== 'object') data.settings = {};
 if (!data.settings.pharmacy) data.settings.pharmacy = { nom: 'Diabaté & Frères Sarl', adresse: '', telephone: '', email: '', rccm: '' };
@@ -2898,6 +2993,51 @@ function saveData() {
         clearTimeout(syncSaveTimer);
         syncSaveTimer = setTimeout(() => { pushRemoteData(); }, 600);
     }
+}
+
+// ---------- Zone de danger : réinitialisation pour la production ----------
+function openResetToProductionModal() {
+    if (!canManageUsers()) return;
+    const input = document.getElementById('resetProdConfirmInput');
+    if (input) input.value = '';
+    const modal = document.getElementById('resetProdModal');
+    if (modal) modal.style.display = 'flex';
+}
+
+function closeResetToProductionModal() {
+    const modal = document.getElementById('resetProdModal');
+    if (modal) modal.style.display = 'none';
+}
+
+function confirmResetToProduction() {
+    if (!canManageUsers()) return;
+    const input = document.getElementById('resetProdConfirmInput');
+    const value = (input?.value || '').trim();
+    if (value !== 'REINITIALISER') {
+        alert('Le texte tapé ne correspond pas exactement à "REINITIALISER". Réinitialisation annulée.');
+        return;
+    }
+    // Conserve les paramètres de la pharmacie, le logo et les seuils ; efface tout le reste.
+    data.products = [];
+    data.sales = [];
+    data.commandes = [];
+    data.movements = [];
+    data.clients = [];
+    data.ordonnances = [];
+    data.suppliers = [];
+    data.guardPartners = [];
+    data.guardSchedule = [];
+    data.expenses = [];
+    data.creditPayments = [];
+    saveData();
+    closeResetToProductionModal();
+    alert('La base de données a été réinitialisée. La pharmacie est prête pour la production.');
+    // Rafraîchit l'affichage de tous les onglets concernés.
+    try { renderDashboard(); } catch(e) {}
+    try { renderStockTable(); } catch(e) {}
+    try { renderClientsTable(); } catch(e) {}
+    try { renderReports(); } catch(e) {}
+    openTab(0);
 }
 
 // ---------- Utilitaires ----------
@@ -3278,13 +3418,30 @@ function stockStatusBadge(p) {
 
 function renderStockTable() {
     const query = (document.getElementById('search')?.value || '').toLowerCase();
+    const filterCategory = document.getElementById('stockFilterCategory')?.value || '';
+    const filterSupplier = document.getElementById('stockFilterSupplier')?.value || '';
+    const filterStatus = document.getElementById('stockFilterStatus')?.value || 'all';
+    const sortMode = document.getElementById('stockSort')?.value || 'name';
     const tbody = document.getElementById('stockTableBody');
-    const filtered = data.products.filter(p =>
+    let filtered = data.products.filter(p =>
         p.name.toLowerCase().includes(query) || p.code.toLowerCase().includes(query)
     );
+    if (filterCategory) filtered = filtered.filter(p => p.category === filterCategory);
+    if (filterSupplier) filtered = filtered.filter(p => p.supplier === filterSupplier);
+    if (filterStatus === 'expiry_soon') filtered = filtered.filter(p => daysUntil(p.expiry) <= 30);
+    if (filterStatus === 'low') filtered = filtered.filter(p => daysUntil(p.expiry) > 30 && p.stock <= LOW_STOCK_THRESHOLD);
+    if (filterStatus === 'ok') filtered = filtered.filter(p => daysUntil(p.expiry) > 30 && p.stock > LOW_STOCK_THRESHOLD);
+
+    filtered = filtered.slice();
+    if (sortMode === 'stock_asc') filtered.sort((a, b) => a.stock - b.stock);
+    else if (sortMode === 'expiry_asc') filtered.sort((a, b) => daysUntil(a.expiry) - daysUntil(b.expiry));
+    else if (sortMode === 'price_desc') filtered.sort((a, b) => b.price - a.price);
+    else filtered.sort((a, b) => a.name.localeCompare(b.name, 'fr'));
 
     if (filtered.length === 0) {
-        tbody.innerHTML = '<tr class="empty-row"><td colspan="10" class="empty-msg">Aucun produit trouvé</td></tr>';
+        tbody.innerHTML = '<tr class="empty-row"><td colspan="10" class="empty-msg">Aucun produit ne correspond aux filtres</td></tr>';
+        populateStockFilterOptions();
+        renderCategoryList();
         return;
     }
 
@@ -3307,7 +3464,39 @@ function renderStockTable() {
             </td>
         </tr>`;
     }).join('');
+    populateStockFilterOptions();
     renderCategoryList();
+}
+
+function populateStockFilterOptions() {
+    const catSel = document.getElementById('stockFilterCategory');
+    const supSel = document.getElementById('stockFilterSupplier');
+    if (catSel) {
+        const current = catSel.value;
+        const categories = [...new Set(data.products.map(p => p.category).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'fr'));
+        catSel.innerHTML = '<option value="">Toutes les catégories</option>' + categories.map(c => `<option value="${c}">${c}</option>`).join('');
+        catSel.value = current;
+    }
+    if (supSel) {
+        const current = supSel.value;
+        const suppliers = [...new Set(data.products.map(p => p.supplier).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'fr'));
+        supSel.innerHTML = '<option value="">Tous les fournisseurs</option>' + suppliers.map(s => `<option value="${s}">${s}</option>`).join('');
+        supSel.value = current;
+    }
+}
+
+function resetStockFilters() {
+    const search = document.getElementById('search');
+    const cat = document.getElementById('stockFilterCategory');
+    const sup = document.getElementById('stockFilterSupplier');
+    const status = document.getElementById('stockFilterStatus');
+    const sort = document.getElementById('stockSort');
+    if (search) search.value = '';
+    if (cat) cat.value = '';
+    if (sup) sup.value = '';
+    if (status) status.value = 'all';
+    if (sort) sort.value = 'name';
+    renderStockTable();
 }
 
 function renderCategoryList() {
@@ -3522,15 +3711,28 @@ function clientBalanceCell(client) {
 
 function renderClientsTable() {
     const search = (document.getElementById('clientSearch')?.value || '').toLowerCase();
+    const debtFilter = document.getElementById('clientDebtFilter')?.value || 'all';
+    const minDebt = parseInt(document.getElementById('clientMinDebt')?.value || '0');
+    const sortMode = document.getElementById('clientSort')?.value || 'name';
     const tbody = document.getElementById('clientsTableBody');
     if (!tbody) return;
-    const filtered = data.clients.filter(c =>
+    let filtered = data.clients.filter(c =>
         c.name.toLowerCase().includes(search) ||
         (c.phone || '').toLowerCase().includes(search) ||
         (c.address || '').toLowerCase().includes(search)
     );
+    if (debtFilter === 'debtors') filtered = filtered.filter(c => (c.credit || 0) > 0);
+    if (debtFilter === 'clean') filtered = filtered.filter(c => (c.credit || 0) <= 0);
+    if (minDebt > 0) filtered = filtered.filter(c => (c.credit || 0) >= minDebt);
+
+    filtered = filtered.slice();
+    if (sortMode === 'debt_desc') filtered.sort((a, b) => (b.credit || 0) - (a.credit || 0));
+    else if (sortMode === 'debt_asc') filtered.sort((a, b) => (a.credit || 0) - (b.credit || 0));
+    else if (sortMode === 'purchases_desc') filtered.sort((a, b) => clientPurchases(b.id).length - clientPurchases(a.id).length);
+    else filtered.sort((a, b) => a.name.localeCompare(b.name, 'fr'));
+
     tbody.innerHTML = filtered.length === 0
-        ? '<tr class="empty-row"><td colspan="6" class="empty-msg">Aucun client enregistré pour le moment</td></tr>'
+        ? '<tr class="empty-row"><td colspan="6" class="empty-msg">Aucun client ne correspond aux filtres</td></tr>'
         : filtered.map(c => {
             const purchases = clientPurchases(c.id);
             return `<tr>
@@ -3646,7 +3848,19 @@ function settleClientCredit(id) {
     if (input === null) return;
     const amount = parseInt(input);
     if (isNaN(amount) || amount <= 0) { alert('Montant invalide.'); return; }
+    const balanceBefore = c.credit;
     c.credit = Math.max(0, c.credit - amount);
+    if (!Array.isArray(data.creditPayments)) data.creditPayments = [];
+    data.creditPayments.push({
+        id: 'PAY' + Date.now() + Math.floor(Math.random() * 1000),
+        clientId: c.id,
+        clientName: c.name,
+        amount: amount,
+        balanceBefore: balanceBefore,
+        balanceAfter: c.credit,
+        date: new Date().toISOString(),
+        recordedBy: (currentUser && currentUser.name) || (currentUser && currentUser.email) || null
+    });
     saveData();
     renderClientsTable();
     openClientHistory(id);
@@ -3658,6 +3872,7 @@ function openClientHistory(id) {
     document.getElementById('clientHistoryTitle').textContent = `Fiche client — ${c.name}`;
     const purchases = clientPurchases(c.id).slice().reverse();
     const ords = data.ordonnances.filter(o => o.clientId === c.id).slice().reverse();
+    const payments = (data.creditPayments || []).filter(p => p.clientId === c.id).slice().reverse();
 
     const purchasesHtml = purchases.length === 0
         ? '<p class="empty-msg">Aucun achat enregistré.</p>'
@@ -3675,6 +3890,15 @@ function openClientHistory(id) {
             ords.map(o => `<tr><td data-label="Date" class="mono">${formatDate(o.date)}</td><td data-label="Médecin">${o.doctor || '—'}</td><td data-label="Statut">${ordonnanceStatusBadge(o.status)}</td></tr>`).join('')
         }</tbody></table>`;
 
+    const paymentsHtml = payments.length === 0
+        ? '<p class="empty-msg">Aucun règlement enregistré.</p>'
+        : `<table class="responsive-table"><thead><tr><th>Date</th><th>Montant reçu</th><th>Solde avant</th><th>Solde après</th></tr></thead><tbody>${
+            payments.map(p => {
+                const d = new Date(p.date);
+                return `<tr><td data-label="Date" class="mono">${d.toLocaleDateString('fr-FR')} ${d.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'})}</td><td data-label="Montant reçu" class="mono" style="color:var(--ok);">+${formatGNF(p.amount)}</td><td data-label="Solde avant" class="mono">${formatGNF(p.balanceBefore)}</td><td data-label="Solde après" class="mono">${formatGNF(p.balanceAfter)}</td></tr>`;
+            }).join('')
+        }</tbody></table>`;
+
     document.getElementById('clientHistoryBody').innerHTML = `
         <p style="color: var(--text-muted); margin-top:0;">${c.phone ? '📞 ' + c.phone : ''} ${c.address ? ' · 📍 ' + c.address : ''}</p>
         ${c.notes ? `<p style="color: var(--text-muted);">📝 ${c.notes}</p>` : ''}
@@ -3684,6 +3908,8 @@ function openClientHistory(id) {
         </div>
         <h4 style="margin-bottom:6px;">Historique des achats</h4>
         ${purchasesHtml}
+        <h4 style="margin-bottom:6px;">Historique des règlements de dette</h4>
+        ${paymentsHtml}
         <h4 style="margin-bottom:6px;">Ordonnances</h4>
         ${ordsHtml}
     `;
@@ -3699,6 +3925,15 @@ function exportClientsCSV() {
     const rows = [['Nom','Téléphone','Adresse','Solde dû (GNF)','Nb achats','Notes']];
     data.clients.forEach(c => rows.push([c.name, c.phone || '', c.address || '', c.credit || 0, clientPurchases(c.id).length, c.notes || '']));
     downloadCSV(`clients_diabate_${new Date().toISOString().split('T')[0]}.csv`, rows);
+}
+
+function exportCreditPaymentsCSV() {
+    const rows = [['Date', 'Client', 'Montant encaissé (GNF)', 'Solde avant (GNF)', 'Solde après (GNF)', 'Enregistré par']];
+    (data.creditPayments || []).slice().reverse().forEach(p => {
+        const d = new Date(p.date);
+        rows.push([d.toLocaleString('fr-FR'), p.clientName || '', p.amount, p.balanceBefore, p.balanceAfter, p.recordedBy || '']);
+    });
+    downloadCSV(`reglements_dettes_diabate_${new Date().toISOString().split('T')[0]}.csv`, rows);
 }
 
 // ---------- Fournisseurs ----------
@@ -4572,9 +4807,12 @@ function renderFinances(clearPreset) {
     `;
 
     const debtors = data.clients.filter(c => (c.credit || 0) > 0).length;
+    const paymentsInPeriod = (data.creditPayments || []).filter(p => dateInRange(p.date, start, end));
+    const totalCollected = paymentsInPeriod.reduce((s, p) => s + p.amount, 0);
     document.getElementById('finCredit').innerHTML = `
         <div class="fin-split-item"><b class="${totalReceivables > 0 ? 'fin-net-negative' : ''}">${formatGNF(totalReceivables)}</b><span>Total dû</span></div>
         <div class="fin-split-item"><b>${debtors}</b><span>Clients débiteurs</span></div>
+        <div class="fin-split-item"><b>${formatGNF(totalCollected)}</b><span>Encaissé sur dettes (période)</span></div>
     `;
 
     renderFinanceChart();
@@ -5700,9 +5938,22 @@ function renderReports() {
         : topProducts.map(([name, stats]) => `<tr><td data-label="Produit">${name}</td><td data-label="Qté vendue" class="mono">${stats.qty}</td><td data-label="Revenu" class="mono">${formatGNF(stats.revenue)}</td></tr>`).join('');
 
     const historyBody = document.getElementById('salesHistoryBody');
-    const recentSales = data.sales.map((sale, i) => ({sale, i})).reverse().slice(0, 20);
+    const filterStart = document.getElementById('salesFilterStart')?.value || '';
+    const filterEnd = document.getElementById('salesFilterEnd')?.value || '';
+    const filterPayment = document.getElementById('salesFilterPayment')?.value || 'all';
+    const filterMinAmount = parseInt(document.getElementById('salesFilterMinAmount')?.value || '0');
+
+    let filteredSales = data.sales.slice();
+    if (filterStart) filteredSales = filteredSales.filter(s => new Date(s.date) >= new Date(filterStart + 'T00:00:00'));
+    if (filterEnd) filteredSales = filteredSales.filter(s => new Date(s.date) <= new Date(filterEnd + 'T23:59:59'));
+    if (filterPayment === 'cash') filteredSales = filteredSales.filter(s => !s.paidOnCredit);
+    if (filterPayment === 'credit') filteredSales = filteredSales.filter(s => s.paidOnCredit);
+    if (filterMinAmount > 0) filteredSales = filteredSales.filter(s => s.total >= filterMinAmount);
+
+    const hasActiveFilter = filterStart || filterEnd || filterPayment !== 'all' || filterMinAmount > 0;
+    const recentSales = filteredSales.map((sale, i) => ({sale, i: data.sales.indexOf(sale)})).reverse().slice(0, hasActiveFilter ? 200 : 20);
     historyBody.innerHTML = recentSales.length === 0
-        ? '<tr class="empty-row"><td colspan="5" class="empty-msg">Aucune vente enregistrée pour le moment</td></tr>'
+        ? '<tr class="empty-row"><td colspan="5" class="empty-msg">Aucune vente ne correspond aux filtres</td></tr>'
         : recentSales.map(({sale, i}) => {
             const itemsSummary = sale.items.map(it => `${it.name} x${it.qty}`).join(', ');
             const d = new Date(sale.date);
@@ -5721,6 +5972,18 @@ function renderReports() {
 }
 
 // ---------- Export CSV ----------
+function resetSalesFilters() {
+    const start = document.getElementById('salesFilterStart');
+    const end = document.getElementById('salesFilterEnd');
+    const payment = document.getElementById('salesFilterPayment');
+    const minAmount = document.getElementById('salesFilterMinAmount');
+    if (start) start.value = '';
+    if (end) end.value = '';
+    if (payment) payment.value = 'all';
+    if (minAmount) minAmount.value = '0';
+    renderReports();
+}
+
 function downloadCSV(filename, rows) {
     const csv = rows.map(row =>
         row.map(cell => {
