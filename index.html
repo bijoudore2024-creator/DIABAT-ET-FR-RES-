@@ -2307,11 +2307,12 @@ async function fetchOrCreateProfile(user, fallbackName) {
         if (!profile) {
             // Premier profil créé pour ce compte : PDG (actif immédiatement) si aucun autre profil n'existe encore,
             // sinon le compte est créé "en attente" avec rôle à définir par un PDG/Administrateur.
-            const { count } = await supabaseClient
+            const { count, error: countErr } = await supabaseClient
                 .from('profiles')
                 .select('id', { count: 'exact', head: true });
+            if (countErr) console.error('Erreur de comptage des profils :', countErr);
             const isFirst = (!count || count === 0);
-            const { data: created, error: insertErr } = await supabaseClient
+            const { error: insertErr } = await supabaseClient
                 .from('profiles')
                 .insert({
                     id: user.id,
@@ -2319,11 +2320,19 @@ async function fetchOrCreateProfile(user, fallbackName) {
                     name: fallbackName || user.email,
                     role: isFirst ? 'pdg' : null,
                     status: isFirst ? 'active' : 'pending'
-                })
-                .select()
-                .single();
-            if (insertErr) throw insertErr;
-            profile = created;
+                });
+            if (insertErr) {
+                console.error('Erreur d\'insertion du profil :', insertErr);
+                alert('Impossible de créer ton profil (' + (insertErr.message || 'erreur inconnue') + '). Contacte HABATECH avec ce message.');
+                throw insertErr;
+            }
+            const { data: reread, error: rereadErr } = await supabaseClient
+                .from('profiles')
+                .select('id, email, name, role, status')
+                .eq('id', user.id)
+                .maybeSingle();
+            if (rereadErr) console.error('Erreur de relecture du profil après création :', rereadErr);
+            profile = reread || { role: isFirst ? 'pdg' : null, status: isFirst ? 'active' : 'pending' };
         }
         return profile;
     } catch (err) {
