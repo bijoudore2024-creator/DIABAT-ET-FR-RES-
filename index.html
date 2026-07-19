@@ -633,6 +633,43 @@
     .suggestion-item:hover { background: rgba(34,139,34,0.08); }
     .suggestion-item:last-child { border-bottom: none; }
 
+    .browse-products-header {
+        display: flex; align-items: center; justify-content: space-between;
+        margin: 16px 0 8px;
+    }
+    .browse-products-header h4 { margin: 0; font-size: 0.95em; color: var(--text-muted); font-family: 'Work Sans', sans-serif; font-weight: 600; }
+    #browseCategoryFilter { max-width: 180px; margin: 0; }
+    .browse-products-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+        gap: 10px;
+        max-height: 360px;
+        overflow-y: auto;
+        padding: 4px 2px;
+    }
+    .browse-product-card {
+        background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+        padding: 10px; cursor: pointer; text-align: left;
+        display: flex; flex-direction: column; gap: 6px;
+        transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .browse-product-card:hover { border-color: var(--accent-soft); box-shadow: 0 3px 10px rgba(34,139,34,0.12); }
+    .browse-product-card.out-of-stock { opacity: 0.5; cursor: not-allowed; }
+    .browse-product-card .bpc-img {
+        width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: 6px;
+        background: var(--panel-2); border: 1px solid var(--line);
+    }
+    .browse-product-card .bpc-img-placeholder {
+        width: 100%; aspect-ratio: 1/1; border-radius: 6px;
+        background: var(--panel-2); border: 1px solid var(--line);
+        display: flex; align-items: center; justify-content: center;
+        color: var(--text-muted); font-size: 1.4em; font-family: 'Fraunces', serif;
+    }
+    .browse-product-card .bpc-name { font-size: 0.82em; font-weight: 600; line-height: 1.25; }
+    .browse-product-card .bpc-meta { font-size: 0.74em; color: var(--text-muted); display: flex; justify-content: space-between; }
+    .browse-product-card .bpc-stock-low { color: var(--warn); }
+    .browse-product-card .bpc-stock-out { color: var(--danger); }
+
     .cart-box {
         background: linear-gradient(180deg, #ffffff, var(--panel-2));
         border: 1px solid var(--line);
@@ -1455,6 +1492,14 @@
                 </select>
                 <input type="text" id="barcode" placeholder="Code-barres ou Nom du produit" style="font-size: 1.05em;" oninput="showSuggestions()" onkeydown="if(event.key==='Enter'){quickAdd();}">
                 <div id="suggestions" class="suggestions" style="display:none;"></div>
+
+                <div class="browse-products-header">
+                    <h4>Parcourir les produits</h4>
+                    <select id="browseCategoryFilter" onchange="renderBrowseProducts()">
+                        <option value="">Toutes les catégories</option>
+                    </select>
+                </div>
+                <div class="browse-products-grid" id="browseProductsGrid"></div>
             </div>
             <div>
                 <h3 style="margin-top:0;">Panier</h3>
@@ -3504,6 +3549,8 @@ function renderCategoryList() {
     if (!dl) return;
     const categories = [...new Set(data.products.map(p => p.category).filter(Boolean))].sort((a, b) => a.localeCompare(b));
     dl.innerHTML = categories.map(c => `<option value="${c}">`).join('');
+    populateBrowseCategoryFilter();
+    renderBrowseProducts();
 }
 
 function populateCatalogCategoryFilter() {
@@ -5773,6 +5820,50 @@ function commandeStatusBadgeText(statut) {
 }
 
 // ---------- Caisse ----------
+// ---------- Parcourir les produits (grille caisse) ----------
+function populateBrowseCategoryFilter() {
+    const select = document.getElementById('browseCategoryFilter');
+    if (!select) return;
+    const current = select.value;
+    const categories = [...new Set(data.products.map(p => p.category).filter(Boolean))].sort();
+    select.innerHTML = '<option value="">Toutes les catégories</option>' +
+        categories.map(c => `<option value="${c}">${c}</option>`).join('');
+    select.value = current;
+}
+
+function renderBrowseProducts() {
+    const grid = document.getElementById('browseProductsGrid');
+    if (!grid) return;
+    const categoryFilter = document.getElementById('browseCategoryFilter')?.value || '';
+
+    let products = data.products.slice();
+    if (categoryFilter) products = products.filter(p => p.category === categoryFilter);
+    products.sort((a, b) => a.name.localeCompare(b.name));
+
+    if (products.length === 0) {
+        grid.innerHTML = '<p class="empty-msg" style="grid-column:1/-1;">Aucun produit dans cette catégorie</p>';
+        return;
+    }
+
+    grid.innerHTML = products.map(p => {
+        const outOfStock = p.stock <= 0;
+        const stockClass = outOfStock ? 'bpc-stock-out' : (p.stock <= (data.settings?.lowStockThreshold || 10) ? 'bpc-stock-low' : '');
+        const img = p.photo
+            ? `<img class="bpc-img" src="${p.photo}" alt="${p.name}">`
+            : `<div class="bpc-img-placeholder">${p.name.charAt(0).toUpperCase()}</div>`;
+        return `
+            <div class="browse-product-card${outOfStock ? ' out-of-stock' : ''}" onclick="${outOfStock ? '' : `addToCart('${p.code}')`}" title="${outOfStock ? 'Rupture de stock' : 'Ajouter au panier'}">
+                ${img}
+                <div class="bpc-name">${p.name}</div>
+                <div class="bpc-meta">
+                    <span class="mono">${formatGNF(p.price)}</span>
+                    <span class="mono ${stockClass}">${outOfStock ? 'Rupture' : 'Stk ' + p.stock}</span>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
 function showSuggestions() {
     const input = document.getElementById('barcode').value.trim().toLowerCase();
     const box = document.getElementById('suggestions');
@@ -5857,10 +5948,33 @@ function renderCart() {
     }
     const total = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
     document.getElementById('total').textContent = `Total : ${formatGNF(total)}`;
+    renderBrowseProducts();
 }
 
 function validateSale() {
     if (cart.length === 0) { alert("Le panier est vide"); return; }
+
+    // Revérifie le stock disponible au moment de la validation : le panier peut
+    // avoir été rempli il y a un moment, et le stock peut avoir changé entre-temps
+    // (autre caissier, synchronisation réseau). Sans ce contrôle, le stock peut
+    // devenir négatif.
+    const shortages = [];
+    cart.forEach(item => {
+        const product = data.products.find(p => p.code === item.code);
+        if (!product || product.stock < item.qty) {
+            shortages.push({
+                name: item.name,
+                demande: item.qty,
+                disponible: product ? product.stock : 0
+            });
+        }
+    });
+    if (shortages.length > 0) {
+        const detail = shortages.map(s => `• ${s.name} : demandé ${s.demande}, disponible ${s.disponible}`).join('\n');
+        alert(`Stock insuffisant pour finaliser la vente :\n\n${detail}\n\nAjustez les quantités dans le panier avant de valider.`);
+        renderCart();
+        return;
+    }
 
     const clientId = document.getElementById('saleClientSelect').value;
     const client = data.clients.find(c => c.id === clientId);
