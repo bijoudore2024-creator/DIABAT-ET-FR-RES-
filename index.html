@@ -912,7 +912,7 @@
     }
 
     /* ---------- Écran de connexion (multi-utilisateur) ---------- */
-    #authScreen {
+    #authScreen, #pendingScreen {
         position: fixed; inset: 0; z-index: 500;
         background:
             radial-gradient(ellipse 600px 300px at 50% -10%, rgba(58,168,58,0.14), transparent 65%),
@@ -920,7 +920,7 @@
         display: flex; align-items: center; justify-content: center;
         padding: 24px;
     }
-    #authScreen.hidden { display: none; }
+    #authScreen.hidden, #pendingScreen.hidden { display: none; }
     .auth-card {
         width: 100%; max-width: 380px;
         background: var(--panel);
@@ -1091,6 +1091,17 @@
             <button id="authSwitchBtn" onclick="toggleAuthMode()">Créer un compte</button>
         </div>
         <p class="auth-offline-note" id="authOfflineNote"></p>
+    </div>
+</div>
+
+<!-- Écran d'attente de validation (compte créé mais pas encore validé par un PDG/Administrateur) -->
+<div id="pendingScreen" class="hidden">
+    <div class="auth-card">
+        <div class="auth-mark">⏳</div>
+        <h2>Compte en attente de validation</h2>
+        <p class="auth-sub">Ton compte a bien été créé. Un PDG ou un Administrateur doit encore le valider et t'assigner un rôle avant que tu puisses accéder à l'application.</p>
+        <p class="auth-offline-note" id="pendingEmailNote"></p>
+        <button type="button" class="auth-submit" onclick="handleSignOut()">Se déconnecter</button>
     </div>
 </div>
 
@@ -2003,7 +2014,7 @@
         <div class="fin-panel" id="usersPanel" style="margin-bottom:20px; display:none;">
             <h3 style="margin-top:0;">Utilisateurs &amp; rôles</h3>
             <p style="color:var(--text-muted); font-size:0.9em; margin-top:-8px;">
-                Gère les rôles de l'équipe. <strong>Admin</strong> : accès total. <strong>Pharmacien</strong> : tout sauf Finances et Paramètres. <strong>Caissier</strong> : Tableau de bord, Ventes, Clients, Ordonnances uniquement.
+                Valide les nouveaux comptes et gère les rôles de l'équipe. <strong>PDG</strong> : accès total (y compris Finances). <strong>Administrateur</strong> : tout sauf Finances, peut valider les comptes. <strong>Agent de commerce</strong> : Ventes, Clients, Ordonnances, Produits, Stock. <strong>Caissier</strong> : Tableau de bord, Ventes, Clients, Ordonnances.
             </p>
             <div id="usersListWrap" style="margin-top:12px;">
                 <p style="color:var(--text-muted); font-size:0.85em;">Chargement…</p>
@@ -2090,7 +2101,8 @@
 //      id uuid primary key references auth.users(id) on delete cascade,
 //      email text not null,
 //      name text,
-//      role text not null default 'caissier',
+//      role text check (role in ('pdg','admin','agent','caissier')),
+//      status text not null default 'pending' check (status in ('pending','active')),
 //      created_at timestamptz not null default now()
 //    );
 //    alter table profiles enable row level security;
@@ -2098,10 +2110,14 @@
 //      for select using (auth.role() = 'authenticated');
 //    create policy "Users can insert their own profile" on profiles
 //      for insert with check (auth.uid() = id);
-//    create policy "Admins can update any profile" on profiles
+//    create policy "PDG and Admins can update any profile" on profiles
 //      for update using (
-//        exists (select 1 from profiles p where p.id = auth.uid() and p.role = 'admin')
+//        exists (select 1 from profiles p where p.id = auth.uid() and p.role in ('pdg','admin'))
 //        or auth.uid() = id
+//      );
+//    create policy "PDG and Admins can delete pending profiles" on profiles
+//      for delete using (
+//        exists (select 1 from profiles p where p.id = auth.uid() and p.role in ('pdg','admin'))
 //      );
 //    alter publication supabase_realtime add table profiles;
 //
@@ -2109,6 +2125,11 @@
 //    (désactive "Confirm email" pour un démarrage rapide en équipe fermée,
 //     ou garde-le actif si tu préfères valider chaque compte par email)
 //
+// NB rôles : pdg (accès total) / admin (tout sauf Finances, gère les utilisateurs) /
+//            agent (Agent de commerce : vente) / caissier (encaissement).
+//    Le tout premier compte créé devient PDG et actif automatiquement ; tous les
+//    suivants restent "en attente" jusqu'à validation par un PDG ou un Administrateur
+//    depuis Paramètres > Utilisateurs & rôles.
 const SUPABASE_CONFIG_KEY = 'diabate_pharma_supabase_config_v1';
 const DEFAULT_SUPABASE_URL = 'https://rwcukffnjtlhmmevheyv.supabase.co';
 const DEFAULT_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ3Y3VrZmZuanRsaG1tZXZoZXl2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQzODk1MjcsImV4cCI6MjA5OTk2NTUyN30.GyqO_Att_kLUmYlJoouwZ-8-4dqRrWTFE2_dvByjEa0';
@@ -2142,25 +2163,28 @@ let realtimeChannel = null;
 
 // ---------- Rôles & permissions ----------
 // Chaque onglet (data-tab) est associé aux rôles autorisés à y accéder.
+// pdg = PDG (accès total) | admin = Administrateur (tout sauf Finances, gère les utilisateurs)
+// agent = Agent de commerce (vente) | caissier = Caissier (encaissement)
 const TAB_ROLES = {
-    0:  ['admin', 'pharmacien', 'caissier'], // Tableau de bord
-    1:  ['admin', 'pharmacien'],             // Stock
-    2:  ['admin', 'pharmacien', 'caissier'], // Ventes
-    3:  ['admin', 'pharmacien'],             // Rapports
-    4:  ['admin', 'pharmacien'],             // Achats
-    5:  ['admin', 'pharmacien'],             // Traçabilité
-    6:  ['admin', 'pharmacien'],             // Produits
-    7:  ['admin', 'pharmacien'],             // Périmés
-    8:  ['admin', 'pharmacien'],             // Lots
-    9:  ['admin', 'pharmacien', 'caissier'], // Clients
-    10: ['admin', 'pharmacien'],             // Fournisseurs
-    11: ['admin', 'pharmacien', 'caissier'], // Ordonnances
-    12: ['admin', 'pharmacien'],             // Gardes
-    13: ['admin', 'pharmacien'],             // Alertes
-    14: ['admin'],                           // Finances
-    15: ['admin']                            // Paramètres
+    0:  ['pdg', 'admin', 'agent', 'caissier'], // Tableau de bord
+    1:  ['pdg', 'admin', 'agent'],             // Stock
+    2:  ['pdg', 'admin', 'agent', 'caissier'], // Ventes
+    3:  ['pdg', 'admin'],                      // Rapports
+    4:  ['pdg', 'admin'],                      // Achats
+    5:  ['pdg', 'admin'],                      // Traçabilité
+    6:  ['pdg', 'admin', 'agent'],             // Produits
+    7:  ['pdg', 'admin'],                      // Périmés
+    8:  ['pdg', 'admin'],                      // Lots
+    9:  ['pdg', 'admin', 'agent', 'caissier'], // Clients
+    10: ['pdg', 'admin'],                      // Fournisseurs
+    11: ['pdg', 'admin', 'agent', 'caissier'], // Ordonnances
+    12: ['pdg', 'admin'],                      // Gardes
+    13: ['pdg', 'admin'],                      // Alertes
+    14: ['pdg'],                               // Finances (PDG uniquement)
+    15: ['pdg', 'admin']                       // Paramètres (accès à la page ; le contenu "Utilisateurs" est filtré en plus)
 };
-const ROLE_LABELS = { admin: 'Admin', pharmacien: 'Pharmacien', caissier: 'Caissier' };
+const ROLE_LABELS = { pdg: 'PDG', admin: 'Administrateur', agent: 'Agent de commerce', caissier: 'Caissier' };
+const ROLE_ORDER = ['pdg', 'admin', 'agent', 'caissier'];
 
 // Libellés + icônes SVG (identiques à la sidebar) + groupe, pour la barre de raccourcis contextuels.
 const TAB_INFO = {
@@ -2216,10 +2240,16 @@ function injectShortcutBar(n) {
 }
 
 function getUserRole() {
-    return (currentUser && currentUser.role) ? currentUser.role : 'admin'; // mode local (pas de Supabase) = accès total
+    return (currentUser && currentUser.role) ? currentUser.role : 'pdg'; // mode local (pas de Supabase) = accès total
 }
 function isAdmin() {
-    return getUserRole() === 'admin';
+    // Conservé pour compat interne : "a un rôle de direction complet" (Finances incluses) = PDG.
+    return getUserRole() === 'pdg';
+}
+function canManageUsers() {
+    // PDG et Administrateur peuvent valider les comptes et assigner des rôles.
+    const r = getUserRole();
+    return r === 'pdg' || r === 'admin';
 }
 function canAccessTab(n) {
     if (!SUPABASE_CONFIGURED) return true; // pas de multi-utilisateur : pas de restriction
@@ -2245,7 +2275,7 @@ function applyRolePermissions() {
         label.style.display = hasVisible ? '' : 'none';
     });
     const usersPanel = document.getElementById('usersPanel');
-    if (usersPanel) usersPanel.style.display = isAdmin() ? '' : 'none';
+    if (usersPanel) usersPanel.style.display = canManageUsers() ? '' : 'none';
     if (typeof updateSidebarScrollHint === 'function') setTimeout(updateSidebarScrollHint, 0);
     const activePanel = document.querySelector('.tab-content.active');
     if (activePanel) {
@@ -2255,23 +2285,30 @@ function applyRolePermissions() {
 }
 
 async function fetchOrCreateProfile(user, fallbackName) {
-    if (!supabaseClient) return { role: 'admin' };
+    if (!supabaseClient) return { role: 'pdg', status: 'active' };
     try {
         let { data: profile, error } = await supabaseClient
             .from('profiles')
-            .select('id, email, name, role')
+            .select('id, email, name, role, status')
             .eq('id', user.id)
             .maybeSingle();
         if (error) throw error;
         if (!profile) {
-            // Premier profil créé pour ce compte : admin si aucun autre profil n'existe encore, sinon caissier.
+            // Premier profil créé pour ce compte : PDG (actif immédiatement) si aucun autre profil n'existe encore,
+            // sinon le compte est créé "en attente" avec rôle à définir par un PDG/Administrateur.
             const { count } = await supabaseClient
                 .from('profiles')
                 .select('id', { count: 'exact', head: true });
-            const role = (!count || count === 0) ? 'admin' : 'caissier';
+            const isFirst = (!count || count === 0);
             const { data: created, error: insertErr } = await supabaseClient
                 .from('profiles')
-                .insert({ id: user.id, email: user.email, name: fallbackName || user.email, role: role })
+                .insert({
+                    id: user.id,
+                    email: user.email,
+                    name: fallbackName || user.email,
+                    role: isFirst ? 'pdg' : null,
+                    status: isFirst ? 'active' : 'pending'
+                })
                 .select()
                 .single();
             if (insertErr) throw insertErr;
@@ -2280,14 +2317,14 @@ async function fetchOrCreateProfile(user, fallbackName) {
         return profile;
     } catch (err) {
         console.error('Erreur de chargement du profil / rôle :', err);
-        return { role: 'caissier' }; // repli prudent en cas d'erreur
+        return { role: null, status: 'pending' }; // repli prudent en cas d'erreur : accès bloqué
     }
 }
 
 async function loadUsersList() {
     const wrap = document.getElementById('usersListWrap');
     if (!wrap) return;
-    if (!isAdmin()) { wrap.innerHTML = ''; return; }
+    if (!canManageUsers()) { wrap.innerHTML = ''; return; }
     if (!supabaseClient) {
         wrap.innerHTML = '<p style="color:var(--text-muted); font-size:0.85em;">Connecte Supabase pour gérer les comptes de l\'équipe.</p>';
         return;
@@ -2296,36 +2333,90 @@ async function loadUsersList() {
     try {
         const { data: profiles, error } = await supabaseClient
             .from('profiles')
-            .select('id, email, name, role')
+            .select('id, email, name, role, status')
+            .order('status', { ascending: true })
             .order('email', { ascending: true });
         if (error) throw error;
         if (!profiles || profiles.length === 0) {
             wrap.innerHTML = '<p style="color:var(--text-muted); font-size:0.85em;">Aucun utilisateur trouvé.</p>';
             return;
         }
-        wrap.innerHTML = profiles.map(function (p) {
-            const roles = ['admin', 'pharmacien', 'caissier'];
-            const options = roles.map(function (r) {
+        const pending = profiles.filter(function (p) { return p.status === 'pending'; });
+        const active = profiles.filter(function (p) { return p.status !== 'pending'; });
+
+        function renderRow(p) {
+            const options = ROLE_ORDER.map(function (r) {
                 return '<option value="' + r + '"' + (p.role === r ? ' selected' : '') + '>' + ROLE_LABELS[r] + '</option>';
             }).join('');
+            const isPending = p.status === 'pending';
+            const actionBtn = isPending
+                ? '<button class="btn btn-success" style="width:auto; padding:6px 12px;" onclick="validateUser(\'' + p.id + '\')">✓ Valider</button>'
+                : '<button class="btn" style="width:auto; padding:6px 12px;" onclick="saveUserRole(\'' + p.id + '\')">Enregistrer</button>';
+            const badge = isPending
+                ? '<span style="font-size:0.72em; font-weight:700; color:var(--warn); background:var(--warn-bg); padding:2px 8px; border-radius:20px; margin-left:6px;">EN ATTENTE</span>'
+                : '';
             return '<div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:10px 0; border-bottom:1px solid var(--line);">' +
                 '<div style="flex:1; min-width:180px;">' +
-                    '<div style="font-weight:600;">' + (p.name || p.email) + '</div>' +
+                    '<div style="font-weight:600;">' + (p.name || p.email) + badge + '</div>' +
                     '<div style="font-size:0.8em; color:var(--text-muted);">' + p.email + '</div>' +
                 '</div>' +
                 '<select id="roleSelect_' + p.id + '" style="width:auto;">' + options + '</select>' +
-                '<button class="btn btn-success" style="width:auto; padding:6px 12px;" onclick="saveUserRole(\'' + p.id + '\')">Enregistrer</button>' +
+                actionBtn +
+                (isPending ? '<button class="btn btn-danger" style="width:auto;" onclick="rejectUser(\'' + p.id + '\')">Refuser</button>' : '') +
                 '<span id="roleSaved_' + p.id + '" style="display:none; color:var(--ok); font-size:0.85em;">✓</span>' +
             '</div>';
-        }).join('');
+        }
+
+        let html = '';
+        if (pending.length > 0) {
+            html += '<div style="font-size:0.78em; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; color:var(--warn); margin:4px 0 6px;">Comptes en attente de validation (' + pending.length + ')</div>';
+            html += pending.map(renderRow).join('');
+            html += '<div style="font-size:0.78em; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; color:var(--text-muted); margin:14px 0 6px;">Équipe active</div>';
+        }
+        html += active.map(renderRow).join('');
+        wrap.innerHTML = html;
     } catch (err) {
         console.error('Erreur de chargement des utilisateurs :', err);
         wrap.innerHTML = '<p style="color:var(--danger); font-size:0.85em;">Impossible de charger la liste des utilisateurs.</p>';
     }
 }
 
+async function validateUser(userId) {
+    if (!canManageUsers() || !supabaseClient) return;
+    const select = document.getElementById('roleSelect_' + userId);
+    if (!select) return;
+    const newRole = select.value;
+    try {
+        const { error } = await supabaseClient
+            .from('profiles')
+            .update({ role: newRole, status: 'active' })
+            .eq('id', userId);
+        if (error) throw error;
+        loadUsersList();
+    } catch (err) {
+        console.error('Erreur de validation :', err);
+        alert('Impossible de valider ce compte. Réessaie.');
+    }
+}
+
+async function rejectUser(userId) {
+    if (!canManageUsers() || !supabaseClient) return;
+    if (!confirm('Refuser et supprimer cette demande de compte ?')) return;
+    try {
+        const { error } = await supabaseClient
+            .from('profiles')
+            .delete()
+            .eq('id', userId);
+        if (error) throw error;
+        loadUsersList();
+    } catch (err) {
+        console.error('Erreur de refus :', err);
+        alert('Impossible de refuser ce compte. Réessaie.');
+    }
+}
+
 async function saveUserRole(userId) {
-    if (!isAdmin() || !supabaseClient) return;
+    if (!canManageUsers() || !supabaseClient) return;
     const select = document.getElementById('roleSelect_' + userId);
     if (!select) return;
     const newRole = select.value;
@@ -2367,7 +2458,7 @@ function updateUserBadge() {
     const nameEl = document.getElementById('userBadgeName');
     const avatarEl = document.getElementById('userAvatarInitial');
     if (!badge) return;
-    if (currentUser) {
+    if (currentUser && currentUser.role) {
         badge.style.display = 'flex';
         const displayName = currentUser.name || currentUser.email || 'Utilisateur';
         nameEl.textContent = displayName;
@@ -2385,6 +2476,17 @@ function showAuthScreen() {
 }
 function hideAuthScreen() {
     const el = document.getElementById('authScreen');
+    if (el) el.classList.add('hidden');
+}
+function showPendingScreen(email) {
+    hideAuthScreen();
+    const el = document.getElementById('pendingScreen');
+    if (el) el.classList.remove('hidden');
+    const note = document.getElementById('pendingEmailNote');
+    if (note) note.textContent = email ? ('Compte : ' + email) : '';
+}
+function hidePendingScreen() {
+    const el = document.getElementById('pendingScreen');
     if (el) el.classList.add('hidden');
 }
 
@@ -2494,6 +2596,7 @@ async function handleSignOut() {
     updateUserBadge();
     applyRolePermissions();
     setSyncStatus('offline', 'Hors ligne');
+    hidePendingScreen();
     showAuthScreen();
 }
 
@@ -2503,10 +2606,18 @@ async function onAuthenticated(user) {
         id: user.id,
         email: user.email,
         name: fallbackName,
-        role: 'caissier'
+        role: null
     };
     const profile = await fetchOrCreateProfile(user, fallbackName);
-    currentUser.role = profile.role || 'caissier';
+    if (profile.status === 'pending' || !profile.role) {
+        currentUser.role = null;
+        updateUserBadge();
+        showPendingScreen(user.email);
+        setSyncStatus('offline', 'En attente de validation');
+        return;
+    }
+    hidePendingScreen();
+    currentUser.role = profile.role;
     if (profile.name) currentUser.name = profile.name;
     updateUserBadge();
     applyRolePermissions();
@@ -2792,7 +2903,7 @@ function renderSettingsTab() {
     renderSettingsLogo();
     renderSupabaseStatus();
     applyRolePermissions();
-    if (isAdmin()) loadUsersList();
+    if (canManageUsers()) loadUsersList();
 }
 
 function renderSettingsLogo() {
