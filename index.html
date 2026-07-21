@@ -1231,6 +1231,184 @@
     @media (min-width: 900px) {
         header h1 { font-size: 3em; font-weight: 700; }
     }
+
+    /* =====================================================
+       STYLE 3D AVANCÉ — relief renforcé + tilt interactif
+       ===================================================== */
+    :root {
+        --d3-persp: 900px;
+        --d3-shadow-1: 0 1px 0 rgba(255,255,255,0.8) inset;
+        --d3-shadow-ambient: 0 2px 4px rgba(20,45,25,0.06), 0 8px 16px rgba(20,45,25,0.07);
+        --d3-shadow-lift: 0 14px 30px rgba(15,40,20,0.16), 0 4px 10px rgba(15,40,20,0.10);
+        --d3-shadow-press: 0 2px 6px rgba(15,40,20,0.18) inset;
+        --d3-rim: 0 0 0 1px rgba(22,193,80,0.10);
+    }
+
+    .stat-cards, .browse-products-grid, .sidebar-nav, #reportCards, #commandeCards, #alertsCards {
+        perspective: var(--d3-persp);
+    }
+
+    .stat-card, .browse-product-card, .fin-panel, .fin-split-item {
+        transform-style: preserve-3d;
+        will-change: transform;
+        position: relative;
+    }
+    .stat-card {
+        box-shadow:
+            var(--d3-shadow-1),
+            0 1px 2px rgba(255,255,255,0.5),
+            var(--d3-shadow-ambient),
+            0 1px 0 rgba(216,212,194,0.9);
+        border-bottom-width: 4px;
+        transform: translateZ(0);
+        transition: transform 0.35s cubic-bezier(.16,.85,.3,1.15), box-shadow 0.35s cubic-bezier(.16,.85,.3,1.15);
+    }
+    .stat-card::before {
+        content: "";
+        position: absolute; inset: 0;
+        border-radius: inherit;
+        background: linear-gradient(135deg, rgba(255,255,255,0.55), rgba(255,255,255,0) 40%);
+        pointer-events: none;
+        opacity: 0.9;
+        transform: translateZ(1px);
+    }
+    .stat-card h3, .stat-card p { position: relative; transform: translateZ(18px); }
+    .stat-card:hover {
+        box-shadow:
+            var(--d3-shadow-1),
+            var(--d3-shadow-lift),
+            var(--d3-rim);
+    }
+
+    .browse-product-card {
+        box-shadow: var(--d3-shadow-ambient), 0 1px 0 rgba(255,255,255,0.6) inset;
+        transform: translateZ(0);
+        transition: transform 0.3s cubic-bezier(.16,.85,.3,1.15), box-shadow 0.3s cubic-bezier(.16,.85,.3,1.15), border-color 0.2s;
+    }
+    .browse-product-card:hover {
+        box-shadow: var(--d3-shadow-lift), 0 0 0 1px rgba(34,139,34,0.18);
+        z-index: 2;
+    }
+    .browse-product-card .bpc-img, .browse-product-card .bpc-img-placeholder {
+        transform: translateZ(10px);
+    }
+
+    .fin-panel:hover {
+        box-shadow: 0 1px 0 rgba(255,255,255,0.7) inset, var(--d3-shadow-lift);
+        transform: translateY(-2px);
+    }
+    .fin-split-item {
+        box-shadow: 0 1px 0 rgba(255,255,255,0.6) inset, 0 4px 10px rgba(20,45,25,0.06);
+        transition: transform 0.2s cubic-bezier(.16,.85,.3,1.15), box-shadow 0.2s;
+    }
+    .fin-split-item:hover { transform: translateY(-3px) translateZ(0); box-shadow: 0 1px 0 rgba(255,255,255,0.6) inset, var(--d3-shadow-ambient); }
+
+    .btn {
+        box-shadow:
+            var(--d3-shadow-1),
+            0 1px 1px rgba(255,255,255,0.4),
+            0 4px 8px rgba(20,45,25,0.10),
+            0 1px 0 rgba(0,0,0,0.04);
+        transform: translateY(0) translateZ(0);
+        transition: transform 0.12s cubic-bezier(.2,.8,.3,1.3), box-shadow 0.16s ease, filter 0.15s, border-bottom-width 0.08s;
+    }
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow:
+            var(--d3-shadow-1),
+            0 1px 1px rgba(255,255,255,0.45),
+            0 10px 18px rgba(20,45,25,0.16),
+            0 2px 4px rgba(20,45,25,0.08);
+    }
+    .btn:active {
+        transform: translateY(2px) scale(0.985);
+        box-shadow: var(--d3-shadow-press), 0 1px 2px rgba(20,45,25,0.12);
+        border-bottom-width: 1px;
+    }
+    .btn-primary {
+        box-shadow:
+            0 1px 0 rgba(255,255,255,0.45) inset,
+            0 1px 1px rgba(255,255,255,0.3),
+            0 6px 14px rgba(22,193,80,0.35),
+            0 2px 4px rgba(22,193,80,0.2);
+    }
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow:
+            0 1px 0 rgba(255,255,255,0.5) inset,
+            0 12px 24px rgba(22,193,80,0.4),
+            0 3px 6px rgba(22,193,80,0.25);
+        filter: brightness(1.1) saturate(1.12);
+    }
+    .btn-primary:active {
+        transform: translateY(2px) scale(0.985);
+        box-shadow: 0 2px 6px rgba(22,193,80,0.3) inset;
+    }
+    .btn-success:hover { transform: translateY(-2px); }
+    .btn-success:active { transform: translateY(2px) scale(0.985); }
+
+    .sidebar {
+        box-shadow:
+            10px 0 40px rgba(0,0,0,0.4),
+            1px 0 0 rgba(255,255,255,0.03) inset,
+            -6px 0 20px rgba(0,0,0,0.15) inset;
+    }
+    .sidebar-link {
+        transition: transform 0.18s cubic-bezier(.2,.8,.3,1.2), background 0.15s, color 0.15s, box-shadow 0.18s;
+    }
+    .sidebar-link:hover {
+        transform: translateX(4px);
+        box-shadow: -2px 0 0 rgba(52,224,122,0.5) inset;
+    }
+    .sidebar-link.active {
+        transform: translateX(2px);
+    }
+
+    .action-modal, #resetProdModal > div {
+        box-shadow:
+            0 2px 0 rgba(255,255,255,0.6) inset,
+            0 30px 70px rgba(6,30,15,0.35),
+            0 10px 24px rgba(6,30,15,0.2),
+            0 0 0 1px rgba(22,193,80,0.08);
+        transform: translateZ(0);
+        animation: d3ModalIn 0.32s cubic-bezier(.2,.85,.25,1.15);
+    }
+    @keyframes d3ModalIn {
+        from { opacity: 0; transform: translateY(24px) scale(0.96) rotateX(4deg); }
+        to   { opacity: 1; transform: translateY(0) scale(1) rotateX(0deg); }
+    }
+
+    input, select {
+        box-shadow:
+            inset 0 3px 6px rgba(30,45,25,0.10),
+            inset 0 1px 2px rgba(30,45,25,0.06),
+            0 1px 0 rgba(255,255,255,0.7);
+        transition: box-shadow 0.18s, border-color 0.18s;
+    }
+    input:focus, select:focus {
+        box-shadow:
+            inset 0 3px 6px rgba(30,45,25,0.08),
+            0 0 0 3px rgba(34,139,34,0.16),
+            0 4px 10px rgba(34,139,34,0.12);
+    }
+
+    header .mark {
+        box-shadow:
+            0 0 0 3px var(--header-bg),
+            0 0 0 4.5px rgba(34,139,34,0.35),
+            0 6px 14px rgba(0,0,0,0.3);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .stat-card, .browse-product-card, .btn, .sidebar-link, .fin-panel, .fin-split-item {
+            transition: none !important;
+            animation: none !important;
+        }
+    }
+
+    @media (hover: none) {
+        .stat-card, .browse-product-card { transform: none !important; }
+    }
 </style>
 </head>
 <body>
@@ -1642,9 +1820,22 @@
                     <div id="cart"></div>
                     <h3 id="total">Total : 0 GNF</h3>
                 </div>
+                <div id="salePaymentBox" style="margin-top:14px;">
+                    <label style="display:block; margin-bottom:6px; color: var(--text-muted); font-size:0.9em;">Mode de paiement</label>
+                    <select id="salePaymentMethod" onchange="onSalePaymentMethodChange()">
+                        <option value="especes">💵 Espèces</option>
+                        <option value="mobile_money">📱 Mobile Money (Orange Money / MTN MoMo)</option>
+                        <option value="virement">🏦 Virement bancaire</option>
+                        <option value="cheque">📄 Chèque</option>
+                        <option value="autre">Autre</option>
+                    </select>
+                    <div id="salePaymentRefBox" style="display:none;">
+                        <input type="text" id="salePaymentRef" placeholder="Référence transaction (facultatif)">
+                    </div>
+                </div>
                 <div id="saleCreditBox" style="display:none; margin-top:12px;">
                     <label style="display:flex; align-items:center; gap:8px; font-size:0.9em; color: var(--text-muted);">
-                        <input type="checkbox" id="saleOnCredit" style="width:auto;"> Vente à crédit (ajouter à la dette du client)
+                        <input type="checkbox" id="saleOnCredit" onchange="onSaleOnCreditChange()" style="width:auto;"> Vente à crédit (ajouter à la dette du client)
                     </label>
                 </div>
                 <button class="btn btn-primary" onclick="validateSale()" style="width:100%; margin-top:14px;">Valider la Vente</button>
@@ -1677,7 +1868,12 @@
             <input type="date" id="salesFilterEnd" onchange="renderReports()" style="max-width:170px;">
             <select id="salesFilterPayment" onchange="renderReports()" style="max-width:200px;">
                 <option value="all">Tous les paiements</option>
-                <option value="cash">Comptant uniquement</option>
+                <option value="cash">Comptant (tous modes)</option>
+                <option value="especes">💵 Espèces</option>
+                <option value="mobile_money">📱 Mobile Money</option>
+                <option value="virement">🏦 Virement bancaire</option>
+                <option value="cheque">📄 Chèque</option>
+                <option value="autre">Autre</option>
                 <option value="credit">Crédit uniquement</option>
             </select>
             <select id="salesFilterMinAmount" onchange="renderReports()" style="max-width:200px;">
@@ -4245,7 +4441,40 @@ function renderClientSelect() {
 function onSaleClientChange() {
     const clientId = document.getElementById('saleClientSelect').value;
     document.getElementById('saleCreditBox').style.display = clientId ? 'block' : 'none';
-    if (!clientId) document.getElementById('saleOnCredit').checked = false;
+    if (!clientId) {
+        document.getElementById('saleOnCredit').checked = false;
+        onSaleOnCreditChange();
+    }
+}
+
+function onSalePaymentMethodChange() {
+    const method = document.getElementById('salePaymentMethod').value;
+    const refBox = document.getElementById('salePaymentRefBox');
+    refBox.style.display = (method === 'mobile_money' || method === 'virement' || method === 'cheque') ? 'block' : 'none';
+    if (refBox.style.display === 'none') document.getElementById('salePaymentRef').value = '';
+}
+
+function onSaleOnCreditChange() {
+    const onCredit = document.getElementById('saleOnCredit').checked;
+    const paymentSelect = document.getElementById('salePaymentMethod');
+    paymentSelect.disabled = onCredit;
+    document.getElementById('salePaymentBox').style.opacity = onCredit ? '0.5' : '1';
+    if (onCredit) {
+        document.getElementById('salePaymentRefBox').style.display = 'none';
+    } else {
+        onSalePaymentMethodChange();
+    }
+}
+
+function paymentMethodLabel(method) {
+    const labels = {
+        especes: '💵 Espèces',
+        mobile_money: '📱 Mobile Money',
+        virement: '🏦 Virement bancaire',
+        cheque: '📄 Chèque',
+        autre: 'Autre'
+    };
+    return labels[method] || labels.especes;
 }
 
 function openAddClientForm() {
@@ -6424,6 +6653,8 @@ function validateSale() {
     const clientId = document.getElementById('saleClientSelect').value;
     const client = data.clients.find(c => c.id === clientId);
     const onCredit = client ? document.getElementById('saleOnCredit').checked : false;
+    const paymentMethod = onCredit ? 'credit' : (document.getElementById('salePaymentMethod').value || 'especes');
+    const paymentRef = onCredit ? '' : (document.getElementById('salePaymentRef').value || '').trim();
 
     const saleRef = 'VT' + Date.now();
     cart.forEach(item => {
@@ -6436,7 +6667,7 @@ function validateSale() {
                 qty: -item.qty,
                 stockAfter: product.stock,
                 ref: saleRef,
-                note: onCredit ? `Vente à crédit${client ? ' (' + client.name + ')' : ''}` : 'Vente au comptoir'
+                note: onCredit ? `Vente à crédit${client ? ' (' + client.name + ')' : ''}` : `Vente au comptoir (${paymentMethodLabel(paymentMethod)})`
             });
         }
     });
@@ -6448,7 +6679,9 @@ function validateSale() {
         total,
         clientId: client ? client.id : null,
         clientName: client ? client.name : '',
-        paidOnCredit: onCredit
+        paidOnCredit: onCredit,
+        paymentMethod: paymentMethod,
+        paymentRef: paymentRef
     };
     data.sales.push(sale);
 
@@ -6464,6 +6697,8 @@ function validateSale() {
     document.getElementById('saleClientSelect').value = '';
     document.getElementById('saleOnCredit').checked = false;
     document.getElementById('saleCreditBox').style.display = 'none';
+    document.getElementById('salePaymentMethod').value = 'especes';
+    onSaleOnCreditChange();
     renderClientSelect();
 
     openSaleActionModal(sale);
@@ -6507,6 +6742,9 @@ function renderReports() {
     if (filterEnd) filteredSales = filteredSales.filter(s => new Date(s.date) <= new Date(filterEnd + 'T23:59:59'));
     if (filterPayment === 'cash') filteredSales = filteredSales.filter(s => !s.paidOnCredit);
     if (filterPayment === 'credit') filteredSales = filteredSales.filter(s => s.paidOnCredit);
+    if (['especes','mobile_money','virement','cheque','autre'].includes(filterPayment)) {
+        filteredSales = filteredSales.filter(s => !s.paidOnCredit && (s.paymentMethod || 'especes') === filterPayment);
+    }
     if (filterMinAmount > 0) filteredSales = filteredSales.filter(s => s.total >= filterMinAmount);
 
     const hasActiveFilter = filterStart || filterEnd || filterPayment !== 'all' || filterMinAmount > 0;
@@ -6518,7 +6756,7 @@ function renderReports() {
             const d = new Date(sale.date);
             return `<tr>
                 <td data-label="Date" class="mono">${d.toLocaleDateString('fr-FR')} ${d.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'})}</td>
-                <td data-label="Client">${sale.clientName || 'Client de passage'}${sale.paidOnCredit ? ' <span class="badge badge-warn">Crédit</span>' : ''}</td>
+                <td data-label="Client">${sale.clientName || 'Client de passage'}${sale.paidOnCredit ? ' <span class="badge badge-warn">Crédit</span>' : ' <span class="badge">' + paymentMethodLabel(sale.paymentMethod || 'especes') + '</span>'}</td>
                 <td data-label="Articles">${itemsSummary}</td>
                 <td data-label="Total" class="mono">${formatGNF(sale.total)}</td>
                 <td data-label="" style="white-space:nowrap;">
@@ -6957,7 +7195,12 @@ function buildReceiptText(sale) {
     });
     lines.push('');
     lines.push(`TOTAL : ${formatGNF(sale.total)}`);
-    if (sale.paidOnCredit) lines.push('— Vente enregistrée à crédit —');
+    if (sale.paidOnCredit) {
+        lines.push('— Vente enregistrée à crédit —');
+    } else if (sale.paymentMethod) {
+        lines.push(`Paiement : ${paymentMethodLabel(sale.paymentMethod)}`);
+        if (sale.paymentRef) lines.push(`Réf. : ${sale.paymentRef}`);
+    }
     lines.push('');
     lines.push('Merci de votre confiance.');
     return lines.join('\n');
@@ -7263,6 +7506,75 @@ if ('serviceWorker' in navigator) {
         }).catch(() => { /* pas de réseau pour vérifier, on ignore silencieusement */ });
     });
 }
+
+// ---------- Moteur de tilt 3D interactif (souris) ----------
+(function () {
+    const TILT_SELECTOR = '.stat-card, .browse-product-card, .fin-panel, .action-modal';
+    const MAX_TILT = 10; // degrés
+    const SCALE_HOVER = 1.03;
+
+    function isTouchOnly() {
+        return window.matchMedia('(hover: none)').matches;
+    }
+
+    function attachTilt(el) {
+        if (el.__tiltAttached || isTouchOnly()) return;
+        el.__tiltAttached = true;
+
+        let rafId = null;
+
+        function onMove(e) {
+            const rect = el.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const px = (x / rect.width) - 0.5;
+            const py = (y / rect.height) - 0.5;
+            const rotY = px * MAX_TILT * 2;
+            const rotX = -py * MAX_TILT * 2;
+
+            if (rafId) cancelAnimationFrame(rafId);
+            rafId = requestAnimationFrame(() => {
+                el.style.transform =
+                    'perspective(900px) rotateX(' + rotX + 'deg) rotateY(' + rotY + 'deg) scale(' + SCALE_HOVER + ') translateZ(0)';
+            });
+        }
+
+        function onEnter() {
+            el.classList.add('d3-tilting');
+            el.style.transition = 'transform 0.08s ease-out';
+        }
+
+        function onLeave() {
+            el.classList.remove('d3-tilting');
+            el.style.transition = 'transform 0.4s cubic-bezier(.16,.85,.3,1.15)';
+            el.style.transform = '';
+        }
+
+        el.addEventListener('mouseenter', onEnter);
+        el.addEventListener('mousemove', onMove);
+        el.addEventListener('mouseleave', onLeave);
+    }
+
+    function scanAndAttach(root) {
+        if (isTouchOnly()) return;
+        const scope = root || document;
+        scope.querySelectorAll(TILT_SELECTOR).forEach(attachTilt);
+    }
+
+    document.addEventListener('DOMContentLoaded', function () { scanAndAttach(); });
+    scanAndAttach();
+
+    const observer = new MutationObserver(function (mutations) {
+        mutations.forEach(function (m) {
+            m.addedNodes.forEach(function (node) {
+                if (node.nodeType !== 1) return;
+                if (node.matches && node.matches(TILT_SELECTOR)) attachTilt(node);
+                if (node.querySelectorAll) scanAndAttach(node);
+            });
+        });
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+})();
 </script>
 </body>
 </html>
