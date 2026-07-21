@@ -1835,8 +1835,13 @@
                 </div>
                 <div id="saleCreditBox" style="display:none; margin-top:12px;">
                     <label style="display:flex; align-items:center; gap:8px; font-size:0.9em; color: var(--text-muted);">
-                        <input type="checkbox" id="saleOnCredit" onchange="onSaleOnCreditChange()" style="width:auto;"> Vente à crédit (ajouter à la dette du client)
+                        <input type="checkbox" id="saleOnCredit" onchange="onSaleOnCreditChange()" style="width:auto;"> Vente à crédit / paiement partiel
                     </label>
+                    <div id="salePartialBox" style="display:none; margin-top:8px;">
+                        <label style="display:block; margin-bottom:4px; color: var(--text-muted); font-size:0.85em;">Montant payé maintenant (0 = tout à crédit)</label>
+                        <input type="number" id="salePaidNow" min="0" step="1" placeholder="0" oninput="onSalePaidNowChange()">
+                        <div id="salePartialSummary" style="font-size:0.85em; color: var(--text-muted); margin-top:-4px;"></div>
+                    </div>
                 </div>
                 <button class="btn btn-primary" onclick="validateSale()" style="width:100%; margin-top:14px;">Valider la Vente</button>
             </div>
@@ -1874,7 +1879,8 @@
                 <option value="virement">🏦 Virement bancaire</option>
                 <option value="cheque">📄 Chèque</option>
                 <option value="autre">Autre</option>
-                <option value="credit">Crédit uniquement</option>
+                <option value="partial">Paiement partiel</option>
+                <option value="credit">Crédit (total ou partiel)</option>
             </select>
             <select id="salesFilterMinAmount" onchange="renderReports()" style="max-width:200px;">
                 <option value="0">Montant min. : aucun</option>
@@ -4456,13 +4462,43 @@ function onSalePaymentMethodChange() {
 
 function onSaleOnCreditChange() {
     const onCredit = document.getElementById('saleOnCredit').checked;
-    const paymentSelect = document.getElementById('salePaymentMethod');
-    paymentSelect.disabled = onCredit;
-    document.getElementById('salePaymentBox').style.opacity = onCredit ? '0.5' : '1';
+    const partialBox = document.getElementById('salePartialBox');
+    partialBox.style.display = onCredit ? 'block' : 'none';
     if (onCredit) {
+        document.getElementById('salePaidNow').value = '';
+        onSalePaidNowChange();
+    } else {
+        document.getElementById('salePaymentMethod').disabled = false;
+        document.getElementById('salePaymentBox').style.opacity = '1';
+        onSalePaymentMethodChange();
+    }
+}
+
+function onSalePaidNowChange() {
+    const total = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
+    const paidNow = Math.max(0, parseInt(document.getElementById('salePaidNow').value) || 0);
+    const remainder = Math.max(0, total - paidNow);
+    const paymentSelect = document.getElementById('salePaymentMethod');
+    const paymentBox = document.getElementById('salePaymentBox');
+    const summary = document.getElementById('salePartialSummary');
+
+    // Le mode de paiement ne concerne que la partie payée maintenant :
+    // pas besoin s'il n'y a rien de payé tout de suite.
+    const noCashNow = paidNow <= 0;
+    paymentSelect.disabled = noCashNow;
+    paymentBox.style.opacity = noCashNow ? '0.5' : '1';
+    if (noCashNow) {
         document.getElementById('salePaymentRefBox').style.display = 'none';
     } else {
         onSalePaymentMethodChange();
+    }
+
+    if (paidNow <= 0) {
+        summary.textContent = total > 0 ? `Vente entièrement à crédit : ${formatGNF(total)} ajoutés à la dette du client.` : '';
+    } else if (remainder <= 0) {
+        summary.textContent = 'Paiement intégral — aucune dette ajoutée.';
+    } else {
+        summary.textContent = `Payé maintenant : ${formatGNF(paidNow)} — Reste à crédit : ${formatGNF(remainder)}`;
     }
 }
 
@@ -6623,6 +6659,7 @@ function renderCart() {
     const total = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
     document.getElementById('total').textContent = `Total : ${formatGNF(total)}`;
     renderBrowseProducts();
+    if (document.getElementById('saleOnCredit').checked) onSalePaidNowChange();
 }
 
 function validateSale() {
@@ -6653,10 +6690,33 @@ function validateSale() {
     const clientId = document.getElementById('saleClientSelect').value;
     const client = data.clients.find(c => c.id === clientId);
     const onCredit = client ? document.getElementById('saleOnCredit').checked : false;
-    const paymentMethod = onCredit ? 'credit' : (document.getElementById('salePaymentMethod').value || 'especes');
-    const paymentRef = onCredit ? '' : (document.getElementById('salePaymentRef').value || '').trim();
+    const total = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
+
+    let paidNow = total;
+    let remainder = 0;
+    if (onCredit) {
+        paidNow = Math.max(0, parseInt(document.getElementById('salePaidNow').value) || 0);
+        if (paidNow > total) paidNow = total;
+        remainder = total - paidNow;
+    }
+    const isFullCredit = onCredit && paidNow <= 0;
+    const isPartial = onCredit && paidNow > 0 && remainder > 0;
+
+    // Une dette ne peut être attribuée qu'à un client identifié.
+    if (onCredit && remainder > 0 && !client) {
+        alert("Sélectionnez un client pour enregistrer une vente à crédit ou un paiement partiel.");
+        return;
+    }
+
+    const paymentMethod = (remainder > 0 && paidNow <= 0) ? 'credit' : (document.getElementById('salePaymentMethod').value || 'especes');
+    const paymentRef = (remainder > 0 && paidNow <= 0) ? '' : (document.getElementById('salePaymentRef').value || '').trim();
 
     const saleRef = 'VT' + Date.now();
+    let noteSuffix;
+    if (isFullCredit) noteSuffix = `Vente à crédit${client ? ' (' + client.name + ')' : ''}`;
+    else if (isPartial) noteSuffix = `Vente partielle : ${formatGNF(paidNow)} (${paymentMethodLabel(paymentMethod)}) + ${formatGNF(remainder)} à crédit${client ? ' (' + client.name + ')' : ''}`;
+    else noteSuffix = `Vente au comptoir (${paymentMethodLabel(paymentMethod)})`;
+
     cart.forEach(item => {
         const product = data.products.find(p => p.code === item.code);
         if (product) {
@@ -6667,26 +6727,28 @@ function validateSale() {
                 qty: -item.qty,
                 stockAfter: product.stock,
                 ref: saleRef,
-                note: onCredit ? `Vente à crédit${client ? ' (' + client.name + ')' : ''}` : `Vente au comptoir (${paymentMethodLabel(paymentMethod)})`
+                note: noteSuffix
             });
         }
     });
 
-    const total = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
     const sale = {
         date: new Date().toISOString(),
         items: cart.map(i => ({code: i.code, name: i.name, price: i.price, qty: i.qty})),
         total,
         clientId: client ? client.id : null,
         clientName: client ? client.name : '',
-        paidOnCredit: onCredit,
+        paidOnCredit: isFullCredit,
+        partialPayment: isPartial,
+        amountPaid: onCredit ? paidNow : total,
+        amountCredit: onCredit ? remainder : 0,
         paymentMethod: paymentMethod,
         paymentRef: paymentRef
     };
     data.sales.push(sale);
 
-    if (client && onCredit) {
-        client.credit = (client.credit || 0) + total;
+    if (client && onCredit && remainder > 0) {
+        client.credit = (client.credit || 0) + remainder;
     }
 
     saveData();
@@ -6697,6 +6759,7 @@ function validateSale() {
     document.getElementById('saleClientSelect').value = '';
     document.getElementById('saleOnCredit').checked = false;
     document.getElementById('saleCreditBox').style.display = 'none';
+    document.getElementById('salePaidNow').value = '';
     document.getElementById('salePaymentMethod').value = 'especes';
     onSaleOnCreditChange();
     renderClientSelect();
@@ -6741,7 +6804,8 @@ function renderReports() {
     if (filterStart) filteredSales = filteredSales.filter(s => new Date(s.date) >= new Date(filterStart + 'T00:00:00'));
     if (filterEnd) filteredSales = filteredSales.filter(s => new Date(s.date) <= new Date(filterEnd + 'T23:59:59'));
     if (filterPayment === 'cash') filteredSales = filteredSales.filter(s => !s.paidOnCredit);
-    if (filterPayment === 'credit') filteredSales = filteredSales.filter(s => s.paidOnCredit);
+    if (filterPayment === 'credit') filteredSales = filteredSales.filter(s => s.paidOnCredit || s.partialPayment);
+    if (filterPayment === 'partial') filteredSales = filteredSales.filter(s => s.partialPayment);
     if (['especes','mobile_money','virement','cheque','autre'].includes(filterPayment)) {
         filteredSales = filteredSales.filter(s => !s.paidOnCredit && (s.paymentMethod || 'especes') === filterPayment);
     }
@@ -6756,7 +6820,11 @@ function renderReports() {
             const d = new Date(sale.date);
             return `<tr>
                 <td data-label="Date" class="mono">${d.toLocaleDateString('fr-FR')} ${d.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'})}</td>
-                <td data-label="Client">${sale.clientName || 'Client de passage'}${sale.paidOnCredit ? ' <span class="badge badge-warn">Crédit</span>' : ' <span class="badge">' + paymentMethodLabel(sale.paymentMethod || 'especes') + '</span>'}</td>
+                <td data-label="Client">${sale.clientName || 'Client de passage'}${
+                    sale.paidOnCredit ? ' <span class="badge badge-warn">Crédit</span>'
+                    : sale.partialPayment ? ' <span class="badge badge-warn">Partiel : ' + formatGNF(sale.amountPaid) + ' + ' + formatGNF(sale.amountCredit) + ' à crédit</span>'
+                    : ' <span class="badge">' + paymentMethodLabel(sale.paymentMethod || 'especes') + '</span>'
+                }</td>
                 <td data-label="Articles">${itemsSummary}</td>
                 <td data-label="Total" class="mono">${formatGNF(sale.total)}</td>
                 <td data-label="" style="white-space:nowrap;">
@@ -7197,6 +7265,10 @@ function buildReceiptText(sale) {
     lines.push(`TOTAL : ${formatGNF(sale.total)}`);
     if (sale.paidOnCredit) {
         lines.push('— Vente enregistrée à crédit —');
+    } else if (sale.partialPayment) {
+        lines.push(`Payé maintenant (${paymentMethodLabel(sale.paymentMethod)}) : ${formatGNF(sale.amountPaid)}`);
+        lines.push(`Reste à crédit : ${formatGNF(sale.amountCredit)}`);
+        if (sale.paymentRef) lines.push(`Réf. : ${sale.paymentRef}`);
     } else if (sale.paymentMethod) {
         lines.push(`Paiement : ${paymentMethodLabel(sale.paymentMethod)}`);
         if (sale.paymentRef) lines.push(`Réf. : ${sale.paymentRef}`);
