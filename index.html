@@ -46,6 +46,54 @@
         --purple-bg: rgba(155,92,255,0.12);
     }
     * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    ::selection { background: rgba(22,193,80,0.28); color: var(--text); }
+    ::-webkit-scrollbar { width: 10px; height: 10px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, var(--accent-soft), var(--teal)); border-radius: 8px; border: 2px solid var(--bg); }
+    ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+    /* Ripple effect for buttons */
+    .btn, button { position: relative; overflow: hidden; }
+    .btn .ripple, button .ripple {
+        position: absolute; border-radius: 50%; transform: scale(0);
+        background: rgba(255,255,255,0.55); pointer-events: none;
+        animation: rippleAnim 0.6s ease-out;
+    }
+    @keyframes rippleAnim { to { transform: scale(2.8); opacity: 0; } }
+
+    /* Scroll reveal */
+    .reveal-init { opacity: 0; transform: translateY(14px); }
+    .reveal-in { animation: revealIn 0.5s cubic-bezier(.2,.8,.3,1) forwards; }
+    @keyframes revealIn { to { opacity: 1; transform: translateY(0); } }
+
+    /* Skeleton shimmer for loading states */
+    .skeleton {
+        background: linear-gradient(90deg, rgba(22,193,80,0.08) 25%, rgba(22,193,80,0.18) 37%, rgba(22,193,80,0.08) 63%);
+        background-size: 400% 100%;
+        animation: shimmer 1.4s ease infinite;
+        border-radius: 8px;
+    }
+    @keyframes shimmer { 0% { background-position: 100% 50%; } 100% { background-position: 0 50%; } }
+
+    /* Connection status pill */
+    #netStatusPill {
+        position: fixed; top: 10px; left: 50%; transform: translateX(-50%) translateY(-60px);
+        z-index: 900; padding: 8px 16px; border-radius: 999px;
+        font-family: 'Work Sans', sans-serif; font-size: 0.8em; font-weight: 600;
+        display: flex; align-items: center; gap: 8px;
+        background: rgba(255,77,61,0.95); color: #fff;
+        box-shadow: 0 10px 30px rgba(255,77,61,0.35);
+        transition: transform 0.35s cubic-bezier(.2,.9,.3,1.2);
+    }
+    #netStatusPill.show { transform: translateX(-50%) translateY(0); }
+    #netStatusPill.online { background: rgba(18,212,126,0.95); box-shadow: 0 10px 30px rgba(18,212,126,0.35); }
+    #netStatusPill .dot { width: 8px; height: 8px; border-radius: 50%; background: #fff; animation: pulseDot 1.4s infinite; }
+    @keyframes pulseDot { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+    /* General smoother, springier interactions app-wide */
+    .btn, .sidebar-link, .icon-btn, .shortcut-chip { transition: all 0.18s cubic-bezier(.2,.8,.3,1.15); }
+    .btn:hover { transform: translateY(-1px); }
     body {
         font-family: 'Work Sans', sans-serif;
         margin: 0;
@@ -380,7 +428,9 @@
         display: none;
         position: fixed;
         inset: 0;
-        background: rgba(8,9,12,0.86);
+        background: rgba(6,8,10,0.55);
+        backdrop-filter: blur(6px) saturate(140%);
+        -webkit-backdrop-filter: blur(6px) saturate(140%);
         z-index: 210;
         align-items: center;
         justify-content: center;
@@ -404,10 +454,16 @@
         position: fixed; right: 18px; bottom: 84px; z-index: 300;
         width: min(360px, calc(100vw - 36px));
         height: min(520px, calc(100vh - 140px));
-        background: var(--panel); border: 1px solid var(--line); border-radius: 16px;
-        box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+        background: rgba(255,255,255,0.82);
+        backdrop-filter: blur(18px) saturate(160%);
+        -webkit-backdrop-filter: blur(18px) saturate(160%);
+        border: 1px solid rgba(255,255,255,0.5);
+        border-radius: 18px;
+        box-shadow: 0 24px 70px rgba(6,58,31,0.28), 0 0 0 1px rgba(22,193,80,0.08);
         flex-direction: column; overflow: hidden;
+        animation: panelRise 0.28s cubic-bezier(.2,.9,.3,1.3);
     }
+    @keyframes panelRise { from { opacity: 0; transform: translateY(16px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
     .ai-chat-panel.open { display: flex; }
     .ai-chat-header {
         background: linear-gradient(180deg, var(--header-bg-2), var(--header-bg));
@@ -434,14 +490,17 @@
     }
     .action-modal-overlay.open { display: flex; }
     .action-modal {
-        background: var(--panel);
-        border: 1px solid var(--line);
-        border-radius: 16px;
+        background: rgba(255,255,255,0.86);
+        backdrop-filter: blur(20px) saturate(160%);
+        -webkit-backdrop-filter: blur(20px) saturate(160%);
+        border: 1px solid rgba(255,255,255,0.6);
+        border-radius: 18px;
         max-width: 380px;
         width: 100%;
         padding: 1.6rem 1.4rem 1.4rem;
-        box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        box-shadow: 0 30px 80px rgba(6,58,31,0.35), 0 0 0 1px rgba(22,193,80,0.1);
         text-align: center;
+        animation: panelRise 0.3s cubic-bezier(.2,.9,.3,1.3);
     }
     .action-modal h3 {
         margin: 0 0 4px;
@@ -1175,6 +1234,7 @@
 </style>
 </head>
 <body>
+<div id="netStatusPill"><span class="dot"></span><span id="netStatusText">Hors ligne</span></div>
 
 <!-- Écran de connexion (auth Supabase multi-utilisateur) -->
 <div id="authScreen" class="hidden">
@@ -7061,6 +7121,62 @@ function closeSidebar() {
     document.getElementById('appSidebar').classList.remove('open');
     document.getElementById('sidebarOverlay').classList.remove('open');
 }
+// ---------- Statut de connexion réseau (indicateur en direct) ----------
+(function() {
+    const pill = document.getElementById('netStatusPill');
+    const text = document.getElementById('netStatusText');
+    if (!pill) return;
+    let hideTimer = null;
+    function updateNetStatus(showAlways) {
+        const online = navigator.onLine;
+        pill.classList.toggle('online', online);
+        text.textContent = online ? 'Connexion rétablie' : 'Mode hors ligne';
+        if (online && !showAlways) {
+            pill.classList.remove('show');
+            return;
+        }
+        pill.classList.add('show');
+        clearTimeout(hideTimer);
+        if (online) hideTimer = setTimeout(() => pill.classList.remove('show'), 2500);
+    }
+    window.addEventListener('online', () => updateNetStatus(true));
+    window.addEventListener('offline', () => updateNetStatus(true));
+    if (!navigator.onLine) updateNetStatus(true);
+})();
+
+// ---------- Effet ripple sur boutons (Material-style, non intrusif) ----------
+document.addEventListener('click', function(e) {
+    const target = e.target.closest('.btn, button');
+    if (!target) return;
+    const rect = target.getBoundingClientRect();
+    const ripple = document.createElement('span');
+    const size = Math.max(rect.width, rect.height);
+    ripple.className = 'ripple';
+    ripple.style.width = ripple.style.height = size + 'px';
+    ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
+    ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
+    target.appendChild(ripple);
+    setTimeout(() => ripple.remove(), 650);
+}, true);
+
+// ---------- Révélation animée des panneaux au scroll ----------
+if ('IntersectionObserver' in window) {
+    const revealObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('reveal-in');
+                revealObserver.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.08 });
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.card, .panel, .kpi-card, .stat-card').forEach(el => {
+            el.classList.add('reveal-init');
+            revealObserver.observe(el);
+        });
+    });
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     const nav = document.getElementById('sidebarNav');
     if (nav) nav.addEventListener('scroll', updateSidebarScrollHint);
@@ -7092,9 +7208,14 @@ initAuth();
 // ---------- Enregistrement du Service Worker (installation + hors-ligne) ----------
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js').catch(err => {
-            console.warn('Service Worker non enregistré :', err);
-        });
+        fetch('sw.js', { method: 'HEAD' }).then(res => {
+            if (res.ok) {
+                navigator.serviceWorker.register('sw.js').catch(err => {
+                    console.warn('Service Worker non enregistré :', err);
+                });
+            }
+            // sw.js absent (ex: aperçu) : on n'enregistre pas, pas d'erreur console
+        }).catch(() => { /* pas de réseau pour vérifier, on ignore silencieusement */ });
     });
 }
 </script>
