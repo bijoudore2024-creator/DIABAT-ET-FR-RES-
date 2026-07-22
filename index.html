@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Diabaté et Frères Sarl - Gestion Pharmacie</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0a3d22">
@@ -92,7 +92,7 @@
 
     /* Connection status pill */
     #netStatusPill {
-        position: fixed; top: 10px; left: 50%; transform: translateX(-50%) translateY(-60px);
+        position: fixed; top: calc(10px + env(safe-area-inset-top, 0px)); left: 50%; transform: translateX(-50%) translateY(-60px);
         z-index: 900; padding: 8px 16px; border-radius: 999px;
         font-family: 'Work Sans', sans-serif; font-size: 0.8em; font-weight: 600;
         display: flex; align-items: center; gap: 8px;
@@ -126,7 +126,7 @@
     header {
         background: linear-gradient(180deg, var(--header-bg-2), var(--header-bg));
         border-bottom: 1px solid var(--header-line);
-        padding: 1.8rem 1.5rem 1.5rem;
+        padding: calc(1.8rem + env(safe-area-inset-top, 0px)) 1.5rem 1.5rem;
         text-align: center;
         position: relative;
     }
@@ -191,7 +191,7 @@
     header .mark .mark-edit-icon svg { width: 16px; height: 16px; }
     .header-bar {
         position: absolute;
-        top: 1.6rem; left: 1.2rem; right: 1.2rem;
+        top: calc(1.6rem + env(safe-area-inset-top, 0px)); left: 1.2rem; right: 1.2rem;
         display: flex; align-items: flex-start; justify-content: space-between;
         z-index: 10;
     }
@@ -228,7 +228,7 @@
     .app-sidebar.open { transform: translateX(0); }
     .sidebar-header {
         display: flex; align-items: center; gap: 12px;
-        padding: 1.5rem 1.2rem 1.2rem;
+        padding: calc(1.5rem + env(safe-area-inset-top, 0px)) 1.2rem 1.2rem;
         border-bottom: 1px solid var(--header-line);
         flex-shrink: 0;
     }
@@ -462,7 +462,10 @@
 
     /* ---------- Assistant IA locale (LM Studio) ---------- */
     .ai-chat-toggle {
-        position: fixed; right: 18px; bottom: 18px; z-index: 300;
+        position: fixed;
+        right: max(18px, calc(env(safe-area-inset-right, 0px) + 12px));
+        bottom: max(18px, calc(env(safe-area-inset-bottom, 0px) + 12px));
+        z-index: 300;
         width: 54px; height: 54px; border-radius: 50%; border: none;
         background: linear-gradient(180deg, var(--header-bg-2), var(--header-bg));
         color: var(--accent-soft); cursor: pointer;
@@ -474,7 +477,10 @@
     .ai-chat-toggle svg { width: 24px; height: 24px; }
     .ai-chat-panel {
         display: none;
-        position: fixed; right: 18px; bottom: 84px; z-index: 300;
+        position: fixed;
+        right: max(18px, calc(env(safe-area-inset-right, 0px) + 12px));
+        bottom: max(84px, calc(env(safe-area-inset-bottom, 0px) + 78px));
+        z-index: 300;
         width: min(360px, calc(100vw - 36px));
         height: min(520px, calc(100vh - 140px));
         background: rgba(255,255,255,0.82);
@@ -1249,10 +1255,23 @@
     @media (max-width: 360px) {
         .stat-cards { grid-template-columns: 1fr 1fr; }
     }
+    /* ---------- Écrans très étroits (ex. Galaxy Fold/Flip fermé ≈280–320px) ---------- */
+    @media (max-width: 320px) {
+        .stat-cards { grid-template-columns: 1fr; }
+        .container { padding: 0 8px 24px; }
+        .tab-content { padding: 16px; }
+        header h1 { font-size: 1.3em; }
+        .btn, button { font-size: 0.9em; }
+    }
 
     /* ---------- Desktop : titre agrandi ---------- */
     @media (min-width: 900px) {
         header h1 { font-size: 3em; font-weight: 700; }
+    }
+    /* ---------- Très grands écrans (desktop large, 4K) : on évite l'étirement excessif ---------- */
+    @media (min-width: 1600px) {
+        .container { max-width: 1500px; }
+        .stat-cards { grid-template-columns: repeat(5, 1fr); }
     }
 
     /* =====================================================
