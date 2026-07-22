@@ -2629,32 +2629,26 @@
         <div class="fin-panel" style="margin-top:20px;">
             <h3 style="margin-top:0;">Assistant IA locale (LM Studio)</h3>
             <p style="color:var(--text-muted); font-size:0.9em; margin-top:-8px;">
-                Connecte l'application à un serveur LM Studio (local ou sur un autre ordinateur du réseau) pour activer l'assistant IA. L'assistant peut répondre à des questions générales et consulter le stock, les ventes et les créances clients pour donner des réponses précises.
+                Active l'assistant IA en te connectant à un serveur LM Studio lancé sur <strong>cet ordinateur</strong>. L'assistant peut répondre à des questions générales et consulter le stock, les ventes et les créances clients pour donner des réponses précises.
             </p>
             <div id="settAiStatus" style="margin:10px 0; padding:10px 14px; border-radius:8px; font-size:0.9em;"></div>
-            <label style="display:block; font-size:0.85em; color:var(--text-muted); margin-bottom:4px;">Adresse du serveur LM Studio</label>
-            <input type="text" id="settAiUrl" placeholder="http://localhost:1234/v1 ou http://192.168.1.10:1234/v1">
-            <label style="display:block; font-size:0.85em; color:var(--text-muted); margin:10px 0 4px;">Nom du modèle chargé dans LM Studio</label>
-            <input type="text" id="settAiModel" placeholder="ex : llama-3.1-8b-instruct">
-            <label style="display:flex; align-items:center; gap:8px; font-size:0.9em; color:var(--text-muted); margin-top:10px;">
-                <input type="checkbox" id="settAiIncludeData" style="width:auto;"> Autoriser l'IA à consulter les données de la pharmacie (stock, ventes, clients)
+            <label style="display:flex; align-items:center; gap:8px; font-size:0.9em; color:var(--text-muted); margin-top:4px;">
+                <input type="checkbox" id="settAiIncludeData" style="width:auto;" checked> Autoriser l'IA à consulter les données de la pharmacie (stock, ventes, clients)
             </label>
             <div style="display:flex; gap:10px; margin-top:12px; flex-wrap:wrap;">
-                <button class="btn btn-success" onclick="saveAiConfig()" style="width:auto;">Enregistrer</button>
-                <button class="btn" onclick="testAiConnection()" style="width:auto;">Tester la connexion</button>
-                <button class="btn" onclick="clearAiConfig()" style="width:auto;">Déconnecter / Effacer</button>
+                <button class="btn btn-success" id="settAiActivateBtn" onclick="activateLocalAi()" style="width:auto;">Activer l'assistant local</button>
+                <button class="btn" onclick="clearAiConfig()" style="width:auto;">Désactiver</button>
             </div>
             <details style="margin-top:16px;">
-                <summary style="cursor:pointer; color:var(--text-muted); font-size:0.9em;">Comment configurer LM Studio ?</summary>
+                <summary style="cursor:pointer; color:var(--text-muted); font-size:0.9em;">Comment ça marche ?</summary>
                 <ol style="font-size:0.85em; color:var(--text-muted); line-height:1.7;">
-                    <li>Installe et ouvre <strong>LM Studio</strong> sur un ordinateur (télécharge un modèle, ex : Llama 3.1 8B Instruct)</li>
+                    <li>Installe et ouvre <strong>LM Studio</strong> sur cet ordinateur (télécharge un modèle, ex : Llama 3.1 8B Instruct)</li>
                     <li>Dans l'onglet <em>Local Server</em>, clique sur "Start Server" (par défaut sur le port 1234)</li>
-                    <li>Si l'application est ouverte sur le <strong>même ordinateur</strong> que LM Studio, utilise <code>http://localhost:1234/v1</code></li>
-                    <li>Si l'application est ouverte sur un <strong>autre appareil</strong> du réseau (téléphone, autre PC), utilise l'adresse IP locale de l'ordinateur qui fait tourner LM Studio, ex : <code>http://192.168.1.10:1234/v1</code> — assure-toi que le pare-feu autorise les connexions entrantes sur ce port</li>
-                    <li>Renseigne le nom exact du modèle chargé (visible en haut de LM Studio), puis clique sur "Tester la connexion"</li>
+                    <li>Clique sur "Activer l'assistant local" : l'application détecte automatiquement le modèle chargé et se connecte</li>
                 </ol>
             </details>
         </div>
+
 
         <div class="fin-panel" id="dangerZonePanel" style="display:none; margin-top:20px; border-color: rgba(224,99,106,0.4);">
             <h3 style="margin-top:0; color:var(--danger);">⚠ Zone de danger</h3>
@@ -3692,8 +3686,6 @@ function renderSettingsTab() {
     document.getElementById('settSupabaseKey').value = (SUPABASE_ANON_KEY === DEFAULT_SUPABASE_ANON_KEY) ? '' : SUPABASE_ANON_KEY;
 
     const ai = data.settings.ai || {};
-    document.getElementById('settAiUrl').value = ai.url || '';
-    document.getElementById('settAiModel').value = ai.model || '';
     document.getElementById('settAiIncludeData').checked = ai.includeData !== false;
     renderAiStatus();
 
@@ -3744,47 +3736,36 @@ function renderAiStatus() {
     if (modelLabel) modelLabel.textContent = ai.model ? `— ${ai.model}` : '';
 }
 
-function saveAiConfig() {
-    const url = document.getElementById('settAiUrl').value.trim().replace(/\/+$/, '');
-    const model = document.getElementById('settAiModel').value.trim();
+const AI_LOCAL_URL = 'http://localhost:1234/v1';
+
+async function activateLocalAi() {
+    const btn = document.getElementById('settAiActivateBtn');
     const includeData = document.getElementById('settAiIncludeData').checked;
-    data.settings.ai = { url, model, includeData };
-    saveData();
-    renderAiStatus();
-    alert('Configuration de l\'assistant IA enregistrée.');
+    btn.disabled = true;
+    btn.textContent = 'Connexion en cours…';
+    try {
+        const res = await fetch(AI_LOCAL_URL + '/models');
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const json = await res.json();
+        const model = json.data?.[0]?.id;
+        if (!model) throw new Error('Aucun modèle chargé dans LM Studio');
+        data.settings.ai = { url: AI_LOCAL_URL, model, includeData };
+        saveData();
+        renderAiStatus();
+        alert('✓ Assistant local activé avec le modèle : ' + model);
+    } catch (err) {
+        alert('✗ Impossible d\'activer l\'assistant : ' + err.message + '\n\nVérifie que LM Studio est ouvert, qu\'un modèle est chargé, et que le serveur local est démarré (onglet Local Server, "Start Server").');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Activer l\'assistant local';
+    }
 }
 
 function clearAiConfig() {
     data.settings.ai = { url: '', model: '', includeData: true };
-    document.getElementById('settAiUrl').value = '';
-    document.getElementById('settAiModel').value = '';
     document.getElementById('settAiIncludeData').checked = true;
     saveData();
     renderAiStatus();
-}
-
-async function testAiConnection() {
-    const url = document.getElementById('settAiUrl').value.trim().replace(/\/+$/, '');
-    const model = document.getElementById('settAiModel').value.trim();
-    if (!url || !model) { alert('Renseigne l\'adresse du serveur et le nom du modèle avant de tester.'); return; }
-    try {
-        const res = await fetch(url + '/chat/completions', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                model,
-                messages: [{ role: 'user', content: 'Réponds uniquement "OK" pour confirmer que tu fonctionnes.' }],
-                max_tokens: 10,
-                temperature: 0
-            })
-        });
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        const json = await res.json();
-        const reply = json.choices?.[0]?.message?.content || '(réponse vide)';
-        alert('✓ Connexion réussie.\nRéponse du modèle : ' + reply.trim());
-    } catch (err) {
-        alert('✗ Connexion échouée : ' + err.message + '\n\nVérifie que LM Studio est lancé, que le serveur local est démarré, et que l\'adresse (IP/port) est correcte et accessible depuis cet appareil.');
-    }
 }
 
 // Construit un résumé compact des données réelles de la pharmacie,
