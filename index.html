@@ -108,6 +108,7 @@
     /* General smoother, springier interactions app-wide */
     .btn, .sidebar-link, .icon-btn, .shortcut-chip { transition: all 0.18s cubic-bezier(.2,.8,.3,1.15); }
     .btn:hover { transform: translateY(-1px); }
+    html { overflow-x: hidden; width: 100%; }
     body {
         font-family: 'Work Sans', sans-serif;
         margin: 0;
@@ -119,6 +120,8 @@
             radial-gradient(circle at 50% 50%, rgba(46,139,255,0.04), transparent 60%);
         color: var(--text);
         min-height: 100vh;
+        overflow-x: hidden;
+        width: 100%;
     }
     h1, h2, h3 { font-family: 'Fraunces', serif; letter-spacing: 0.01em; font-weight: 600; font-optical-sizing: auto; }
     .mono { font-family: 'IBM Plex Mono', monospace; }
@@ -1277,29 +1280,10 @@
     /* =====================================================
        TABLETTES & ÉCRANS PLIABLES (Galaxy Z Fold3 et suivants)
        Écran interne déplié ≈ 673–915px de large en portrait,
-       bien plus en paysage. On bascule alors sur un menu
-       latéral fixe façon "tablette" au lieu du tiroir mobile,
-       et on ouvre les grilles pour profiter de la largeur.
+       bien plus en paysage. Le menu reste un tiroir (identique
+       partout, comportement fiable), on profite seulement de la
+       largeur disponible pour ouvrir les grilles de cartes.
        ===================================================== */
-    @media (min-width: 700px) {
-        .sidebar-overlay { display: none !important; }
-        .app-sidebar {
-            position: fixed;
-            transform: translateX(0) !important;
-            box-shadow: none;
-            width: 260px;
-        }
-        .sidebar-close { display: none; }
-        .header-bar [aria-label="Menu"] { display: none; }
-        body { position: relative; }
-        header, .container {
-            box-sizing: border-box;
-            margin-left: 260px;
-            padding-left: max(0px, env(safe-area-inset-left, 0px));
-        }
-        .container { max-width: 1300px; margin-right: auto; }
-        #netStatusPill { left: calc(260px + (100% - 260px) / 2); }
-    }
     @media (min-width: 700px) and (max-width: 1023px) {
         /* Écran interne d'un pliable ouvert : plusieurs colonnes au lieu d'empiler en 1 */
         .stat-cards { grid-template-columns: repeat(3, 1fr); }
@@ -1310,12 +1294,6 @@
     @media (min-width: 1024px) {
         .stat-cards { grid-template-columns: repeat(4, 1fr); }
         .browse-products-grid { grid-template-columns: repeat(4, 1fr); }
-    }
-    /* Charnière d'un pliable ouvert en mode "livre" (paysage) : sur les
-       navigateurs qui l'exposent, on ajoute une marge de sécurité pour ne
-       rien placer dessus (dégradation neutre partout ailleurs). */
-    @supports (left: env(fold-left)) {
-        .container, header { margin-left: max(260px, calc(env(fold-left, 0px) + env(fold-width, 0px) + 20px)); }
     }
 
     /* =====================================================
