@@ -27,23 +27,37 @@
         --header-line: #22c55e;
         --header-text: #f3fbf5;
         --header-text-muted: #dff5e6;
-        --accent: #16c150;
-        --accent-soft: #34e07a;
+        --accent: #0fe95c;
+        --accent-soft: #3cf58c;
         --accent-dim: #0e8f3c;
         --text: #0c1f14;
         --text-muted: #4c6357;
-        --danger: #ff4d3d;
-        --danger-bg: rgba(255,77,61,0.12);
-        --warn: #ffb020;
-        --warn-bg: rgba(255,176,32,0.16);
-        --ok: #12d47e;
-        --ok-bg: rgba(18,212,126,0.12);
-        --blue: #2e8bff;
-        --blue-bg: rgba(46,139,255,0.12);
-        --teal: #00c2a8;
-        --teal-bg: rgba(0,194,168,0.12);
-        --purple: #9b5cff;
-        --purple-bg: rgba(155,92,255,0.12);
+        --danger: #ff3b2f;
+        --danger-bg: rgba(255,59,47,0.14);
+        --warn: #ffa600;
+        --warn-bg: rgba(255,166,0,0.18);
+        --ok: #0eeb7c;
+        --ok-bg: rgba(14,235,124,0.14);
+        --blue: #2f7bff;
+        --blue-bg: rgba(47,123,255,0.14);
+        --teal: #00e0c0;
+        --teal-bg: rgba(0,224,192,0.14);
+        --purple: #a259ff;
+        --purple-bg: rgba(162,89,255,0.14);
+        --pink: #ff4fa3;
+        --pink-bg: rgba(255,79,163,0.14);
+        --amber: #ffb020;
+        --amber-bg: rgba(255,176,32,0.16);
+        --cyan: #00c2ff;
+        --cyan-bg: rgba(0,194,255,0.14);
+        /* Couleurs de section (groupes de la sidebar) */
+        --sec-dashboard: #16c150;
+        --sec-stock: var(--blue);
+        --sec-activite: var(--purple);
+        --sec-appro: var(--amber);
+        --sec-pharmacie: var(--teal);
+        --sec-gestion: var(--pink);
+        --sec-systeme: #8a94a6;
     }
     * { box-sizing: border-box; }
     html { scroll-behavior: smooth; }
@@ -289,9 +303,18 @@
         width: 100%;
         transition: background 0.15s, color 0.15s;
     }
-    .sidebar-link svg { width: 18px; height: 18px; flex-shrink: 0; }
-    .sidebar-link:hover { background: rgba(255,255,255,0.05); color: var(--header-text); }
-    .sidebar-link.active { background: linear-gradient(90deg, rgba(22,193,80,0.22), rgba(0,194,168,0.10)); color: var(--accent-soft); box-shadow: inset 0 1px 3px rgba(0,0,0,0.15), inset 3px 0 0 var(--accent-soft), 0 0 12px rgba(52,224,122,0.25); }
+    .sidebar-link svg { width: 18px; height: 18px; flex-shrink: 0; transition: color 0.15s, filter 0.15s; }
+    .sidebar-link:hover { background: rgba(255,255,255,0.06); color: var(--header-text); }
+    .sidebar-link:hover svg { color: var(--sec-color, var(--accent-soft)); filter: drop-shadow(0 0 5px var(--sec-color, var(--accent-soft))); }
+    .sidebar-link.active { background: linear-gradient(90deg, color-mix(in srgb, var(--sec-color, var(--accent-soft)) 28%, transparent), color-mix(in srgb, var(--sec-color, var(--accent-soft)) 8%, transparent)); color: var(--sec-color, var(--accent-soft)); box-shadow: inset 0 1px 3px rgba(0,0,0,0.15), inset 3px 0 0 var(--sec-color, var(--accent-soft)), 0 0 14px color-mix(in srgb, var(--sec-color, var(--accent-soft)) 45%, transparent); }
+    .sidebar-link.active svg { color: var(--sec-color, var(--accent-soft)); filter: drop-shadow(0 0 4px var(--sec-color, var(--accent-soft))); }
+    .sidebar-link.sec-dashboard { --sec-color: var(--sec-dashboard); }
+    .sidebar-link.sec-stock { --sec-color: var(--sec-stock); }
+    .sidebar-link.sec-activite { --sec-color: var(--sec-activite); }
+    .sidebar-link.sec-appro { --sec-color: var(--sec-appro); }
+    .sidebar-link.sec-pharmacie { --sec-color: var(--sec-pharmacie); }
+    .sidebar-link.sec-gestion { --sec-color: var(--sec-gestion); }
+    .sidebar-link.sec-systeme { --sec-color: var(--sec-systeme); }
     .sidebar-sep { height: 1px; background: var(--header-line); margin: 8px 12px; }
     .sidebar-group-label { padding: 7px 16px 2px; font-size: 0.7em; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted); opacity: 0.7; }
 
@@ -1409,6 +1432,105 @@
     @media (hover: none) {
         .stat-card, .browse-product-card { transform: none !important; }
     }
+
+    /* =====================================================
+       DYNAMISME VISUEL — couleurs vives par section + animations
+       ===================================================== */
+
+    /* Transitions générales plus rapides et énergiques */
+    .btn, .stat-tile, .stat-card, .browse-product-card, .sidebar-link,
+    .quick-action, .shortcut-chip, .pill-btn, .icon-btn {
+        transition-duration: 0.16s !important;
+    }
+
+    /* Halo coloré dynamique sur les stat-tiles du dashboard */
+    .stat-tile { position: relative; overflow: hidden; }
+    .stat-tile::after {
+        content: "";
+        position: absolute; inset: 0;
+        background: radial-gradient(circle at 85% 0%, var(--tile-accent, var(--accent)) 0%, transparent 60%);
+        opacity: 0; transition: opacity 0.25s;
+        pointer-events: none;
+    }
+    .stat-tile:hover::after { opacity: 0.12; }
+    .stat-tile:hover { box-shadow: 0 1px 0 rgba(255,255,255,0.6) inset, 0 12px 26px rgba(30,30,20,0.14), 0 0 0 1px var(--tile-accent, var(--accent)); }
+    .stat-tile .stat-glyph { transition: transform 0.25s cubic-bezier(.3,1.6,.5,1), background 0.2s; }
+    .stat-tile:hover .stat-glyph { transform: scale(1.12) rotate(-4deg); }
+
+    /* Purple / pink / cyan variantes pour stat-tile, alignées sur les sections */
+    .stat-tile.purple { --tile-accent: var(--purple); --tile-glyph-bg: var(--purple-bg); }
+    .stat-tile.pink { --tile-accent: var(--pink); --tile-glyph-bg: var(--pink-bg); }
+    .stat-tile.cyan { --tile-accent: var(--cyan); --tile-glyph-bg: var(--cyan-bg); }
+    .stat-tile.amber { --tile-accent: var(--amber); --tile-glyph-bg: var(--amber-bg); }
+
+    /* Cartes stat génériques : léger liseré coloré tournant selon contexte + entrée dynamique */
+    .stat-cards .stat-card { animation: statPop 0.4s cubic-bezier(.2,.9,.25,1.3) backwards; }
+    .stat-cards .stat-card:nth-child(1) { animation-delay: 0.02s; }
+    .stat-cards .stat-card:nth-child(2) { animation-delay: 0.07s; }
+    .stat-cards .stat-card:nth-child(3) { animation-delay: 0.12s; }
+    .stat-cards .stat-card:nth-child(4) { animation-delay: 0.17s; }
+    @keyframes statPop {
+        from { opacity: 0; transform: translateY(10px) scale(0.94); }
+        to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* Badges d'alerte / danger : pulsation vive pour capter l'oeil */
+    .badge-danger, .badge.badge-danger {
+        animation: badgePulse 1.6s ease-in-out infinite;
+    }
+    @keyframes badgePulse {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(255,59,47,0.45); }
+        50% { box-shadow: 0 0 0 5px rgba(255,59,47,0); }
+    }
+    .badge-warn, .badge.badge-warn {
+        animation: badgeGlow 2.2s ease-in-out infinite;
+    }
+    @keyframes badgeGlow {
+        0%, 100% { filter: brightness(1); }
+        50% { filter: brightness(1.18); }
+    }
+
+    /* Boutons primaires : dégradé animé légèrement mouvant pour plus de vie */
+    .btn-primary {
+        background-size: 200% 200%;
+        animation: gradientShift 4s ease infinite;
+    }
+    @keyframes gradientShift {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+    }
+
+    /* Sidebar : icône active légèrement animée pour indiquer où on se trouve */
+    .sidebar-link.active svg { animation: iconBreathe 2.4s ease-in-out infinite; }
+    @keyframes iconBreathe {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.08); }
+    }
+
+    /* Titres de sections colorés selon le contexte de couleur ambiant */
+    #tab2 h2, #tab2 h3 { color: var(--sec-activite); }
+    #tab1 h2, #tab1 h3, #tab6 h2, #tab6 h3, #tab8 h2, #tab8 h3 { color: var(--sec-stock); }
+    #tab4 h2, #tab4 h3, #tab10 h2, #tab10 h3 { color: var(--sec-appro); }
+    #tab12 h2, #tab12 h3, #tab5 h2, #tab5 h3, #tab13 h2, #tab13 h3 { color: var(--sec-pharmacie); }
+    #tab3 h2, #tab3 h3, #tab14 h2, #tab14 h3 { color: var(--sec-gestion); }
+
+    /* Chiffres clés : légère mise en avant colorée */
+    .stat-card h3 { text-shadow: 0 0 18px color-mix(in srgb, var(--accent-soft) 35%, transparent); }
+
+    /* Cartes produits : accent coloré aléatoire discret au survol (variation visuelle) */
+    .browse-product-card:hover { border-color: var(--sec-stock); box-shadow: var(--d3-shadow-lift), 0 0 0 1px var(--sec-stock); }
+
+    /* Scrollbar plus vive */
+    ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, var(--accent-soft), var(--cyan)); }
+
+    /* Connexion réseau : pill plus franche */
+    #netStatusPill.online { background: linear-gradient(135deg, var(--ok), var(--teal)); }
+
+    @media (prefers-reduced-motion: reduce) {
+        .stat-cards .stat-card, .badge-danger, .badge-warn, .btn-primary, .sidebar-link.active svg {
+            animation: none !important;
+        }
+    }
 </style>
 </head>
 <body>
@@ -1475,79 +1597,79 @@
     </div>
     <div class="sidebar-nav-wrap">
     <nav class="sidebar-nav" id="sidebarNav">
-        <button class="sidebar-link" data-tab="0" onclick="openTab(0); closeSidebar();">
+        <button class="sidebar-link sec-dashboard" data-tab="0" onclick="openTab(0); closeSidebar();">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
             Tableau de bord
         </button>
 
         <div class="sidebar-group-label">Catalogue &amp; Stock</div>
-        <button class="sidebar-link" data-tab="6" onclick="openTab(6); closeSidebar();">
+        <button class="sidebar-link sec-stock" data-tab="6" onclick="openTab(6); closeSidebar();">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 12.4 12 21l-9-9V3h9l9 9.4z"/><circle cx="7.5" cy="7.5" r="1.2"/></svg>
             Produits
         </button>
-        <button class="sidebar-link" data-tab="1" onclick="openTab(1); closeSidebar();">
+        <button class="sidebar-link sec-stock" data-tab="1" onclick="openTab(1); closeSidebar();">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></svg>
             Stock
         </button>
-        <button class="sidebar-link" data-tab="8" onclick="openTab(8); closeSidebar();">
+        <button class="sidebar-link sec-stock" data-tab="8" onclick="openTab(8); closeSidebar();">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/><path d="M12 11v5"/><path d="M9.5 13.5 12 16l2.5-2.5"/></svg>
             Lots
         </button>
-        <button class="sidebar-link" data-tab="7" onclick="openTab(7); closeSidebar();">
+        <button class="sidebar-link sec-stock" data-tab="7" onclick="openTab(7); closeSidebar();">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2s6 7.5 6 12a6 6 0 0 1-12 0c0-4.5 6-12 6-12z"/></svg>
             Périmés
         </button>
 
         <div class="sidebar-group-label">Activité</div>
-        <button class="sidebar-link" data-tab="2" onclick="openTab(2); closeSidebar();">
+        <button class="sidebar-link sec-activite" data-tab="2" onclick="openTab(2); closeSidebar();">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M2 3h2l2.6 12.6a2 2 0 0 0 2 1.6h8.8a2 2 0 0 0 2-1.6L21 7H5.2"/></svg>
             Ventes
         </button>
-        <button class="sidebar-link" data-tab="11" onclick="openTab(11); closeSidebar();">
+        <button class="sidebar-link sec-activite" data-tab="11" onclick="openTab(11); closeSidebar();">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="3" width="12" height="18" rx="2"/><path d="M9 3v2a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1V3"/><path d="M9 12h6"/><path d="M9 16h4"/></svg>
             Ordonnances
         </button>
-        <button class="sidebar-link" data-tab="9" onclick="openTab(9); closeSidebar();">
+        <button class="sidebar-link sec-activite" data-tab="9" onclick="openTab(9); closeSidebar();">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
             Clients
         </button>
 
         <div class="sidebar-group-label">Approvisionnement</div>
-        <button class="sidebar-link" data-tab="4" onclick="openTab(4); closeSidebar();">
+        <button class="sidebar-link sec-appro" data-tab="4" onclick="openTab(4); closeSidebar();">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M2 3h2l2.6 12.6a2 2 0 0 0 2 1.6h8.8a2 2 0 0 0 2-1.6L21 7H5.2"/></svg>
             Achats
         </button>
-        <button class="sidebar-link" data-tab="10" onclick="openTab(10); closeSidebar();">
+        <button class="sidebar-link sec-appro" data-tab="10" onclick="openTab(10); closeSidebar();">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="4" rx="1"/><path d="M5 8v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8"/><path d="M10 12h4"/></svg>
             Fournisseurs
         </button>
 
         <div class="sidebar-group-label">Pharmacie</div>
-        <button class="sidebar-link" data-tab="12" onclick="openTab(12); closeSidebar();">
+        <button class="sidebar-link sec-pharmacie" data-tab="12" onclick="openTab(12); closeSidebar();">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2s6 7.5 6 12a6 6 0 0 1-12 0c0-4.5 6-12 6-12z"/></svg>
             Gardes
         </button>
-        <button class="sidebar-link" data-tab="5" onclick="openTab(5); closeSidebar();">
+        <button class="sidebar-link sec-pharmacie" data-tab="5" onclick="openTab(5); closeSidebar();">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>
             Traçabilité
         </button>
-        <button class="sidebar-link" data-tab="13" onclick="openTab(13); closeSidebar();">
+        <button class="sidebar-link sec-pharmacie" data-tab="13" onclick="openTab(13); closeSidebar();">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
             Alertes
         </button>
 
         <div class="sidebar-group-label">Gestion</div>
-        <button class="sidebar-link" data-tab="3" onclick="openTab(3); closeSidebar();">
+        <button class="sidebar-link sec-gestion" data-tab="3" onclick="openTab(3); closeSidebar();">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="20" x2="4" y2="12"/><line x1="12" y1="20" x2="12" y2="6"/><line x1="20" y1="20" x2="20" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg>
             Rapports
         </button>
-        <button class="sidebar-link" data-tab="14" onclick="openTab(14); closeSidebar();">
+        <button class="sidebar-link sec-gestion" data-tab="14" onclick="openTab(14); closeSidebar();">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12h8"/><path d="M12 8v8"/></svg>
             Finances
         </button>
 
         <div class="sidebar-group-label">Système</div>
-        <button class="sidebar-link" data-tab="15" onclick="openTab(15); closeSidebar();">
+        <button class="sidebar-link sec-systeme" data-tab="15" onclick="openTab(15); closeSidebar();">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
             Paramètres
         </button>
@@ -1833,11 +1955,12 @@
                         <input type="text" id="salePaymentRef" placeholder="Référence transaction (facultatif)">
                     </div>
                 </div>
-                <div id="saleCreditBox" style="display:none; margin-top:12px;">
+                <div id="saleCreditBox" style="margin-top:12px;">
                     <label style="display:flex; align-items:center; gap:8px; font-size:0.9em; color: var(--text-muted);">
                         <input type="checkbox" id="saleOnCredit" onchange="onSaleOnCreditChange()" style="width:auto;"> Vente à crédit / paiement partiel
                     </label>
                     <div id="salePartialBox" style="display:none; margin-top:8px;">
+                        <div id="salePartialClientHint" style="display:none; font-size:0.82em; color: var(--warn); margin-bottom:6px;">⚠ Sélectionnez un client ci-dessus pour enregistrer une dette.</div>
                         <label style="display:block; margin-bottom:4px; color: var(--text-muted); font-size:0.85em;">Montant payé maintenant (0 = tout à crédit)</label>
                         <input type="number" id="salePaidNow" min="0" step="1" placeholder="0" oninput="onSalePaidNowChange()">
                         <div id="salePartialSummary" style="font-size:0.85em; color: var(--text-muted); margin-top:-4px;"></div>
@@ -2611,6 +2734,20 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
+
+// ---------- Sécurité : échappement HTML (anti-XSS) ----------
+// Toute donnée saisie par un utilisateur (nom de produit, client, fournisseur,
+// note, etc.) doit passer par cette fonction avant d'être injectée dans du HTML,
+// pour empêcher l'exécution de scripts malveillants (ex: <img src=x onerror=...>).
+function escapeHtml(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
 
 // ---------- Configuration Supabase (multi-utilisateur, temps réel) ----------
 // 1) Crée un projet sur https://supabase.com
@@ -3897,9 +4034,9 @@ function renderDashboard() {
                 const days = daysUntil(p.expiry);
                 const pillClass = days <= 30 ? 'danger' : 'warn';
                 return `<div class="alert-item">
-                    <div class="alert-avatar">${p.photo ? `<img src="${p.photo}" onclick="openImageLightbox('${p.photo}', '${p.name.replace(/'/g, "\\'")}')" style="width:100%; height:100%; object-fit:cover; border-radius:10px; cursor:pointer;">` : '💊'}</div>
+                    <div class="alert-avatar">${p.photo ? `<img src="${escapeHtml(p.photo)}" onclick="openImageLightbox('${encodeURIComponent(p.photo)}', '${escapeHtml(p.name).replace(/'/g, "\\'")}')" style="width:100%; height:100%; object-fit:cover; border-radius:10px; cursor:pointer;">` : '💊'}</div>
                     <div class="alert-info">
-                        <div class="alert-name">${p.name}</div>
+                        <div class="alert-name">${escapeHtml(p.name)}</div>
                         <div class="alert-expiry">Expire le <span class="date-accent">${formatDate(p.expiry)}</span> (${days} jours)</div>
                     </div>
                     <div class="days-pill ${pillClass}">${days} jours</div>
@@ -4110,19 +4247,19 @@ function renderStockTable() {
     tbody.innerHTML = filtered.map(p => {
         const rowClass = (p.stock <= LOW_STOCK_THRESHOLD ? 'low-stock ' : '') + (daysUntil(p.expiry) <= 30 ? 'near-expiry' : '');
         return `<tr class="${rowClass}">
-            <td data-label="">${p.photo ? `<img src="${p.photo}" onclick="openImageLightbox('${p.photo}', '${p.name.replace(/'/g, "\\'")}')" style="width:38px; height:38px; object-fit:cover; border-radius:6px; border:1px solid var(--line); cursor:pointer;">` : `<div style="width:38px; height:38px; border-radius:6px; border:1px dashed var(--line); display:flex; align-items:center; justify-content:center; color:var(--text-muted); font-size:16px;">💊</div>`}</td>
-            <td data-label="Code" class="mono">${p.code}</td>
-            <td data-label="Produit">${p.name}</td>
-            <td data-label="Catégorie">${p.category || '—'}</td>
-            <td data-label="Lot" class="mono">${p.lot || '—'}</td>
+            <td data-label="">${p.photo ? `<img src="${escapeHtml(p.photo)}" onclick="openImageLightbox('${encodeURIComponent(p.photo)}', '${escapeHtml(p.name).replace(/'/g, "\\'")}')" style="width:38px; height:38px; object-fit:cover; border-radius:6px; border:1px solid var(--line); cursor:pointer;">` : `<div style="width:38px; height:38px; border-radius:6px; border:1px dashed var(--line); display:flex; align-items:center; justify-content:center; color:var(--text-muted); font-size:16px;">💊</div>`}</td>
+            <td data-label="Code" class="mono">${escapeHtml(p.code)}</td>
+            <td data-label="Produit">${escapeHtml(p.name)}</td>
+            <td data-label="Catégorie">${escapeHtml(p.category) || '—'}</td>
+            <td data-label="Lot" class="mono">${escapeHtml(p.lot) || '—'}</td>
             <td data-label="Stock" class="mono">${p.stock}</td>
             <td data-label="Prix" class="mono">${formatGNF(p.price)}</td>
             <td data-label="Péremption" class="mono">${formatDate(p.expiry)}</td>
             <td data-label="Statut">${stockStatusBadge(p)}</td>
             <td data-label="" style="white-space:nowrap;">
-                <button class="btn" onclick="openEditProductForm('${p.code}')" style="width:auto; padding:5px 10px;">Modifier</button>
-                <button class="btn" onclick="openTab(5); filterTraceability('${p.code}')" style="width:auto; padding:5px 10px;">Historique</button>
-                <button class="btn btn-danger" onclick="deleteProduct('${p.code}')" style="width:auto; padding:5px 10px;">Suppr.</button>
+                <button class="btn" onclick="openEditProductForm('${escapeHtml(p.code)}')" style="width:auto; padding:5px 10px;">Modifier</button>
+                <button class="btn" onclick="openTab(5); filterTraceability('${escapeHtml(p.code)}')" style="width:auto; padding:5px 10px;">Historique</button>
+                <button class="btn btn-danger" onclick="deleteProduct('${escapeHtml(p.code)}')" style="width:auto; padding:5px 10px;">Suppr.</button>
             </td>
         </tr>`;
     }).join('');
@@ -4216,20 +4353,20 @@ function renderProductsCatalog() {
 
     grid.innerHTML = filtered.map(p => {
         const photo = p.photo
-            ? `<img class="product-card-photo" src="${p.photo}" onclick="openImageLightbox('${p.photo}', '${p.name.replace(/'/g, "\\'")}')" alt="${p.name}">`
+            ? `<img class="product-card-photo" src="${escapeHtml(p.photo)}" onclick="openImageLightbox('${encodeURIComponent(p.photo)}', '${escapeHtml(p.name).replace(/'/g, "\\'")}')" alt="${escapeHtml(p.name)}">`
             : `<div class="product-card-photo-placeholder">💊</div>`;
         return `<div class="product-card">
             ${photo}
-            <h4>${p.name}</h4>
-            <div class="pc-code">${p.code}${p.category ? ' · ' + p.category : ''}</div>
+            <h4>${escapeHtml(p.name)}</h4>
+            <div class="pc-code">${escapeHtml(p.code)}${p.category ? ' · ' + escapeHtml(p.category) : ''}</div>
             <div class="pc-meta">
                 <span class="mono">${formatGNF(p.price)}</span>
                 <span class="mono">Stock : ${p.stock}</span>
             </div>
             ${stockStatusBadge(p)}
             <div class="pc-actions">
-                <button class="btn" onclick="openTab(1); openEditProductForm('${p.code}');" style="width:auto; padding:5px 10px;">Modifier</button>
-                <button class="btn" onclick="openTab(5); filterTraceability('${p.code}');" style="width:auto; padding:5px 10px;">Historique</button>
+                <button class="btn" onclick="openTab(1); openEditProductForm('${escapeHtml(p.code)}');" style="width:auto; padding:5px 10px;">Modifier</button>
+                <button class="btn" onclick="openTab(5); filterTraceability('${escapeHtml(p.code)}');" style="width:auto; padding:5px 10px;">Historique</button>
             </div>
         </div>`;
     }).join('');
@@ -4411,15 +4548,15 @@ function renderClientsTable() {
         : filtered.map(c => {
             const purchases = clientPurchases(c.id);
             return `<tr>
-                <td data-label="Nom">${c.name}</td>
-                <td data-label="Téléphone" class="mono">${c.phone || '—'}</td>
-                <td data-label="Adresse">${c.address || '—'}</td>
+                <td data-label="Nom">${escapeHtml(c.name)}</td>
+                <td data-label="Téléphone" class="mono">${escapeHtml(c.phone) || '—'}</td>
+                <td data-label="Adresse">${escapeHtml(c.address) || '—'}</td>
                 <td data-label="Solde dû">${clientBalanceCell(c)}</td>
                 <td data-label="Achats" class="mono">${purchases.length}</td>
                 <td data-label="">
-                    <button class="btn" onclick="openClientHistory('${c.id}')" style="width:auto; padding:5px 10px;">Fiche</button>
-                    <button class="btn" onclick="openEditClientForm('${c.id}')" style="width:auto; padding:5px 10px;">Modifier</button>
-                    <button class="btn btn-danger" onclick="deleteClient('${c.id}')" style="width:auto; padding:5px 10px;">Suppr.</button>
+                    <button class="btn" onclick="openClientHistory('${escapeHtml(c.id)}')" style="width:auto; padding:5px 10px;">Fiche</button>
+                    <button class="btn" onclick="openEditClientForm('${escapeHtml(c.id)}')" style="width:auto; padding:5px 10px;">Modifier</button>
+                    <button class="btn btn-danger" onclick="deleteClient('${escapeHtml(c.id)}')" style="width:auto; padding:5px 10px;">Suppr.</button>
                 </td>
             </tr>`;
         }).join('');
@@ -4428,7 +4565,7 @@ function renderClientsTable() {
 
 function renderClientSelect() {
     const options = '<option value="">Client de passage (sans compte)</option>' +
-        data.clients.map(c => `<option value="${c.id}">${c.name}${c.credit > 0 ? ' (dette: ' + formatGNF(c.credit) + ')' : ''}</option>`).join('');
+        data.clients.map(c => `<option value="${escapeHtml(c.id)}">${escapeHtml(c.name)}${c.credit > 0 ? ' (dette: ' + formatGNF(c.credit) + ')' : ''}</option>`).join('');
     const saleSel = document.getElementById('saleClientSelect');
     if (saleSel) {
         const current = saleSel.value;
@@ -4439,18 +4576,25 @@ function renderClientSelect() {
     if (ordSel) {
         const current2 = ordSel.value;
         ordSel.innerHTML = '<option value="">— Patient sans compte client —</option>' +
-            data.clients.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+            data.clients.map(c => `<option value="${escapeHtml(c.id)}">${escapeHtml(c.name)}</option>`).join('');
         if (data.clients.some(c => c.id === current2)) ordSel.value = current2;
     }
 }
 
 function onSaleClientChange() {
     const clientId = document.getElementById('saleClientSelect').value;
-    document.getElementById('saleCreditBox').style.display = clientId ? 'block' : 'none';
     if (!clientId) {
         document.getElementById('saleOnCredit').checked = false;
         onSaleOnCreditChange();
+    } else {
+        updateSalePartialClientHint();
     }
+}
+
+function updateSalePartialClientHint() {
+    const clientId = document.getElementById('saleClientSelect').value;
+    const onCredit = document.getElementById('saleOnCredit').checked;
+    document.getElementById('salePartialClientHint').style.display = (onCredit && !clientId) ? 'block' : 'none';
 }
 
 function onSalePaymentMethodChange() {
@@ -4464,6 +4608,7 @@ function onSaleOnCreditChange() {
     const onCredit = document.getElementById('saleOnCredit').checked;
     const partialBox = document.getElementById('salePartialBox');
     partialBox.style.display = onCredit ? 'block' : 'none';
+    updateSalePartialClientHint();
     if (onCredit) {
         document.getElementById('salePaidNow').value = '';
         onSalePaidNowChange();
@@ -4481,6 +4626,7 @@ function onSalePaidNowChange() {
     const paymentSelect = document.getElementById('salePaymentMethod');
     const paymentBox = document.getElementById('salePaymentBox');
     const summary = document.getElementById('salePartialSummary');
+    updateSalePartialClientHint();
 
     // Le mode de paiement ne concerne que la partie payée maintenant :
     // pas besoin s'il n'y a rien de payé tout de suite.
@@ -4617,7 +4763,7 @@ function openClientHistory(id) {
         : `<table class="responsive-table"><thead><tr><th>Date</th><th>Articles</th><th>Total</th></tr></thead><tbody>${
             purchases.map(s => {
                 const d = new Date(s.date);
-                const items = s.items.map(it => `${it.name} x${it.qty}`).join(', ');
+                const items = s.items.map(it => `${escapeHtml(it.name)} x${it.qty}`).join(', ');
                 return `<tr><td data-label="Date" class="mono">${d.toLocaleDateString('fr-FR')}</td><td data-label="Articles">${items}</td><td data-label="Total" class="mono">${formatGNF(s.total)}</td></tr>`;
             }).join('')
         }</tbody></table>`;
@@ -4625,7 +4771,7 @@ function openClientHistory(id) {
     const ordsHtml = ords.length === 0
         ? '<p class="empty-msg">Aucune ordonnance enregistrée.</p>'
         : `<table class="responsive-table"><thead><tr><th>Date</th><th>Médecin</th><th>Statut</th></tr></thead><tbody>${
-            ords.map(o => `<tr><td data-label="Date" class="mono">${formatDate(o.date)}</td><td data-label="Médecin">${o.doctor || '—'}</td><td data-label="Statut">${ordonnanceStatusBadge(o.status)}</td></tr>`).join('')
+            ords.map(o => `<tr><td data-label="Date" class="mono">${formatDate(o.date)}</td><td data-label="Médecin">${escapeHtml(o.doctor) || '—'}</td><td data-label="Statut">${ordonnanceStatusBadge(o.status)}</td></tr>`).join('')
         }</tbody></table>`;
 
     const paymentsHtml = payments.length === 0
@@ -4638,11 +4784,11 @@ function openClientHistory(id) {
         }</tbody></table>`;
 
     document.getElementById('clientHistoryBody').innerHTML = `
-        <p style="color: var(--text-muted); margin-top:0;">${c.phone ? '📞 ' + c.phone : ''} ${c.address ? ' · 📍 ' + c.address : ''}</p>
-        ${c.notes ? `<p style="color: var(--text-muted);">📝 ${c.notes}</p>` : ''}
+        <p style="color: var(--text-muted); margin-top:0;">${c.phone ? '📞 ' + escapeHtml(c.phone) : ''} ${c.address ? ' · 📍 ' + escapeHtml(c.address) : ''}</p>
+        ${c.notes ? `<p style="color: var(--text-muted);">📝 ${escapeHtml(c.notes)}</p>` : ''}
         <div style="display:flex; align-items:center; gap:12px; margin:10px 0;">
             <span>Solde dû : ${clientBalanceCell(c)}</span>
-            ${c.credit > 0 ? `<button class="btn btn-success" onclick="settleClientCredit('${c.id}')" style="width:auto; padding:5px 10px;">Encaisser un paiement</button>` : ''}
+            ${c.credit > 0 ? `<button class="btn btn-success" onclick="settleClientCredit('${escapeHtml(c.id)}')" style="width:auto; padding:5px 10px;">Encaisser un paiement</button>` : ''}
         </div>
         <h4 style="margin-bottom:6px;">Historique des achats</h4>
         ${purchasesHtml}
@@ -4690,7 +4836,7 @@ function supplierTotalAmount(supplierName) {
 
 function renderSupplierSelects() {
     const options = '<option value="">— Aucun fournisseur —</option>' +
-        data.suppliers.map(s => `<option value="${s.name}">${s.name}</option>`).join('');
+        data.suppliers.map(s => `<option value="${escapeHtml(s.name)}">${escapeHtml(s.name)}</option>`).join('');
     const prodSel = document.getElementById('newSupplier');
     if (prodSel) {
         const current = prodSel.value;
@@ -4701,7 +4847,7 @@ function renderSupplierSelects() {
     if (cmdSel) {
         const current2 = cmdSel.value;
         cmdSel.innerHTML = '<option value="">— Choisir un fournisseur —</option>' +
-            data.suppliers.map(s => `<option value="${s.name}">${s.name}</option>`).join('');
+            data.suppliers.map(s => `<option value="${escapeHtml(s.name)}">${escapeHtml(s.name)}</option>`).join('');
         if (data.suppliers.some(s => s.name === current2)) cmdSel.value = current2;
     }
 }
@@ -4721,15 +4867,15 @@ function renderSuppliersTable() {
         : filtered.map(s => {
             const cmds = supplierCommandes(s.name);
             return `<tr>
-                <td data-label="Nom">${s.name}</td>
-                <td data-label="Téléphone" class="mono">${s.phone || '—'}</td>
-                <td data-label="Catégorie">${s.category || '—'}</td>
+                <td data-label="Nom">${escapeHtml(s.name)}</td>
+                <td data-label="Téléphone" class="mono">${escapeHtml(s.phone) || '—'}</td>
+                <td data-label="Catégorie">${escapeHtml(s.category) || '—'}</td>
                 <td data-label="Commandes" class="mono">${cmds.length}</td>
                 <td data-label="Montant total" class="mono">${formatGNF(supplierTotalAmount(s.name))}</td>
                 <td data-label="">
-                    <button class="btn" onclick="openSupplierHistory('${s.id}')" style="width:auto; padding:5px 10px;">Fiche</button>
-                    <button class="btn" onclick="openEditSupplierForm('${s.id}')" style="width:auto; padding:5px 10px;">Modifier</button>
-                    <button class="btn btn-danger" onclick="deleteSupplier('${s.id}')" style="width:auto; padding:5px 10px;">Suppr.</button>
+                    <button class="btn" onclick="openSupplierHistory('${escapeHtml(s.id)}')" style="width:auto; padding:5px 10px;">Fiche</button>
+                    <button class="btn" onclick="openEditSupplierForm('${escapeHtml(s.id)}')" style="width:auto; padding:5px 10px;">Modifier</button>
+                    <button class="btn btn-danger" onclick="deleteSupplier('${escapeHtml(s.id)}')" style="width:auto; padding:5px 10px;">Suppr.</button>
                 </td>
             </tr>`;
         }).join('');
@@ -4815,14 +4961,14 @@ function openSupplierHistory(id) {
         ? '<p class="empty-msg">Aucune commande enregistrée avec ce fournisseur.</p>'
         : `<table class="responsive-table"><thead><tr><th>Date</th><th>Articles</th><th>Total</th><th>Statut</th></tr></thead><tbody>${
             cmds.map(c => {
-                const items = c.items.map(it => `${it.name} x${it.qty}`).join(', ');
+                const items = c.items.map(it => `${escapeHtml(it.name)} x${it.qty}`).join(', ');
                 return `<tr><td data-label="Date" class="mono">${formatDate(c.date)}</td><td data-label="Articles">${items}</td><td data-label="Total" class="mono">${formatGNF(commandeTotal(c))}</td><td data-label="Statut">${commandeStatusBadge(c.status)}</td></tr>`;
             }).join('')
         }</tbody></table>`;
 
     document.getElementById('supplierHistoryBody').innerHTML = `
-        <p style="color: var(--text-muted); margin-top:0;">${s.phone ? '📞 ' + s.phone : ''} ${s.address ? ' · 📍 ' + s.address : ''} ${s.category ? ' · 🏷 ' + s.category : ''}</p>
-        ${s.notes ? `<p style="color: var(--text-muted);">📝 ${s.notes}</p>` : ''}
+        <p style="color: var(--text-muted); margin-top:0;">${s.phone ? '📞 ' + escapeHtml(s.phone) : ''} ${s.address ? ' · 📍 ' + escapeHtml(s.address) : ''} ${s.category ? ' · 🏷 ' + escapeHtml(s.category) : ''}</p>
+        ${s.notes ? `<p style="color: var(--text-muted);">📝 ${escapeHtml(s.notes)}</p>` : ''}
         <div style="display:flex; align-items:center; gap:12px; margin:10px 0;">
             <span>Total commandes : <span class="mono">${cmds.length}</span></span>
             <span>Montant total : <span class="mono">${formatGNF(supplierTotalAmount(s.name))}</span></span>
@@ -4861,7 +5007,7 @@ function todayISO() {
 function guardPharmacyLabel(entry) {
     if (entry.partnerId === OWN_PHARMACY_VALUE) return OWN_PHARMACY_NAME;
     const p = data.guardPartners.find(p => p.id === entry.partnerId);
-    return p ? p.name : '—';
+    return p ? escapeHtml(p.name) : '—';
 }
 
 function guardStatusBadge(dateStr) {
@@ -4894,8 +5040,8 @@ function renderGuardTodayBanner() {
             <p style="margin:0; font-family:'Fraunces',serif; letter-spacing:0.02em; font-size:1.05em;">
                 ${isOwn ? '🏆 Notre pharmacie est de garde aujourd\'hui' : '📍 De garde aujourd\'hui : ' + guardPharmacyLabel(entry)}
             </p>
-            ${partner ? `<p style="margin:6px 0 0; color: var(--text-muted);">${partner.phone ? '📞 ' + partner.phone : ''}${partner.address ? ' · 📍 ' + partner.address : ''}</p>` : ''}
-            ${entry.note ? `<p style="margin:6px 0 0; color: var(--text-muted);">📝 ${entry.note}</p>` : ''}
+            ${partner ? `<p style="margin:6px 0 0; color: var(--text-muted);">${partner.phone ? '📞 ' + escapeHtml(partner.phone) : ''}${partner.address ? ' · 📍 ' + escapeHtml(partner.address) : ''}</p>` : ''}
+            ${entry.note ? `<p style="margin:6px 0 0; color: var(--text-muted);">📝 ${escapeHtml(entry.note)}</p>` : ''}
         </div>
     `;
 }
@@ -4906,12 +5052,12 @@ function renderGuardPartnersTable() {
     tbody.innerHTML = data.guardPartners.length === 0
         ? '<tr class="empty-row"><td colspan="4" class="empty-msg">Aucune pharmacie partenaire enregistrée</td></tr>'
         : data.guardPartners.map(p => `<tr>
-            <td data-label="Nom">${p.name}</td>
-            <td data-label="Téléphone" class="mono">${p.phone || '—'}</td>
-            <td data-label="Adresse / zone">${p.address || '—'}</td>
+            <td data-label="Nom">${escapeHtml(p.name)}</td>
+            <td data-label="Téléphone" class="mono">${escapeHtml(p.phone) || '—'}</td>
+            <td data-label="Adresse / zone">${escapeHtml(p.address) || '—'}</td>
             <td data-label="">
-                <button class="btn" onclick="openEditGuardPartnerForm('${p.id}')" style="width:auto; padding:5px 10px;">Modifier</button>
-                <button class="btn btn-danger" onclick="deleteGuardPartner('${p.id}')" style="width:auto; padding:5px 10px;">Suppr.</button>
+                <button class="btn" onclick="openEditGuardPartnerForm('${escapeHtml(p.id)}')" style="width:auto; padding:5px 10px;">Modifier</button>
+                <button class="btn btn-danger" onclick="deleteGuardPartner('${escapeHtml(p.id)}')" style="width:auto; padding:5px 10px;">Suppr.</button>
             </td>
         </tr>`).join('');
 }
@@ -4985,7 +5131,7 @@ function renderGuardPharmacySelect() {
     const current = sel.value;
     sel.innerHTML = '<option value="">— Pharmacie de garde —</option>' +
         `<option value="${OWN_PHARMACY_VALUE}">${OWN_PHARMACY_NAME}</option>` +
-        data.guardPartners.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+        data.guardPartners.map(p => `<option value="${escapeHtml(p.id)}">${escapeHtml(p.name)}</option>`).join('');
     if ([...sel.options].some(o => o.value === current)) sel.value = current;
 }
 
@@ -4997,11 +5143,11 @@ function renderGuardScheduleTable() {
         ? '<tr class="empty-row"><td colspan="4" class="empty-msg">Aucune date de garde assignée</td></tr>'
         : list.map(g => `<tr>
             <td data-label="Date" class="mono">${formatDate(g.date)}</td>
-            <td data-label="Pharmacie de garde">${guardPharmacyLabel(g)}${g.note ? ' <span style="color:var(--text-muted);">— ' + g.note + '</span>' : ''}</td>
+            <td data-label="Pharmacie de garde">${guardPharmacyLabel(g)}${g.note ? ' <span style="color:var(--text-muted);">— ' + escapeHtml(g.note) + '</span>' : ''}</td>
             <td data-label="Statut">${guardStatusBadge(g.date)}</td>
             <td data-label="">
-                <button class="btn" onclick="openEditGuardScheduleForm('${g.id}')" style="width:auto; padding:5px 10px;">Modifier</button>
-                <button class="btn btn-danger" onclick="deleteGuardScheduleEntry('${g.id}')" style="width:auto; padding:5px 10px;">Suppr.</button>
+                <button class="btn" onclick="openEditGuardScheduleForm('${escapeHtml(g.id)}')" style="width:auto; padding:5px 10px;">Modifier</button>
+                <button class="btn btn-danger" onclick="deleteGuardScheduleEntry('${escapeHtml(g.id)}')" style="width:auto; padding:5px 10px;">Suppr.</button>
             </td>
         </tr>`).join('');
 }
@@ -5087,30 +5233,30 @@ function collectAlerts() {
     data.products.forEach(p => {
         const days = daysUntil(p.expiry);
         if (days < 0) {
-            alerts.push({type: 'expired', severity: 'danger', label: 'Produit périmé', detail: `${p.name} (${p.code}) — périmé depuis ${Math.abs(days)} j — Stock : ${p.stock}`, ref: p.code, tab: 7});
+            alerts.push({type: 'expired', severity: 'danger', label: 'Produit périmé', detail: `${escapeHtml(p.name)} (${escapeHtml(p.code)}) — périmé depuis ${Math.abs(days)} j — Stock : ${p.stock}`, ref: p.code, tab: 7});
         } else if (days <= EXPIRY_ALERT_DAYS) {
-            alerts.push({type: 'expiry', severity: days <= 30 ? 'danger' : 'warn', label: 'Péremption proche', detail: `${p.name} (${p.code}) — expire dans ${days} j — Stock : ${p.stock}`, ref: p.code, tab: 7});
+            alerts.push({type: 'expiry', severity: days <= 30 ? 'danger' : 'warn', label: 'Péremption proche', detail: `${escapeHtml(p.name)} (${escapeHtml(p.code)}) — expire dans ${days} j — Stock : ${p.stock}`, ref: p.code, tab: 7});
         }
         if (p.stock <= LOW_STOCK_THRESHOLD) {
-            alerts.push({type: 'stock', severity: p.stock <= 5 ? 'danger' : 'warn', label: 'Stock bas', detail: `${p.name} (${p.code}) — Stock restant : ${p.stock}`, ref: p.code, tab: 1});
+            alerts.push({type: 'stock', severity: p.stock <= 5 ? 'danger' : 'warn', label: 'Stock bas', detail: `${escapeHtml(p.name)} (${escapeHtml(p.code)}) — Stock restant : ${p.stock}`, ref: p.code, tab: 1});
         }
     });
 
     data.clients.forEach(c => {
         if (c.credit > 0) {
-            alerts.push({type: 'credit', severity: c.credit >= 100000 ? 'danger' : 'warn', label: 'Client endetté', detail: `${c.name} — Solde dû : ${formatGNF(c.credit)}`, ref: c.id, tab: 9});
+            alerts.push({type: 'credit', severity: c.credit >= 100000 ? 'danger' : 'warn', label: 'Client endetté', detail: `${escapeHtml(c.name)} — Solde dû : ${formatGNF(c.credit)}`, ref: c.id, tab: 9});
         }
     });
 
     data.commandes.forEach(c => {
         if (c.status === 'en_attente') {
-            alerts.push({type: 'commande', severity: 'warn', label: 'Commande en attente', detail: `${c.supplier || 'Fournisseur inconnu'} — ${formatDate(c.date)} — Total : ${formatGNF(commandeTotal(c))}`, ref: c.id, tab: 4});
+            alerts.push({type: 'commande', severity: 'warn', label: 'Commande en attente', detail: `${escapeHtml(c.supplier) || 'Fournisseur inconnu'} — ${formatDate(c.date)} — Total : ${formatGNF(commandeTotal(c))}`, ref: c.id, tab: 4});
         }
     });
 
     data.ordonnances.forEach(o => {
         if (o.status === 'en_attente') {
-            alerts.push({type: 'ordonnance', severity: 'warn', label: 'Ordonnance en attente', detail: `${o.clientName || 'Patient'} — ${formatDate(o.date)}`, ref: o.id, tab: 11});
+            alerts.push({type: 'ordonnance', severity: 'warn', label: 'Ordonnance en attente', detail: `${escapeHtml(o.clientName) || 'Patient'} — ${formatDate(o.date)}`, ref: o.id, tab: 11});
         }
     });
 
@@ -5190,14 +5336,14 @@ function renderCommandes() {
     }
     tbody.innerHTML = list.map(c => {
         const total = commandeTotal(c);
-        const articlesLabel = c.items.map(it => `${it.name} x${it.qty}`).join(', ');
+        const articlesLabel = c.items.map(it => `${escapeHtml(it.name)} x${it.qty}`).join(', ');
         const actions = c.status === 'en_attente'
-            ? `<button class="btn btn-success" onclick="receiveCommande('${c.id}')" style="width:auto; padding:5px 10px;">Marquer reçue</button>
-               <button class="btn btn-danger" onclick="cancelCommande('${c.id}')" style="width:auto; padding:5px 10px;">Annuler</button>`
-            : `<button class="btn btn-danger" onclick="deleteCommande('${c.id}')" style="width:auto; padding:5px 10px;">Suppr.</button>`;
+            ? `<button class="btn btn-success" onclick="receiveCommande('${escapeHtml(c.id)}')" style="width:auto; padding:5px 10px;">Marquer reçue</button>
+               <button class="btn btn-danger" onclick="cancelCommande('${escapeHtml(c.id)}')" style="width:auto; padding:5px 10px;">Annuler</button>`
+            : `<button class="btn btn-danger" onclick="deleteCommande('${escapeHtml(c.id)}')" style="width:auto; padding:5px 10px;">Suppr.</button>`;
         return `<tr>
             <td data-label="Date" class="mono">${formatDate(c.date)}</td>
-            <td data-label="Fournisseur">${c.supplier || '—'}</td>
+            <td data-label="Fournisseur">${escapeHtml(c.supplier) || '—'}</td>
             <td data-label="Articles">${articlesLabel}</td>
             <td data-label="Total" class="mono">${formatGNF(total)}</td>
             <td data-label="Statut">${commandeStatusBadge(c.status)}</td>
@@ -5288,17 +5434,17 @@ function onCommandeCostChange(rowId, val) {
 function renderCommandeItemRows() {
     const tbody = document.getElementById('cmdItemsBody');
     const options = '<option value="">— Choisir un produit —</option>' +
-        data.products.map(p => `<option value="${p.code}">${p.name} (${p.code})</option>`).join('') +
+        data.products.map(p => `<option value="${escapeHtml(p.code)}">${escapeHtml(p.name)} (${escapeHtml(p.code)})</option>`).join('') +
         '<option value="__new__">＋ Nouveau produit…</option>';
     tbody.innerHTML = cmdItems.map(it => `
         <tr>
             <td data-label="Produit">
                 <select onchange="onCommandeProductChange(${it.rowId}, this.value)">
-                    ${it.isNew ? options.replace('value="__new__"', 'value="__new__" selected') : options.replace(`value="${it.code}"`, `value="${it.code}" selected`)}
+                    ${it.isNew ? options.replace('value="__new__"', 'value="__new__" selected') : options.replace(`value="${escapeHtml(it.code)}"`, `value="${escapeHtml(it.code)}" selected`)}
                 </select>
                 ${it.isNew ? `
-                    <input type="text" placeholder="Nom du nouveau produit" value="${it.newName || ''}" oninput="onCommandeNewNameChange(${it.rowId}, this.value)" style="margin-top:6px;">
-                    <input type="text" placeholder="Catégorie (ex: Antibiotique)" list="categoryList" value="${it.newCategory || ''}" oninput="onCommandeNewCategoryChange(${it.rowId}, this.value)" style="margin-top:6px;">
+                    <input type="text" placeholder="Nom du nouveau produit" value="${escapeHtml(it.newName) || ''}" oninput="onCommandeNewNameChange(${it.rowId}, this.value)" style="margin-top:6px;">
+                    <input type="text" placeholder="Catégorie (ex: Antibiotique)" list="categoryList" value="${escapeHtml(it.newCategory) || ''}" oninput="onCommandeNewCategoryChange(${it.rowId}, this.value)" style="margin-top:6px;">
                 ` : ''}
             </td>
             <td data-label="Qté"><input type="number" min="1" value="${it.qty}" onchange="onCommandeQtyChange(${it.rowId}, this.value)"></td>
@@ -5679,11 +5825,11 @@ function renderExpensesTable() {
             <tr>
                 <td data-label="Date">${formatDate(e.date)}</td>
                 <td data-label="Catégorie">${expenseCategoryBadge(e.category)}</td>
-                <td data-label="Libellé">${e.label}${e.note ? `<br><small style="color:var(--text-muted);">${e.note}</small>` : ''}</td>
+                <td data-label="Libellé">${escapeHtml(e.label)}${e.note ? `<br><small style="color:var(--text-muted);">${escapeHtml(e.note)}</small>` : ''}</td>
                 <td data-label="Montant" class="mono">${formatGNF(e.amount)}</td>
                 <td data-label="">
-                    <button class="btn" onclick="openEditExpenseForm('${e.id}')" style="width:auto; padding:5px 10px;">Modifier</button>
-                    <button class="btn btn-danger" onclick="deleteExpense('${e.id}')" style="width:auto; padding:5px 10px;">Suppr.</button>
+                    <button class="btn" onclick="openEditExpenseForm('${escapeHtml(e.id)}')" style="width:auto; padding:5px 10px;">Modifier</button>
+                    <button class="btn btn-danger" onclick="deleteExpense('${escapeHtml(e.id)}')" style="width:auto; padding:5px 10px;">Suppr.</button>
                 </td>
             </tr>
         `).join('');
@@ -5791,18 +5937,18 @@ function renderOrdonnanceItemRows() {
     const tbody = document.getElementById('ordItemsBody');
     if (!tbody) return;
     const options = '<option value="">— Choisir un produit en stock —</option>' +
-        data.products.map(p => `<option value="${p.code}">${p.name} (${p.code})</option>`).join('') +
+        data.products.map(p => `<option value="${escapeHtml(p.code)}">${escapeHtml(p.name)} (${escapeHtml(p.code)})</option>`).join('') +
         '<option value="__autre__">Autre / non stocké…</option>';
     tbody.innerHTML = ordItems.map(it => `
         <tr>
             <td data-label="Médicament">
                 <select onchange="onOrdonnanceProductChange(${it.rowId}, this.value)" style="margin-bottom:6px;">
-                    ${it.code ? options.replace(`value="${it.code}"`, `value="${it.code}" selected`) : options.replace('value="__autre__"', 'value="__autre__" selected')}
+                    ${it.code ? options.replace(`value="${escapeHtml(it.code)}"`, `value="${escapeHtml(it.code)}" selected`) : options.replace('value="__autre__"', 'value="__autre__" selected')}
                 </select>
-                ${!it.code ? `<input type="text" placeholder="Nom du médicament" value="${it.name}" oninput="onOrdonnanceNameChange(${it.rowId}, this.value)">` : ''}
+                ${!it.code ? `<input type="text" placeholder="Nom du médicament" value="${escapeHtml(it.name)}" oninput="onOrdonnanceNameChange(${it.rowId}, this.value)">` : ''}
             </td>
             <td data-label="Qté"><input type="number" min="1" value="${it.qty}" onchange="onOrdonnanceQtyChange(${it.rowId}, this.value)"></td>
-            <td data-label="Posologie"><input type="text" placeholder="ex: 1 cp matin/soir x7j" value="${it.posologie}" oninput="onOrdonnancePosologieChange(${it.rowId}, this.value)"></td>
+            <td data-label="Posologie"><input type="text" placeholder="ex: 1 cp matin/soir x7j" value="${escapeHtml(it.posologie)}" oninput="onOrdonnancePosologieChange(${it.rowId}, this.value)"></td>
             <td data-label=""><button class="btn btn-danger" onclick="removeOrdonnanceItemRow(${it.rowId})" style="width:auto; padding:5px 10px;">✕</button></td>
         </tr>
     `).join('');
@@ -6003,18 +6149,18 @@ function renderOrdonnancesTable() {
     tbody.innerHTML = filtered.length === 0
         ? '<tr class="empty-row"><td colspan="6" class="empty-msg">Aucune ordonnance enregistrée pour le moment</td></tr>'
         : filtered.map(o => {
-            const itemsSummary = o.items.map(it => `${it.name} x${it.qty}`).join(', ');
+            const itemsSummary = o.items.map(it => `${escapeHtml(it.name)} x${it.qty}`).join(', ');
             const actions = [];
             if (o.status === 'en_attente') {
-                actions.push(`<button class="btn btn-success" onclick="dispenserOrdonnance('${o.id}')" style="width:auto; padding:5px 10px;">Dispenser</button>`);
-                actions.push(`<button class="btn" onclick="openEditOrdonnanceForm('${o.id}')" style="width:auto; padding:5px 10px;">Modifier</button>`);
+                actions.push(`<button class="btn btn-success" onclick="dispenserOrdonnance('${escapeHtml(o.id)}')" style="width:auto; padding:5px 10px;">Dispenser</button>`);
+                actions.push(`<button class="btn" onclick="openEditOrdonnanceForm('${escapeHtml(o.id)}')" style="width:auto; padding:5px 10px;">Modifier</button>`);
             }
-            if (o.photo) actions.push(`<button class="btn" onclick="viewOrdonnancePhoto('${o.id}')" style="width:auto; padding:5px 10px;">📷 Photo</button>`);
-            actions.push(`<button class="btn btn-danger" onclick="deleteOrdonnance('${o.id}')" style="width:auto; padding:5px 10px;">Suppr.</button>`);
+            if (o.photo) actions.push(`<button class="btn" onclick="viewOrdonnancePhoto('${escapeHtml(o.id)}')" style="width:auto; padding:5px 10px;">📷 Photo</button>`);
+            actions.push(`<button class="btn btn-danger" onclick="deleteOrdonnance('${escapeHtml(o.id)}')" style="width:auto; padding:5px 10px;">Suppr.</button>`);
             return `<tr>
                 <td data-label="Date" class="mono">${formatDate(o.date)}</td>
-                <td data-label="Patient">${o.clientName || '—'}</td>
-                <td data-label="Médecin">${o.doctor || '—'}</td>
+                <td data-label="Patient">${escapeHtml(o.clientName) || '—'}</td>
+                <td data-label="Médecin">${escapeHtml(o.doctor) || '—'}</td>
                 <td data-label="Médicaments">${itemsSummary}</td>
                 <td data-label="Statut">${ordonnanceStatusBadge(o.status)}</td>
                 <td data-label="">${actions.join(' ')}</td>
@@ -6069,18 +6215,18 @@ function renderExpiryTable() {
     tbody.innerHTML = rows.map(({ p, days }) => {
         const daysLabel = days < 0 ? `Périmé depuis ${Math.abs(days)} j` : `${days} j`;
         return `<tr>
-            <td data-label="">${p.photo ? `<img src="${p.photo}" onclick="openImageLightbox('${p.photo}', '${p.name.replace(/'/g, "\\'")}')" style="width:38px; height:38px; object-fit:cover; border-radius:6px; border:1px solid var(--line); cursor:pointer;">` : `<div style="width:38px; height:38px; border-radius:6px; border:1px dashed var(--line); display:flex; align-items:center; justify-content:center; color:var(--text-muted); font-size:16px;">💊</div>`}</td>
-            <td data-label="Code" class="mono">${p.code}</td>
-            <td data-label="Produit">${p.name}</td>
-            <td data-label="Catégorie">${p.category || '—'}</td>
-            <td data-label="Lot" class="mono">${p.lot || '—'}</td>
+            <td data-label="">${p.photo ? `<img src="${escapeHtml(p.photo)}" onclick="openImageLightbox('${encodeURIComponent(p.photo)}', '${escapeHtml(p.name).replace(/'/g, "\\'")}')" style="width:38px; height:38px; object-fit:cover; border-radius:6px; border:1px solid var(--line); cursor:pointer;">` : `<div style="width:38px; height:38px; border-radius:6px; border:1px dashed var(--line); display:flex; align-items:center; justify-content:center; color:var(--text-muted); font-size:16px;">💊</div>`}</td>
+            <td data-label="Code" class="mono">${escapeHtml(p.code)}</td>
+            <td data-label="Produit">${escapeHtml(p.name)}</td>
+            <td data-label="Catégorie">${escapeHtml(p.category) || '—'}</td>
+            <td data-label="Lot" class="mono">${escapeHtml(p.lot) || '—'}</td>
             <td data-label="Stock" class="mono">${p.stock}</td>
             <td data-label="Péremption" class="mono">${formatDate(p.expiry)}</td>
             <td data-label="Jours restants" class="mono">${daysLabel}</td>
             <td data-label="Statut">${expiryStatusBadge(days)}</td>
             <td data-label="" style="white-space:nowrap;">
-                <button class="btn" onclick="openTab(1); openEditProductForm('${p.code}');" style="width:auto; padding:5px 10px;">Modifier</button>
-                ${p.stock > 0 ? `<button class="btn btn-danger" onclick="retirerProduitPerime('${p.code}')" style="width:auto; padding:5px 10px;">Retirer du stock</button>` : ''}
+                <button class="btn" onclick="openTab(1); openEditProductForm('${escapeHtml(p.code)}');" style="width:auto; padding:5px 10px;">Modifier</button>
+                ${p.stock > 0 ? `<button class="btn btn-danger" onclick="retirerProduitPerime('${escapeHtml(p.code)}')" style="width:auto; padding:5px 10px;">Retirer du stock</button>` : ''}
             </td>
         </tr>`;
     }).join('');
@@ -6159,10 +6305,10 @@ function renderLotsTable() {
     }
 
     tbody.innerHTML = rows.map(r => {
-        const lotLabel = r.lot === '__sans_lot__' ? '— (sans lot)' : r.lot;
-        const productsLabel = r.products.map(p => p.name).join(', ');
+        const lotLabel = r.lot === '__sans_lot__' ? '— (sans lot)' : escapeHtml(r.lot);
+        const productsLabel = r.products.map(p => escapeHtml(p.name)).join(', ');
         const status = r.days === null ? '<span class="badge">—</span>' : expiryStatusBadge(r.days);
-        const lotEsc = r.lot.replace(/'/g, "\\'");
+        const lotEsc = escapeHtml(r.lot).replace(/'/g, "\\'");
         return `<tr>
             <td data-label="Lot" class="mono">${lotLabel}</td>
             <td data-label="Produits associés">${productsLabel} <span style="color:var(--text-muted); font-size:0.82em;">(${r.products.length})</span></td>
@@ -6198,7 +6344,7 @@ function populateTraceProductFilter() {
     const options = [...map.entries()].sort((a, b) => a[1].localeCompare(b[1]));
 
     select.innerHTML = '<option value="">Tous les produits</option>' +
-        options.map(([code, name]) => `<option value="${code}">${name} (${code})</option>`).join('');
+        options.map(([code, name]) => `<option value="${escapeHtml(code)}">${escapeHtml(name)} (${escapeHtml(code)})</option>`).join('');
 
     // Restaurer la sélection précédente si elle existe toujours
     if (current && map.has(current)) select.value = current;
@@ -6236,14 +6382,14 @@ function renderTraceability() {
         const qtyColor = m.qty > 0 ? 'var(--ok)' : (m.qty < 0 ? 'var(--danger)' : 'var(--text-muted)');
         return `<tr>
             <td data-label="Date" class="mono">${d.toLocaleDateString('fr-FR')} ${d.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'})}</td>
-            <td data-label="Code" class="mono">${m.code}</td>
-            <td data-label="Produit">${m.name}</td>
-            <td data-label="Lot" class="mono">${m.lot || '—'}</td>
+            <td data-label="Code" class="mono">${escapeHtml(m.code)}</td>
+            <td data-label="Produit">${escapeHtml(m.name)}</td>
+            <td data-label="Lot" class="mono">${escapeHtml(m.lot) || '—'}</td>
             <td data-label="Mouvement">${movementTypeBadge(m.type)}</td>
             <td data-label="Quantité" class="mono" style="color:${qtyColor}; font-weight:600;">${qtySign}</td>
             <td data-label="Stock après" class="mono">${m.stockAfter}</td>
-            <td data-label="Référence" class="mono">${m.ref || '—'}</td>
-            <td data-label="Détail">${m.note || '—'}</td>
+            <td data-label="Référence" class="mono">${escapeHtml(m.ref) || '—'}</td>
+            <td data-label="Détail">${escapeHtml(m.note) || '—'}</td>
         </tr>`;
     }).join('');
 }
@@ -6314,31 +6460,31 @@ function generateFullReportPDF() {
 
     const stockRowsHtml = data.products.map(p => `
         <tr>
-            <td>${p.code}</td><td>${p.name}</td><td>${p.category||'—'}</td><td>${p.lot||'—'}</td>
+            <td>${escapeHtml(p.code)}</td><td>${escapeHtml(p.name)}</td><td>${escapeHtml(p.category)||'—'}</td><td>${escapeHtml(p.lot)||'—'}</td>
             <td style="text-align:right;">${p.stock}</td><td style="text-align:right;">${formatGNF(p.price)}</td><td>${formatDate(p.expiry)}</td>
         </tr>`).join('') || emptyRow(7, 'Aucun produit');
 
     const topProductsHtml = topProducts.map(([name, s]) => `
-        <tr><td>${name}</td><td style="text-align:right;">${s.qty}</td><td style="text-align:right;">${formatGNF(s.revenue)}</td></tr>
+        <tr><td>${escapeHtml(name)}</td><td style="text-align:right;">${s.qty}</td><td style="text-align:right;">${formatGNF(s.revenue)}</td></tr>
     `).join('') || emptyRow(3, 'Aucune vente enregistrée');
 
     const salesHtml = [...data.sales].reverse().slice(0, 50).map(sale => {
         const d = new Date(sale.date);
-        const itemsSummary = sale.items.map(it => `${it.name} x${it.qty}`).join(', ');
+        const itemsSummary = sale.items.map(it => `${escapeHtml(it.name)} x${it.qty}`).join(', ');
         return `<tr><td>${d.toLocaleDateString('fr-FR')} ${d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}</td><td>${itemsSummary}</td><td style="text-align:right;">${formatGNF(sale.total)}</td></tr>`;
     }).join('') || emptyRow(3, 'Aucune vente enregistrée');
 
     const commandesHtml = commandesRows.map(c => {
-        const itemsSummary = c.items.map(it => `${it.name} x${it.qty}`).join(', ');
-        return `<tr><td>${c.date||'—'}</td><td>${c.supplier||'—'}</td><td>${itemsSummary}</td><td style="text-align:right;">${formatGNF(commandeTotal(c))}</td><td>${commandeStatusBadgeText(c.status)}</td></tr>`;
+        const itemsSummary = c.items.map(it => `${escapeHtml(it.name)} x${it.qty}`).join(', ');
+        return `<tr><td>${c.date||'—'}</td><td>${escapeHtml(c.supplier)||'—'}</td><td>${itemsSummary}</td><td style="text-align:right;">${formatGNF(commandeTotal(c))}</td><td>${commandeStatusBadgeText(c.status)}</td></tr>`;
     }).join('') || emptyRow(5, 'Aucune commande enregistrée');
 
-    const lowStockHtml = lowStock.map(p => `<tr><td>${p.code}</td><td>${p.name}</td><td style="text-align:right;">${p.stock}</td></tr>`).join('') || emptyRow(3, 'Aucun produit en stock faible');
-    const nearExpiryHtml = nearExpiry.map(p => `<tr><td>${p.code}</td><td>${p.name}</td><td>${p.lot||'—'}</td><td>${formatDate(p.expiry)}</td><td style="text-align:right;">${daysUntil(p.expiry)} j</td></tr>`).join('') || emptyRow(5, 'Aucun produit proche de la péremption');
+    const lowStockHtml = lowStock.map(p => `<tr><td>${escapeHtml(p.code)}</td><td>${escapeHtml(p.name)}</td><td style="text-align:right;">${p.stock}</td></tr>`).join('') || emptyRow(3, 'Aucun produit en stock faible');
+    const nearExpiryHtml = nearExpiry.map(p => `<tr><td>${escapeHtml(p.code)}</td><td>${escapeHtml(p.name)}</td><td>${escapeHtml(p.lot)||'—'}</td><td>${formatDate(p.expiry)}</td><td style="text-align:right;">${daysUntil(p.expiry)} j</td></tr>`).join('') || emptyRow(5, 'Aucun produit proche de la péremption');
 
     const movementsHtml = movementRows.map(m => {
         const d = new Date(m.date);
-        return `<tr><td>${d.toLocaleDateString('fr-FR')} ${d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}</td><td>${m.code}</td><td>${m.name}</td><td>${m.lot||'—'}</td><td>${movementTypeLabel(m.type)}</td><td style="text-align:right;">${m.qty > 0 ? '+' + m.qty : m.qty}</td><td style="text-align:right;">${m.stockAfter}</td></tr>`;
+        return `<tr><td>${d.toLocaleDateString('fr-FR')} ${d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}</td><td>${escapeHtml(m.code)}</td><td>${escapeHtml(m.name)}</td><td>${escapeHtml(m.lot)||'—'}</td><td>${movementTypeLabel(m.type)}</td><td style="text-align:right;">${m.qty > 0 ? '+' + m.qty : m.qty}</td><td style="text-align:right;">${m.stockAfter}</td></tr>`;
     }).join('') || emptyRow(7, 'Aucun mouvement enregistré');
 
     const reportHtml = `
@@ -6559,12 +6705,12 @@ function renderBrowseProducts() {
         const outOfStock = p.stock <= 0;
         const stockClass = outOfStock ? 'bpc-stock-out' : (p.stock <= (data.settings?.lowStockThreshold || 10) ? 'bpc-stock-low' : '');
         const img = p.photo
-            ? `<img class="bpc-img" src="${p.photo}" alt="${p.name}">`
-            : `<div class="bpc-img-placeholder">${p.name.charAt(0).toUpperCase()}</div>`;
+            ? `<img class="bpc-img" src="${escapeHtml(p.photo)}" alt="${escapeHtml(p.name)}">`
+            : `<div class="bpc-img-placeholder">${escapeHtml(p.name.charAt(0).toUpperCase())}</div>`;
         return `
-            <div class="browse-product-card${outOfStock ? ' out-of-stock' : ''}" onclick="${outOfStock ? '' : `addToCart('${p.code}')`}" title="${outOfStock ? 'Rupture de stock' : 'Ajouter au panier'}">
+            <div class="browse-product-card${outOfStock ? ' out-of-stock' : ''}" onclick="${outOfStock ? '' : `addToCart('${escapeHtml(p.code)}')`}" title="${outOfStock ? 'Rupture de stock' : 'Ajouter au panier'}">
                 ${img}
-                <div class="bpc-name">${p.name}</div>
+                <div class="bpc-name">${escapeHtml(p.name)}</div>
                 <div class="bpc-meta">
                     <span class="mono">${formatGNF(p.price)}</span>
                     <span class="mono ${stockClass}">${outOfStock ? 'Rupture' : 'Stk ' + p.stock}</span>
@@ -6587,9 +6733,9 @@ function showSuggestions() {
         box.innerHTML = '<div class="suggestion-item">Aucun produit correspondant</div>';
     } else {
         box.innerHTML = matches.map(p => `
-            <div class="suggestion-item" onclick="addToCart('${p.code}')" style="display:flex; align-items:center; gap:10px;">
-                ${p.photo ? `<img src="${p.photo}" style="width:30px; height:30px; object-fit:cover; border-radius:5px; flex-shrink:0;">` : ''}
-                <span style="flex:1;">${p.name} <small style="color: var(--text-muted);">(${p.code})</small></span>
+            <div class="suggestion-item" onclick="addToCart('${escapeHtml(p.code)}')" style="display:flex; align-items:center; gap:10px;">
+                ${p.photo ? `<img src="${escapeHtml(p.photo)}" style="width:30px; height:30px; object-fit:cover; border-radius:5px; flex-shrink:0;">` : ''}
+                <span style="flex:1;">${escapeHtml(p.name)} <small style="color: var(--text-muted);">(${escapeHtml(p.code)})</small></span>
                 <span class="mono">${formatGNF(p.price)} · stock: ${p.stock}</span>
             </div>
         `).join('');
@@ -6647,11 +6793,11 @@ function renderCart() {
     } else {
         container.innerHTML = cart.map(item => `
             <div class="cart-item">
-                <span>${item.name}<br><small class="mono" style="color: var(--text-muted);">${formatGNF(item.price)} x ${item.qty}</small></span>
+                <span>${escapeHtml(item.name)}<br><small class="mono" style="color: var(--text-muted);">${formatGNF(item.price)} x ${item.qty}</small></span>
                 <div class="qty-controls" style="display:flex; align-items:center; gap:6px;">
-                    <button onclick="changeQty('${item.code}', -1)">−</button>
+                    <button onclick="changeQty('${escapeHtml(item.code)}', -1)">−</button>
                     <span class="mono">${item.qty}</span>
-                    <button onclick="changeQty('${item.code}', 1)">+</button>
+                    <button onclick="changeQty('${escapeHtml(item.code)}', 1)">+</button>
                 </div>
             </div>
         `).join('');
@@ -6758,7 +6904,6 @@ function validateSale() {
     renderStockTable();
     document.getElementById('saleClientSelect').value = '';
     document.getElementById('saleOnCredit').checked = false;
-    document.getElementById('saleCreditBox').style.display = 'none';
     document.getElementById('salePaidNow').value = '';
     document.getElementById('salePaymentMethod').value = 'especes';
     onSaleOnCreditChange();
@@ -6792,7 +6937,7 @@ function renderReports() {
     const topBody = document.getElementById('topProductsBody');
     topBody.innerHTML = topProducts.length === 0
         ? '<tr class="empty-row"><td colspan="3" class="empty-msg">Aucune vente enregistrée pour le moment</td></tr>'
-        : topProducts.map(([name, stats]) => `<tr><td data-label="Produit">${name}</td><td data-label="Qté vendue" class="mono">${stats.qty}</td><td data-label="Revenu" class="mono">${formatGNF(stats.revenue)}</td></tr>`).join('');
+        : topProducts.map(([name, stats]) => `<tr><td data-label="Produit">${escapeHtml(name)}</td><td data-label="Qté vendue" class="mono">${stats.qty}</td><td data-label="Revenu" class="mono">${formatGNF(stats.revenue)}</td></tr>`).join('');
 
     const historyBody = document.getElementById('salesHistoryBody');
     const filterStart = document.getElementById('salesFilterStart')?.value || '';
@@ -6816,11 +6961,11 @@ function renderReports() {
     historyBody.innerHTML = recentSales.length === 0
         ? '<tr class="empty-row"><td colspan="5" class="empty-msg">Aucune vente ne correspond aux filtres</td></tr>'
         : recentSales.map(({sale, i}) => {
-            const itemsSummary = sale.items.map(it => `${it.name} x${it.qty}`).join(', ');
+            const itemsSummary = sale.items.map(it => `${escapeHtml(it.name)} x${it.qty}`).join(', ');
             const d = new Date(sale.date);
             return `<tr>
                 <td data-label="Date" class="mono">${d.toLocaleDateString('fr-FR')} ${d.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'})}</td>
-                <td data-label="Client">${sale.clientName || 'Client de passage'}${
+                <td data-label="Client">${escapeHtml(sale.clientName) || 'Client de passage'}${
                     sale.paidOnCredit ? ' <span class="badge badge-warn">Crédit</span>'
                     : sale.partialPayment ? ' <span class="badge badge-warn">Partiel : ' + formatGNF(sale.amountPaid) + ' + ' + formatGNF(sale.amountCredit) + ' à crédit</span>'
                     : ' <span class="badge">' + paymentMethodLabel(sale.paymentMethod || 'especes') + '</span>'
@@ -7071,7 +7216,7 @@ function printStockReport() {
     const totalValue = data.products.reduce((s, p) => s + p.stock * p.price, 0);
     const lowStock = data.products.filter(p => p.stock <= LOW_STOCK_THRESHOLD).length;
     const rows = data.products.map(p => `
-        <tr><td>${p.code}</td><td>${p.name}</td><td>${p.category || '—'}</td><td>${p.lot || '—'}</td>
+        <tr><td>${escapeHtml(p.code)}</td><td>${escapeHtml(p.name)}</td><td>${escapeHtml(p.category) || '—'}</td><td>${escapeHtml(p.lot) || '—'}</td>
         <td style="text-align:right;">${p.stock}</td><td style="text-align:right;">${formatGNF(p.price)}</td><td>${formatDate(p.expiry)}</td></tr>
     `).join('') || printEmptyRow(7, 'Aucun produit enregistré');
 
@@ -7091,8 +7236,8 @@ function printCommandesReport() {
     const enAttente = data.commandes.filter(c => c.status === 'en_attente');
     const totalEnAttente = enAttente.reduce((s, c) => s + commandeTotal(c), 0);
     const rows = [...data.commandes].sort((a, b) => (b.date || '').localeCompare(a.date || '')).map(c => {
-        const itemsSummary = c.items.map(it => `${it.name} x${it.qty}`).join(', ');
-        return `<tr><td>${c.date || '—'}</td><td>${c.supplier || '—'}</td><td>${itemsSummary}</td><td style="text-align:right;">${formatGNF(commandeTotal(c))}</td><td>${commandeStatusBadgeText(c.status)}</td></tr>`;
+        const itemsSummary = c.items.map(it => `${escapeHtml(it.name)} x${it.qty}`).join(', ');
+        return `<tr><td>${c.date || '—'}</td><td>${escapeHtml(c.supplier) || '—'}</td><td>${itemsSummary}</td><td style="text-align:right;">${formatGNF(commandeTotal(c))}</td><td>${commandeStatusBadgeText(c.status)}</td></tr>`;
     }).join('') || printEmptyRow(5, 'Aucune commande enregistrée');
 
     const body = `
@@ -7110,7 +7255,7 @@ function printClientsReport() {
     const totalCredit = data.clients.reduce((s, c) => s + (c.credit || 0), 0);
     const debtors = data.clients.filter(c => (c.credit || 0) > 0).length;
     const rows = data.clients.map(c => `
-        <tr><td>${c.name}</td><td>${c.phone || '—'}</td><td>${c.address || '—'}</td>
+        <tr><td>${escapeHtml(c.name)}</td><td>${escapeHtml(c.phone) || '—'}</td><td>${escapeHtml(c.address) || '—'}</td>
         <td style="text-align:right;">${formatGNF(c.credit || 0)}</td><td style="text-align:right;">${clientPurchases(c.id).length}</td></tr>
     `).join('') || printEmptyRow(5, 'Aucun client enregistré');
 
@@ -7127,7 +7272,7 @@ function printClientsReport() {
 
 function printSuppliersReport() {
     const rows = data.suppliers.map(s => `
-        <tr><td>${s.name}</td><td>${s.phone || '—'}</td><td>${s.category || '—'}</td>
+        <tr><td>${escapeHtml(s.name)}</td><td>${escapeHtml(s.phone) || '—'}</td><td>${escapeHtml(s.category) || '—'}</td>
         <td style="text-align:right;">${supplierCommandes(s.name).length}</td><td style="text-align:right;">${formatGNF(supplierTotalAmount(s.name))}</td></tr>
     `).join('') || printEmptyRow(5, 'Aucun fournisseur enregistré');
 
@@ -7143,7 +7288,7 @@ function printSuppliersReport() {
 function printTraceabilityReport() {
     const rows = [...data.movements].sort((a, b) => b.date.localeCompare(a.date)).map(m => {
         const d = new Date(m.date);
-        return `<tr><td>${d.toLocaleDateString('fr-FR')} ${d.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'})}</td><td>${m.code}</td><td>${m.name}</td><td>${m.lot || '—'}</td><td>${movementTypeLabel(m.type)}</td><td style="text-align:right;">${m.qty > 0 ? '+' + m.qty : m.qty}</td><td style="text-align:right;">${m.stockAfter}</td></tr>`;
+        return `<tr><td>${d.toLocaleDateString('fr-FR')} ${d.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'})}</td><td>${escapeHtml(m.code)}</td><td>${escapeHtml(m.name)}</td><td>${escapeHtml(m.lot) || '—'}</td><td>${movementTypeLabel(m.type)}</td><td style="text-align:right;">${m.qty > 0 ? '+' + m.qty : m.qty}</td><td style="text-align:right;">${m.stockAfter}</td></tr>`;
     }).join('') || printEmptyRow(7, 'Aucun mouvement enregistré');
 
     const body = `
@@ -7157,8 +7302,8 @@ function printTraceabilityReport() {
 
 function printOrdonnancesReport() {
     const rows = [...data.ordonnances].reverse().map(o => {
-        const itemsSummary = o.items.map(it => `${it.name} x${it.qty}`).join(', ');
-        return `<tr><td>${formatDate(o.date)}</td><td>${o.clientName || '—'}</td><td>${o.doctor || '—'}</td><td>${itemsSummary}</td><td>${o.status}</td></tr>`;
+        const itemsSummary = o.items.map(it => `${escapeHtml(it.name)} x${it.qty}`).join(', ');
+        return `<tr><td>${formatDate(o.date)}</td><td>${escapeHtml(o.clientName) || '—'}</td><td>${escapeHtml(o.doctor) || '—'}</td><td>${itemsSummary}</td><td>${o.status}</td></tr>`;
     }).join('') || printEmptyRow(5, 'Aucune ordonnance enregistrée');
 
     const body = `
@@ -7190,8 +7335,8 @@ function printSalesReport() {
     const avgBasket = data.sales.length ? Math.round(totalRevenue / data.sales.length) : 0;
     const rows = [...data.sales].reverse().map(sale => {
         const d = new Date(sale.date);
-        const itemsSummary = sale.items.map(it => `${it.name} x${it.qty}`).join(', ');
-        return `<tr><td>${d.toLocaleDateString('fr-FR')} ${d.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'})}</td><td>${sale.clientName || '—'}</td><td>${itemsSummary}</td><td style="text-align:right;">${formatGNF(sale.total)}</td></tr>`;
+        const itemsSummary = sale.items.map(it => `${escapeHtml(it.name)} x${it.qty}`).join(', ');
+        return `<tr><td>${d.toLocaleDateString('fr-FR')} ${d.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'})}</td><td>${escapeHtml(sale.clientName) || '—'}</td><td>${itemsSummary}</td><td style="text-align:right;">${formatGNF(sale.total)}</td></tr>`;
     }).join('') || printEmptyRow(4, 'Aucune vente enregistrée');
 
     const body = `
@@ -7217,7 +7362,7 @@ function printFinanceReport() {
     const netResult = revenue - purchasesCost - totalExpenses;
 
     const expenseRows = [...expensesInPeriod].sort((a, b) => b.date.localeCompare(a.date)).map(e => `
-        <tr><td>${formatDate(e.date)}</td><td>${e.category}</td><td>${e.label}</td><td style="text-align:right;">${formatGNF(e.amount)}</td></tr>
+        <tr><td>${formatDate(e.date)}</td><td>${escapeHtml(e.category)}</td><td>${escapeHtml(e.label)}</td><td style="text-align:right;">${formatGNF(e.amount)}</td></tr>
     `).join('') || printEmptyRow(4, 'Aucune dépense sur cette période');
 
     const periodLabel = start || end ? `Période : ${start ? formatDate(start) : '…'} → ${end ? formatDate(end) : '…'}` : 'Toutes périodes confondues';
@@ -7326,7 +7471,7 @@ function printReceipt(sale) {
         + '-' + String(d.getHours()).padStart(2, '0') + String(d.getMinutes()).padStart(2, '0') + String(d.getSeconds()).padStart(2, '0');
     const itemsHtml = sale.items.map(i => `
         <tr>
-            <td>${i.name}</td>
+            <td>${escapeHtml(i.name)}</td>
             <td style="text-align:center;">${i.qty}</td>
             <td style="text-align:right;">${formatGNF(i.price)}</td>
             <td style="text-align:right;">${formatGNF(i.price * i.qty)}</td>
@@ -7418,15 +7563,15 @@ function printReceipt(sale) {
             </style>
         </head>
         <body>
-            <h2>${p.nom || 'Diabaté &amp; Frères Sarl'}</h2>
-            <p class="center tagline">${p.adresse || 'Siguiri, Guinée'}${p.telephone ? ' · Tél : ' + p.telephone : ''}</p>
+            <h2>${escapeHtml(p.nom) || 'Diabaté &amp; Frères Sarl'}</h2>
+            <p class="center tagline">${escapeHtml(p.adresse) || 'Siguiri, Guinée'}${p.telephone ? ' · Tél : ' + escapeHtml(p.telephone) : ''}</p>
             <div class="rule"></div>
             <p class="doc-label">Reçu de vente</p>
             <div class="ref-box">
                 <span>N° ${ref}</span>
                 <span>${d.toLocaleDateString('fr-FR')} ${d.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'})}</span>
             </div>
-            ${sale.clientName ? `<p class="meta">Client : ${sale.clientName}</p>` : ''}
+            ${sale.clientName ? `<p class="meta">Client : ${escapeHtml(sale.clientName)}</p>` : ''}
             <hr class="dashed">
             <table>
                 <thead><tr><th style="text-align:left;">Article</th><th style="text-align:center;">Qté</th><th style="text-align:right;">P.U.</th><th style="text-align:right;">Total</th></tr></thead>
