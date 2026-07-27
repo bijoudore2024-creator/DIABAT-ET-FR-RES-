@@ -5158,14 +5158,21 @@ function handleLogoSelect(event) {
         alert('Veuillez sélectionner une image.');
         return;
     }
-    resizeImage(file, 160, 160, 0.85).then(async dataUrl => {
+    resizeImage(file, 160, 160, 0.85).then(dataUrl => {
         const oldLogo = data.logo;
-        const photoUrl = await uploadPhotoToStorage(dataUrl, 'logo');
-        data.logo = photoUrl;
-        if (oldLogo && oldLogo !== photoUrl) deletePhotoFromStorage(oldLogo);
+        data.logo = dataUrl;
         saveData();
         renderLogo();
         renderSettingsLogo();
+        // Envoi vers Firebase Storage en arrière-plan, sans bloquer l'enregistrement.
+        uploadPhotoToStorage(dataUrl, 'logo').then(uploadedUrl => {
+            if (!uploadedUrl || uploadedUrl === dataUrl) return;
+            data.logo = uploadedUrl;
+            if (oldLogo && oldLogo !== uploadedUrl) deletePhotoFromStorage(oldLogo);
+            saveData();
+            renderLogo();
+            renderSettingsLogo();
+        }).catch(err => console.warn('Upload logo en arrière-plan échoué :', err));
     }).catch(() => alert('Impossible de charger cette image.'));
     event.target.value = '';
 }
@@ -5524,17 +5531,14 @@ async function saveProductForm() {
         return;
     }
 
-    // Upload de la photo vers Firebase Storage si une nouvelle photo a été sélectionnée
-    // (une data URL base64 fraîchement redimensionnée) ; si c'est déjà une URL Storage
-    // existante (photo inchangée) ou si Storage n'est pas configuré, on la garde telle quelle.
-    const saveBtn = document.querySelector('#addProductForm button.btn-success');
+    // On enregistre tout de suite avec la photo en base64 (rapide, pas d'attente réseau).
+    // L'envoi vers Firebase Storage (si configuré) se fait ensuite en arrière-plan ;
+    // une fois terminé, on remplace juste l'URL de la photo dans la fiche, sans bloquer
+    // le bouton Enregistrer ni faire attendre l'utilisateur.
     let photoUrl = pendingPhoto || '';
     const oldPhoto = editingCode ? (data.products.find(p => p.code === editingCode) || {}).photo : '';
-    if (pendingPhoto && pendingPhoto.startsWith('data:')) {
-        if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = 'Envoi de la photo…'; }
-        photoUrl = await uploadPhotoToStorage(pendingPhoto, 'products');
-        if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = 'Enregistrer'; }
-    }
+    const needsBackgroundUpload = pendingPhoto && pendingPhoto.startsWith('data:');
+    const codeForUpload = code || editingCode;
 
     if (editingCode) {
         if (!code) code = editingCode;
@@ -5580,6 +5584,21 @@ async function saveProductForm() {
     saveData();
     closeProductForm();
     renderStockTable();
+
+    // Envoi de la photo vers Firebase Storage en arrière-plan (si configuré) : n'empêche
+    // plus l'enregistrement d'attendre le réseau. Une fois terminé, on met juste à jour
+    // l'URL de la photo dans la fiche produit et on sauvegarde à nouveau, silencieusement.
+    if (needsBackgroundUpload) {
+        uploadPhotoToStorage(pendingPhoto, 'products').then(uploadedUrl => {
+            if (!uploadedUrl || uploadedUrl === photoUrl) return;
+            const p = data.products.find(p => p.code === codeForUpload);
+            if (p) {
+                p.photo = uploadedUrl;
+                saveData();
+                renderStockTable();
+            }
+        }).catch(err => console.warn('Upload photo produit en arrière-plan échoué :', err));
+    }
 }
 
 function deleteProduct(code) {
@@ -7115,15 +7134,12 @@ async function saveOrdonnanceForm() {
         return;
     }
 
-    // Upload vers Firebase Storage si une nouvelle photo (data URL) a été sélectionnée.
-    const saveBtn = document.querySelector('#addOrdonnanceForm button.btn-success');
+    // On enregistre tout de suite avec la photo en base64 (pas d'attente réseau).
+    // L'envoi vers Firebase Storage (si configuré) se fait ensuite en arrière-plan.
     let photoUrl = pendingOrdPhoto || '';
     const oldPhoto = editingId ? (data.ordonnances.find(o => o.id === editingId) || {}).photo : '';
-    if (pendingOrdPhoto && pendingOrdPhoto.startsWith('data:')) {
-        if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = 'Envoi de la photo…'; }
-        photoUrl = await uploadPhotoToStorage(pendingOrdPhoto, 'ordonnances');
-        if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = 'Enregistrer l\'ordonnance'; }
-    }
+    const needsBackgroundUpload = pendingOrdPhoto && pendingOrdPhoto.startsWith('data:');
+    let idForUpload = editingId;
 
     if (editingId) {
         const o = data.ordonnances.find(o => o.id === editingId);
@@ -7138,8 +7154,9 @@ async function saveOrdonnanceForm() {
             if (oldPhoto && oldPhoto !== photoUrl) deletePhotoFromStorage(oldPhoto);
         }
     } else {
+        idForUpload = generateOrdonnanceId();
         data.ordonnances.push({
-            id: generateOrdonnanceId(),
+            id: idForUpload,
             clientId: clientId || null,
             clientName: patientName,
             doctor, date, notes,
@@ -7154,6 +7171,19 @@ async function saveOrdonnanceForm() {
     saveData();
     closeOrdonnanceForm();
     renderOrdonnancesTable();
+
+    // Envoi de la photo en arrière-plan, sans bloquer l'enregistrement ni l'interface.
+    if (needsBackgroundUpload) {
+        uploadPhotoToStorage(pendingOrdPhoto, 'ordonnances').then(uploadedUrl => {
+            if (!uploadedUrl || uploadedUrl === photoUrl) return;
+            const o = data.ordonnances.find(o => o.id === idForUpload);
+            if (o) {
+                o.photo = uploadedUrl;
+                saveData();
+                renderOrdonnancesTable();
+            }
+        }).catch(err => console.warn('Upload photo ordonnance en arrière-plan échoué :', err));
+    }
 }
 
 function dispenserOrdonnance(id) {
