@@ -5235,11 +5235,25 @@ function resizeImage(file, maxW, maxH, quality) {
 // folder : "products", "ordonnances" ou "logo" — pour ranger les fichiers proprement.
 async function uploadPhotoToStorage(dataUrl, folder) {
     if (!fbStorage || !currentUser) return dataUrl;
-    try {
+    // Délai de sécurité : si l'upload traîne (réseau lent/instable), on abandonne
+    // et on retombe sur la data URL plutôt que de bloquer indéfiniment le bouton Enregistrer.
+    const UPLOAD_TIMEOUT_MS = 12000;
+    const timeout = new Promise((resolve) => {
+        setTimeout(() => resolve({ __timedOut: true }), UPLOAD_TIMEOUT_MS);
+    });
+    const doUpload = (async () => {
         const path = folder + '/' + currentUser.id + '_' + Date.now() + '_' + Math.round(Math.random() * 1e6) + '.jpg';
         const ref = fbStorage.ref().child(path);
         await ref.putString(dataUrl, 'data_url', { contentType: 'image/jpeg' });
         return await ref.getDownloadURL();
+    })();
+    try {
+        const result = await Promise.race([doUpload, timeout]);
+        if (result && result.__timedOut) {
+            console.warn('Upload photo trop long (>' + UPLOAD_TIMEOUT_MS + 'ms), repli en local.');
+            return dataUrl;
+        }
+        return result;
     } catch (err) {
         console.error('Erreur upload photo vers Firebase Storage (repli en local) :', err);
         return dataUrl;
