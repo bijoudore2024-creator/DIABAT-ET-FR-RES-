@@ -1140,21 +1140,91 @@
     /* ---------- Écran de connexion (multi-utilisateur + sécurité locale) ---------- */
     #authScreen, #pendingScreen, #localPinScreen, #localLoginScreen {
         position: fixed; inset: 0; z-index: 500;
+        overflow-y: auto;
         background:
-            radial-gradient(ellipse 600px 300px at 50% -10%, rgba(58,168,58,0.14), transparent 65%),
-            linear-gradient(180deg, #0a3d22 0%, #0d4527 55%, #0a2416 100%);
-        display: flex; align-items: center; justify-content: center;
-        padding: 24px;
+            radial-gradient(ellipse 900px 500px at 50% -8%, rgba(60,245,140,0.16), transparent 60%),
+            repeating-linear-gradient(90deg, rgba(255,255,255,0.025) 0px, rgba(255,255,255,0.025) 2px, transparent 2px, transparent 74px),
+            repeating-linear-gradient(0deg, rgba(0,0,0,0.10) 0px, rgba(0,0,0,0.10) 3px, transparent 3px, transparent 96px),
+            linear-gradient(180deg, #082e1b 0%, #0a3d22 45%, #0f6b34 100%, #0a2416 100%);
+        display: flex; align-items: flex-start; justify-content: center;
+        padding: 0;
     }
     #authScreen.hidden, #pendingScreen.hidden, #localPinScreen.hidden, #localLoginScreen.hidden { display: none; }
+
+    /* Bandeau/scène décorative (badge, langue, thème, logo héro) — auth principal + connexion locale */
+    .auth-stage { width: 100%; min-height: 100%; display: flex; flex-direction: column; align-items: center; padding-bottom: 40px; }
+    .auth-topbar {
+        width: 100%; max-width: 520px; margin: 0 auto;
+        display: flex; align-items: flex-start; justify-content: space-between;
+        padding: 18px 20px 0;
+        box-sizing: border-box;
+    }
+    .auth-badge {
+        display: flex; align-items: center; gap: 9px;
+        background: linear-gradient(135deg, rgba(15,233,92,0.22), rgba(15,233,92,0.06));
+        border: 1px solid rgba(15,233,92,0.35);
+        border-radius: 999px; padding: 7px 14px 7px 9px;
+        backdrop-filter: blur(4px);
+    }
+    .auth-badge .auth-badge-icon {
+        width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0;
+        background: rgba(255,255,255,0.14);
+        display: flex; align-items: center; justify-content: center;
+        color: #eafff2;
+    }
+    .auth-badge .auth-badge-icon svg { width: 15px; height: 15px; }
+    .auth-badge-text { color: #eafff2; font-size: 0.68em; line-height: 1.25; font-weight: 600; }
+    .auth-badge-text small { display: block; font-weight: 500; opacity: 0.8; font-size: 0.92em; }
+    .auth-top-controls { display: flex; align-items: center; gap: 8px; }
+    .auth-lang-pill {
+        display: flex; align-items: center; gap: 5px;
+        background: rgba(255,255,255,0.10); border: 1px solid rgba(255,255,255,0.18);
+        color: #eafff2; font-size: 0.74em; font-weight: 600;
+        border-radius: 999px; padding: 7px 12px; cursor: default;
+        font-family: 'Work Sans', sans-serif;
+    }
+    .auth-lang-pill svg { width: 12px; height: 12px; opacity: 0.8; }
+    .auth-theme-btn {
+        width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+        background: rgba(255,255,255,0.10); border: 1px solid rgba(255,255,255,0.18);
+        color: #eafff2; display: flex; align-items: center; justify-content: center; cursor: pointer;
+    }
+    .auth-theme-btn svg { width: 16px; height: 16px; }
+    .auth-theme-btn:hover { background: rgba(255,255,255,0.18); }
+
+    .auth-hero { text-align: center; padding: 26px 20px 18px; }
+    .auth-hero-glow {
+        width: 96px; height: 96px; border-radius: 50%; margin: 0 auto 14px;
+        display: flex; align-items: center; justify-content: center;
+        background: radial-gradient(circle, rgba(15,233,92,0.30) 0%, rgba(15,233,92,0.06) 62%, transparent 75%);
+    }
+    .auth-hero-mark {
+        width: 66px; height: 66px; border-radius: 50%; overflow: hidden;
+        background: #ffffff; border: 3px solid rgba(255,255,255,0.9);
+        display: flex; align-items: center; justify-content: center;
+        box-shadow: 0 6px 24px rgba(0,0,0,0.3);
+    }
+    .auth-hero-mark img { width: 100%; height: 100%; object-fit: cover; }
+    .auth-hero h1 {
+        font-family: 'Fraunces', serif; font-weight: 700; letter-spacing: 0.01em;
+        color: #f4fff7; font-size: 1.9em; margin: 4px 0 2px; text-transform: uppercase;
+    }
+    .auth-hero-sub {
+        color: rgba(234,255,242,0.72); font-size: 0.78em; font-weight: 500;
+        letter-spacing: 0.01em;
+    }
+
     .auth-card {
-        width: 100%; max-width: 380px;
+        width: calc(100% - 40px);
+        max-width: 380px;
         background: var(--panel);
         border: 1px solid var(--line);
-        border-radius: 18px;
-        padding: 32px 26px;
-        box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+        border-radius: 20px;
+        padding: 30px 24px 26px;
+        box-shadow: 0 24px 60px rgba(0,0,0,0.4);
+        margin: 0 20px;
     }
+    .auth-stage .auth-card { margin-top: 4px; }
     .auth-card .auth-mark {
         width: 54px; height: 54px; border-radius: 14px;
         margin: 0 auto 16px;
@@ -1180,9 +1250,22 @@
         width: 100%; padding: 11px 13px; border-radius: 10px;
         border: 1px solid var(--line); background: var(--panel-2);
         color: var(--text); font-family: 'Work Sans', sans-serif; font-size: 0.92em;
-        margin: 0;
+        margin: 0; box-sizing: border-box;
     }
     .auth-field input:focus, .auth-field select:focus { outline: none; border-color: var(--accent-dim); }
+    .auth-field-icon { position: relative; }
+    .auth-field-icon input { padding-left: 40px; }
+    .auth-field-icon svg {
+        position: absolute; left: 13px; top: 50%; transform: translateY(-50%);
+        width: 17px; height: 17px; color: var(--accent-dim); opacity: 0.75; pointer-events: none;
+    }
+    .auth-row {
+        display: flex; align-items: center; justify-content: space-between;
+        margin: -2px 0 16px; font-size: 0.76em;
+    }
+    .auth-remember { display: flex; align-items: center; gap: 7px; color: var(--text-muted); cursor: pointer; user-select: none; }
+    .auth-remember input[type="checkbox"] { width: 15px; height: 15px; accent-color: var(--accent-dim); margin: 0; cursor: pointer; }
+    .auth-forgot { background: none; border: none; color: var(--accent-dim); font-weight: 700; cursor: pointer; padding: 0; font-family: 'Work Sans', sans-serif; font-size: 1em; }
     .auth-error {
         background: var(--danger-bg); color: var(--danger);
         border-radius: 10px; padding: 9px 12px; font-size: 0.8em;
@@ -1190,17 +1273,20 @@
     }
     .auth-error.show { display: block; }
     .auth-submit {
-        width: 100%; padding: 12px; border-radius: 10px; border: none;
-        background: linear-gradient(135deg, var(--accent-soft), var(--accent));
-        color: #f5f0e6; font-weight: 700; font-size: 0.92em; cursor: pointer;
+        width: 100%; padding: 13px; border-radius: 10px; border: none;
+        background: linear-gradient(135deg, var(--accent-soft), var(--accent-dim));
+        color: #04250f; font-weight: 700; font-size: 0.94em; cursor: pointer;
         font-family: 'Work Sans', sans-serif;
+        display: flex; align-items: center; justify-content: center; gap: 8px;
+        box-shadow: 0 8px 20px rgba(15,233,92,0.28);
     }
+    .auth-submit svg { width: 17px; height: 17px; }
     .auth-submit:disabled { opacity: 0.6; cursor: wait; }
     .auth-switch {
         text-align: center; margin-top: 16px; font-size: 0.8em; color: var(--text-muted);
     }
     .auth-switch button {
-        background: none; border: none; color: var(--accent-soft); font-weight: 700;
+        background: none; border: none; color: var(--accent-dim); font-weight: 700;
         cursor: pointer; font-family: 'Work Sans', sans-serif; font-size: 1em; padding: 0;
     }
     .auth-offline-note {
@@ -1210,6 +1296,11 @@
     .auth-dev-credit {
         margin-top: 10px; font-size: 0.66em; color: var(--text-muted);
         text-align: center; opacity: 0.75; letter-spacing: 0.02em;
+    }
+    @media (max-width: 380px) {
+        .auth-hero h1 { font-size: 1.55em; }
+        .auth-badge-text { font-size: 0.62em; }
+        .auth-card { padding: 26px 18px 22px; }
     }
 
     /* ---------- Badge utilisateur + statut sync (header) ---------- */
@@ -1707,38 +1798,72 @@
 
 <!-- Écran de connexion (auth Firebase multi-utilisateur) -->
 <div id="authScreen" class="hidden">
-    <div class="auth-card">
-        <div class="auth-mark" id="authMark"><img src="" id="authMarkImg" alt="Diabaté &amp; Frères Sarl"></div>
-        <h2>Diabaté &amp; Frères Sarl</h2>
-        <p class="auth-sub" id="authSubtitle">Connexion à votre espace pharmacie</p>
-        <div class="auth-error" id="authError"></div>
-        <form id="authForm" onsubmit="return false;">
-            <div class="auth-field" id="authNameField" style="display:none;">
-                <label for="authName">Nom complet</label>
-                <input type="text" id="authName" autocomplete="name" placeholder="Ex: Mariam Diabaté">
+    <div class="auth-stage">
+        <div class="auth-topbar">
+            <div class="auth-badge">
+                <span class="auth-badge-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5v6c0 5 3.4 9 8 11 4.6-2 8-6 8-11V5l-8-3z"/><path d="M12 8v6M9 11h6"/></svg>
+                </span>
+                <span class="auth-badge-text">Votre santé,<small>notre priorité</small></span>
             </div>
-            <div class="auth-field">
-                <label for="authEmail">Email</label>
-                <input type="email" id="authEmail" autocomplete="username" placeholder="vous@pharmacie.gn">
+            <div class="auth-top-controls">
+                <span class="auth-lang-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20 15 15 0 0 1 0-20z"/></svg>Français</span>
+                <button type="button" class="auth-theme-btn theme-toggle-btn" onclick="toggleDarkMode()" aria-label="Changer de thème" title="Mode sombre / clair">
+                    <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+                    <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg>
+                </button>
             </div>
-            <div class="auth-field">
-                <label for="authPassword">Mot de passe</label>
-                <div style="position:relative;">
-                    <input type="password" id="authPassword" autocomplete="current-password" placeholder="••••••••" style="padding-right:42px;">
-                    <button type="button" id="togglePasswordBtn" onclick="togglePasswordVisibility()" aria-label="Afficher le mot de passe" style="position:absolute; right:6px; top:50%; transform:translateY(-50%); background:none; border:none; padding:6px; cursor:pointer; color:var(--text-muted); display:flex; align-items:center;">
-                        <svg id="eyeIconShow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px; height:18px;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                        <svg id="eyeIconHide" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px; height:18px; display:none;"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a20.3 20.3 0 0 1 4.22-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a20.3 20.3 0 0 1-2.68 3.9M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
-                    </button>
-                </div>
-            </div>
-            <button type="submit" class="auth-submit" id="authSubmitBtn" onclick="handleAuthSubmit()">Se connecter</button>
-        </form>
-        <div class="auth-switch">
-            <span id="authSwitchText">Nouveau membre de l'équipe ?</span>
-            <button id="authSwitchBtn" onclick="toggleAuthMode()">Créer un compte</button>
         </div>
-        <p class="auth-offline-note" id="authOfflineNote"></p>
-        <p class="auth-dev-credit">Développé par HABATECH · 627 54 19 25</p>
+        <div class="auth-hero">
+            <div class="auth-hero-glow"><div class="auth-hero-mark" id="authMark"><img src="" id="authMarkImg" alt="Diabaté &amp; Frères Sarl"></div></div>
+            <h1>Pharmacie</h1>
+            <p class="auth-hero-sub">Gestion intelligente · Sécurisée · Performante</p>
+        </div>
+        <div class="auth-card">
+            <h2>Diabaté &amp; Frères Sarl</h2>
+            <p class="auth-sub" id="authSubtitle">Connexion à votre espace pharmacie</p>
+            <div class="auth-error" id="authError"></div>
+            <form id="authForm" onsubmit="return false;">
+                <div class="auth-field" id="authNameField" style="display:none;">
+                    <label for="authName">Nom complet</label>
+                    <div class="auth-field-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        <input type="text" id="authName" autocomplete="name" placeholder="Ex: Mariam Diabaté">
+                    </div>
+                </div>
+                <div class="auth-field">
+                    <label for="authEmail">Email</label>
+                    <div class="auth-field-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        <input type="email" id="authEmail" autocomplete="username" placeholder="vous@pharmacie.gn">
+                    </div>
+                </div>
+                <div class="auth-field">
+                    <label for="authPassword">Mot de passe</label>
+                    <div class="auth-field-icon" style="position:relative;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+                        <input type="password" id="authPassword" autocomplete="current-password" placeholder="••••••••" style="padding-right:42px;">
+                        <button type="button" id="togglePasswordBtn" onclick="togglePasswordVisibility()" aria-label="Afficher le mot de passe" style="position:absolute; right:6px; top:50%; transform:translateY(-50%); background:none; border:none; padding:6px; cursor:pointer; color:var(--text-muted); display:flex; align-items:center;">
+                            <svg id="eyeIconShow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px; height:18px;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                            <svg id="eyeIconHide" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px; height:18px; display:none;"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a20.3 20.3 0 0 1 4.22-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a20.3 20.3 0 0 1-2.68 3.9M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="auth-row">
+                    <label class="auth-remember"><input type="checkbox" id="authRememberMe">Se souvenir de moi</label>
+                    <button type="button" class="auth-forgot" onclick="handleForgotPassword()">Mot de passe oublié ?</button>
+                </div>
+                <button type="submit" class="auth-submit" id="authSubmitBtn" onclick="handleAuthSubmit()">Se connecter
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                </button>
+            </form>
+            <div class="auth-switch">
+                <span id="authSwitchText">Nouveau membre de l'équipe ?</span>
+                <button id="authSwitchBtn" onclick="toggleAuthMode()">Créer un compte</button>
+            </div>
+            <p class="auth-offline-note" id="authOfflineNote"></p>
+            <p class="auth-dev-credit">Développé par HABATECH · 627 54 19 25</p>
+        </div>
     </div>
 </div>
 
@@ -1773,24 +1898,50 @@
 
 <!-- Écran de connexion locale par compte/rôle (fonctionne sans internet) -->
 <div id="localLoginScreen" class="hidden">
-    <div class="auth-card">
-        <div class="auth-mark" id="localLoginMark"><img src="" id="localLoginMarkImg" alt="Diabaté &amp; Frères Sarl"></div>
-        <h2>Diabaté &amp; Frères Sarl</h2>
-        <p class="auth-sub">Connexion locale de l'équipe</p>
-        <div class="auth-error" id="localLoginError"></div>
-        <form id="localLoginForm" onsubmit="return false;">
-            <div class="auth-field">
-                <label for="localLoginUser">Compte</label>
-                <select id="localLoginUser"></select>
+    <div class="auth-stage">
+        <div class="auth-topbar">
+            <div class="auth-badge">
+                <span class="auth-badge-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5v6c0 5 3.4 9 8 11 4.6-2 8-6 8-11V5l-8-3z"/><path d="M12 8v6M9 11h6"/></svg>
+                </span>
+                <span class="auth-badge-text">Votre santé,<small>notre priorité</small></span>
             </div>
-            <div class="auth-field">
-                <label for="localLoginPassword">Mot de passe</label>
-                <input type="password" id="localLoginPassword" autocomplete="current-password" placeholder="••••••••" onkeydown="if(event.key==='Enter'){handleLocalLoginSubmit();}">
+            <div class="auth-top-controls">
+                <span class="auth-lang-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20 15 15 0 0 1 0-20z"/></svg>Français</span>
+                <button type="button" class="auth-theme-btn theme-toggle-btn" onclick="toggleDarkMode()" aria-label="Changer de thème" title="Mode sombre / clair">
+                    <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+                    <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg>
+                </button>
             </div>
-            <button type="submit" class="auth-submit" onclick="handleLocalLoginSubmit()">Se connecter</button>
-        </form>
-        <p class="auth-offline-note">Mode local — aucune connexion internet requise.</p>
-        <p class="auth-dev-credit">Développé par HABATECH · 627 54 19 25</p>
+        </div>
+        <div class="auth-hero">
+            <div class="auth-hero-glow"><div class="auth-hero-mark" id="localLoginMark"><img src="" id="localLoginMarkImg" alt="Diabaté &amp; Frères Sarl"></div></div>
+            <h1>Pharmacie</h1>
+            <p class="auth-hero-sub">Gestion intelligente · Sécurisée · Performante</p>
+        </div>
+        <div class="auth-card">
+            <h2>Diabaté &amp; Frères Sarl</h2>
+            <p class="auth-sub">Connexion locale de l'équipe</p>
+            <div class="auth-error" id="localLoginError"></div>
+            <form id="localLoginForm" onsubmit="return false;">
+                <div class="auth-field">
+                    <label for="localLoginUser">Compte</label>
+                    <select id="localLoginUser"></select>
+                </div>
+                <div class="auth-field">
+                    <label for="localLoginPassword">Mot de passe</label>
+                    <div class="auth-field-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+                        <input type="password" id="localLoginPassword" autocomplete="current-password" placeholder="••••••••" onkeydown="if(event.key==='Enter'){handleLocalLoginSubmit();}">
+                    </div>
+                </div>
+                <button type="submit" class="auth-submit" onclick="handleLocalLoginSubmit()">Se connecter
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                </button>
+            </form>
+            <p class="auth-offline-note">Mode local — aucune connexion internet requise.</p>
+            <p class="auth-dev-credit">Développé par HABATECH · 627 54 19 25</p>
+        </div>
     </div>
 </div>
 
@@ -1902,6 +2053,7 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
             </button>
         </div>
+        <div style="display:flex; align-items:center; gap:2px;">
         <button class="icon-btn" aria-label="Notifications" onclick="openTab(0)">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
             <span class="notif-dot" id="notifCount">0</span>
@@ -1910,6 +2062,7 @@
             <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
             <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
         </button>
+        </div>
     </div>
     <div class="mark" id="logoMark" onclick="document.getElementById('logoUpload').click()" title="Changer le logo">
         <span id="logoMarkContent"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKAAAACgCAYAAACLz2ctAABLiUlEQVR42u29d7wlZX3H//4+z8wp99zetleWtoAKi4olLKCCGgUsF40lJmJAjRoSE02McV31Z6KJNZZYMSaWsIjGGEUF5SJKXRDUpS2wvd1eTpuZ5/n+/pg5954tqEl++WVhz2dfs+fcU+bMzPOdby/QQgsttNBCCy200EILLbTQQgsttNBCCy200EILLbTQQgsttNBCCy200EILLbTQQgsttNBCCy200EILLbTQQgsttNBCC48VSOsS/J9eE21d7hYasKxfH/z/+otDQ43flNbdfixjCMsmXPoU+zCY/y92uy573Nz09+am9zdD3PSnAXyLAI+981eAfFfpXLt44CUYuSDRIA+KNYIg6aekSWiKIJJ9VbOXjAX1h3wwk7B+/tcURYxBXIKP/WZJ9BuFrY/8+xjMNN8ILQI8dohPcquWfoYFfX8U5QoQJeBcypAUMM1EJfOEJY2/ZY4oU7rzjd02faXpeeM9BYxgcpZgemab27H/z934+DeONSKUY5b4hjBswgTHr/iqLlvwUjer7qTFohc+qdcctzBPaAJEAtQYkBAVSTmfASMGxaIYxKTcUBvmhKZcU9UjYrL3FCQlTOdTIpwq1/nRPaN67R17NcnbIKxXVHbsvyTaN3I1GzBsPDbE8bFJgENDlk2bXH7Vsve6VUvemVSi6B0X9Ofe+dJlFHtDSARsDsI8BHkIQjCWlPoCwIIx6eUzJmOEknE608T59GBjt8Ed1YMVsHDrLXu4/AM/c3eP1yRfreHu2/aMZGbm1mxHrkWAjz8YwOfac2vl5OPurkuJP3lWt/3oG1bLwzsjNn5nHz8fj8GmHE4NKbGISYlMMg4n81LY06QTYuboEa8p6YmkxKjZa6p0BZZXr1vA5ZecyI6tkzz9Ldcm+5wEuX1j11Z/+eDz2LDBsHGjbxHg4w8BkBSXLLy8unLxPy0q2eTOd58Q1MXy3I8+zH2TQH8BjEBowNqUAE3G7Ux22ebUQsmoTUC0ydrQ+cfGZ70Hr+AUEgd7Z/iL81bxwStO55Ofv1vf9Ll7yBGNlR7cvWZiYmLqWLCMzTFHfuvXpyTSUTibWDj7uA4WLu3kU9ePct+0kl9awhQDbDHA5gNM3mJyASa0mNBgc0H6dy7A5ENMPsAUss/lD33NpI85m26hndtnUAywK3r40PB27vv5OJc8e410dAQkYvuTMDz5WGEQxxoBCjcOJ0BAomfhYVF3YNTCvWMOU8rhMrHpss17xXuP14x5ZSJUVfGpRE03UlHsVbMte93rQY/p9yFxgojBW8Od26cY6M7Tnc/hRXCB1o4lfejYgsJ6wBgbgKJiEB/gYo9HURF0jno0FaGNx2xLCRDEZy4ZPXgTbTZAQBqvNd8Joqh4sJB4UARjREl1x0UtAnzcn3m22CKZjtd4w3PEEG1mRIg2qXqqqXfFzxsYKT02WKLOfU9VD70PmqSspP8b9YigsXvasSKCg2OXAEkNC8ksXGMzoWsOJ0DV1MXS4Hxk1qwx88YGOh9WmeN8GYOcc8Mcut+G6yalMzGppa0i8bFkER6TkMaiZ1xQmsNmJiVCabhRTGbNZkERPcjSPYSlicwH4xpiWeY/K5kIn4uOzP09b++aY0guHbscMAudqUjK/Roik0y3y+K2aeStye3iFTGSxnQ9qJknroPczs06YKYrKs1iWeZcM+IdzbFjVQ1bBHiMGCSogAlS8dcgDgRcqhtKQ3/TxhdMaqQ0ESGSEfKcuNaDRHBzVES1ycDJZLYXQD2iGSM2Zn+LAI8JAtQ0gmHMPH351BIWUofxvLjNnNDGz+ttIqhkFCY6H/fNvqPacETPKYPzVnVDB2w8l4wdq+BEHj7MVmlZwY8fzJLSncxFMMB6wahiFIxP3SYm28SBzEUxMrJwHOyqUVDX7Lrx4NJNXBb9cNn3Pdlzn1nWinpFjXoQbKxntazgxzHuhLjonVev+Ez/iuIIX6ngQ5+5ZkzqnnECYpEwwIpJ48CO1Geomt7CjTjxnBKYyWWvSMMIaXDcBhd0PiUv7xHxiDhUs9cCE7B+fcC2bQErVz7KWQzDMEmLAB9bsIBb1NOzNOzsaB9Ro4WgW7CLWdg5yNI2T66Qy6IaoNagIpRdzPTMNM4lqYmay0OxiBWLesXj5zMT1M0R2rwIlkwNbPIX+iYC9OCTABFrUI+P3Y8ZHk6AhO3bH+feiMfe8aY5T+uP9Pb6lDM8CsMQSBTal69eufWrX/3ygmXLVvu2nJiernYq9VTfs0YQFRLv8N7hnWeqWmF8apJto/v4+SMPcPvW+7hl+0NMVaahrYhtawdJQ3ZzrhUPxjaSVecNE1TS0IdXcA6pOZblDd0W7h+paVRLpDQy8bm88T/HOYO13ma7dYB3BpfE+FqdoFL71/Hx8fKjrKM/yLRuEeD/+Dj/x/lxnX19Z5Zrte4Tli//0k0/uWFJb9+gV1Xj1WNNat3W4xgRIZ/L/dp97di7m+/e/hO+/JPvc/P2+6CtnSBfwMUuTROME9xUdT5TpiGKG7qhT7kfiULk0k0y3XAuGJ1kfvGGL9GAhaCjgB0br134q63tm37TNUnTuuAozap5LBBgc0qSdObzq6W/80k5m8Nmx+8Aa+38N5xL/3aQaGKCIPAVr8trPe0fivM5lhfb/a2brja9fYN450E81oS8/R/ezzU/uZ5Cewcd+TY6ghwL+3p54glreebpZ3DmqadhwxzOJ1iTai8uidl04/d5/6Yv84t9uwh6e3HlCn+w7nj+4OzjmJotp8eiHlTx6lPLTz3qfZo5jQPvUJegLkHwTjVRvAPxqHN4B8Wi8q2bp/0//WTEtPna3Wbrrr8Nw9CKeI+zYMFhNapWJUySu3R6enIGxgCO1lT/4DFCfEFh4eA76Ot6Sa3UdqIPbb4qkgW/SF0mMu/JOKgmI+Me3oAGgToRrYShETEYMXgcmrljHty3h4dG9kJ1FqIYYgcu5l+u+y4myPPU447ndRe+mFe/6KXYXEC1XiEX5nj5eS/gBU9dz7v/+VN86PvXYNo7+dZP7+PiJy3kwueshloVbNhUO+LTfECNwWdmsXfgInAxJJElqUMSZaJb0ShGOkN+fPc01GN8Z9u6aM2Kq2vSVAQlkibQOo9DIqnWKoWpyk/d/tG/ijeVf8FRmF9oHwPEtzI8YcUP/LKFr4hy7QscEnjBOa/ea7o5xTuv3jn1TrMN8c5nr6t4r16NtUadk44w5I0vuoS2trbMCgZrAr49fD1bDuwm7OqCQgHTXsSW2jDtJVwxZNfYAb59ww/5/k9u5NRVa1i1bAVJEuN8QiHfxgVPeSbHdffz3Zt+xKwN2fSjB3jm8m5WLcxTm66iscPVamhcx+Qbsbck9fPgMy7p0i2rIYnLEeVqQhw5xBk+du1+to5EJKrqMc6reg/eq3iv6tXj1RvvnIZOwkLS23VC2FV6rbU2ctOzN2Vrri0O+Fv4J/P5/Cq3cvkP3eLe4/xsEl98Ws5e8rROWdwbWhsUUGsxJkxTqqxFxGJMytmMDVAEr6lbJXaGV/3j7WyfdBgxTQnNZs557PAZp7SpZdu4R51HvGDCDqSrg9t2P8x5b/oDvvDn7+YVL34pURLjvcd55dXPexHdxTaGPvBO6oUCl37kJ9z8kecz0AM+doShMF1VvvD1n1NNwDTsBO9RPKIeUcV5R09BedEzF7CoK6Qy7alFjvv3zNLbmeObf3qSFAMN3JxyYucsDichdRW9/d5JPnntNr87zuXC1Ys/kBf66zv3vg02GDg60v2PTgLcsAE2bvS6cME/sXTguHC2Gn3wkoHcW57fh09gx2SCBBYThpgwBDEYG6LWpjW3WNTYNKKhihiYrdq5BITmOG36tEkVNll6Fha1Ml+J6R0+cWjkCHt6qcd1XvW378Cp49UveRlxkhBYQz2KeeE5F/Dx8VEu/+Q/sM3n+esv3sYX/urpuGoZyYXsGy3z1k9thpw9xH0j86ldRiERPvadXVzzjidwyoqQu+6dZttIjdNP7OHE5e0kSR0y36SIoEYw1uIloKe9KM8+fzV/eOEJ9lXv+ole/+B4Ei7q/4tcuf6laHzjlqNFHB+NBGjZuNGVSj2nxYu6n5NUYnfFeT25t1y8kGvvmuJd353kvinFZRdcbUY0mTNYGvlSDSIzMpfFEsUeQkkJa86jo3MccC4s16h0s400K0GNZkVvQpx4rOTwCwd43Qffw5oVq3jamU8hiWOCwBDFEZe9+JXc+PPNfOUn1/OvP9vF5Xfu5SmndECcYEVpHyhQCwKMSHZ4Op/EoKDeY0V4YKLOc//mLm78yFPZV0npc8uE47h33IW3Ml+T0sjqEUETpV2VF50+wMfffAZX/d16ecpl3+PhimpxUe+GaHz89xgaEjZtaoXiDnflrU/ZUX/bS+NcQQY60Csu6OXnj1R42Rf3cfuoMJPPUykWqbYVqRVL1ApFasU8tbY81VKBaluRainbioXstQIaZBkwTdGJdP2yRAExKUcxjQidzKULijUQWAgsElpcACYXErUXuOyD72Z2dgZjUqZiBLx6PvjGP2dBWxdRkvCJ/7wfJAR1eFVcoiQKsXoSIEZwIjhjccbgjCXS1OWyq55w8d/dw7/dPgOFkFpoKBcKVPMFqrk81XyeavZ3JZenWswxUsjx2R/v5PIPb6Z3SSevf+EJVmcj8fng4nboY9MmdzSs/9FHgOeck5ZuG/8cjT1nLAplSX/AV2+bZtpb8l0BGZ2kReHZczNfNZk+N5JuNn00RtIKtyb9b04EZ6lRclDKvc4lGDQoNeWQgmbE6AWCrk5+ue1BPnfVV1Px5xVrLUkcs3jhYt7wgosgKnPt3WPs2DULeTtfKRfadAsMhDaNvAQWzQWpeM6HJAZsZ5F7RiP++ea9SHceDQMkSM+pcX6SJVCkN4xgjcEu6ebrP9/Proemec66pUjO+NgGlvb2E48WN9xRmIywMTUIxAoeVvWkC7N72iPG4lwqFLXJzZ8aG/OmnVedDwFkxDWfo6fMv5AaIfO5gTSJ79QK1eaQQkNfEwsmQIMQL4L09vKJb13F9PQEgQ3w3mNMmhnz2he8lN7OHkZGZ7nxF/shL3ivWa1xelNIYJs4rEnj0NlzCUO8tZhCiGkvgA3SY25cA8keVQ8KRfsse7uewJ6RKn2declb49UE1hfCk1oE+JsUwTBVTwsCqh7jFW1kjzQyU7xPkz2bNnXz8dY50puzOQ4mvoY41qYaj7kCclXU+4OIVhp6YvYoknHDtjYe3ruL/xy+ARGDcw5jDN7HLFu2gt9ZeyrUatx83wRp4XpGxLaR0tXMuuf1Osli0eoVH1h8YFMO2azjqh52PvN3V3YeCEEAoc30WC/RUeXuODodMQ1FLG3gYyW1RNOIgc6lOWni02ZCcyGuQx5VUz7mmwjrkHt/jqgaxKk693wuv8/rEaLSaYeEtrwlaCtw9Y+uT98y6f4S71HgWWc8BcRz/55ZqCcY05RtfbBCMJc7aKygsafLe1Z15yB2mCYO3TgsadyQeoTCqIwYRR2icfabelRFwI5aAnQIphTwza0Jz//IAa5/JMG2FRBNTXfrFZM4jHNI4uZy7+a3ppLKLEdPfJoKL9Isguf/mFu05jw/Gt/Lcvaa0+8FSDyDRcvJK3u46d5fMTs7SRiEqRjOHD+nn3gy5EIOzERo3YMoRg1BYLHWYAPBBkJgDYEYwkAg9oSTM3z9DSdz7soSVB2mOerROJ6szngu9WvuPJsP0qdif861efTEH44GN4xlaCh9duCAsGXEsH7A1x/6ldBh2T6asP0hhZxALrUQMUAYQD4PxQLk81gTIgjeubTYzAqKnWulkbo5ssZAze3UDg2Ma1NCaebCUTnC5xVEUg5nEc5c3seV99zLIzt3cdrJpx7EWZctXEyxVGLPZI2xqYhiQanVI/xY0hSLkvm0f4W893z5Lafy3Gcv4vM/3H7Q7zeSsNU3hSCbqu8O1jga3FLnrsLR1PMoOCqYXZM/quEd/cdPfTx+2jPWMzU1gXcxSeyYiiL2jI8yPTXJrslxHty1g21j+9g1NoqLYygEUGrHFAtYLyTq0gySTFlPOYNPSXGuRsPP+WPnbA/v57NQVOZ7/GmzIaNzrxlRnnJiN1deU+eRvXs47eRTcZmdAVAoFmkr5KnUImYqESuWtnHln5zJA3sqBIFJ60HwWUxaSSLHOad28azT2vHjZYIgyCwLn0Y8TCOfUA4veG++Q3zmA9UEwaYc8ijLifk/J8DupQvPprPU7YLQJ7X68Yo/yQ50+9um9xwf7/0lMZEJwgDNB5iiZXD5UtZ1PpHBYgeDbT0UyTM2PsXmB7bwnVtu4Pt33szO3fvwpSL0dGHF4JMk5RR+XsczTcZEsz4110CokeHsfernmeMg8/TXKPXIG+WEJT2gCVOTU4cYLEo+n6dQLDJbqSLiMUnE75+7KHXJNBInMv0Wl6SPtRrVyRrF3nyapDCXSe1SwjKZS2iO8A7WJdOurdnxuxh1De6nR1XTt/87Aly/PmB4OIlt8Mpk0eBlLkxDX5qz2O42/uWRO/iXbTdBPpTUX5aFyGzaFLItsAyUOlnbs4Szlqzld08+i889+/1oLeLbN/2Iz/znN7h2y124vEW6ujBessU91DA+pLY3S5tK9cBsoX1Kbc2RijkL23sKgbCoO4TAkng91NDGqU91NQH1GQGFSXo8jYRVrxkBxhmRxXiXgMtktG861kYJqT2kd7A2qwuNGLOm+/Fmvva5xQGB4WEFcNXoSy5JXpeUCg6cIIJJIrp78tYW28Xk0+5SElrUpNGKNGIBk85x3f6H+d6OX/G+n13NSZ0LePmpZ3P5My/momc/lzvuvpP3/utn+Padt+I6O8gFORzxnBJ/KKEgc060bKFT7ic+DcU1p3g1xCWJp78U0t5m0yq6g+LM6XdqlSqzMzOEVrAGYpfw5e/vYaIcYdA0J1BTd4sIRFHEuuPbec5pHfgoyfpapsQkzZV4Tuc480Hhx+YSUVLCVu+OytTo/0sR7DPDY5cs7avT0VYQ9agR8d4wGztyFnJWMVYJjAMsDo9VQ817gsDQlyvgCh0g8JCr8de3f5OPbf4Ol59yLn/93Ev597//DN/+8ff5y09/hHtHdmGKJYzKfISjSXOaq9l1Ps019BmR2awInfmUe8kK1KnHnLqkg1otgVjpLJUOIUCYnp5itlpl5cJ2BrssO/dVed3HfpEaUuIP6eeR7t96z6cvXcUfDS1Fk3iOmyku8xfOhxMbLh2Za4TZ1Kcw8YhPOeChPdOPdTeMMjRka7DTVKNvilPU4ST2FJM6J4SOwVCwKlSqjpGyZ7TsqMaefKj8Tr+hGMdM1h1ognMxRROyoKuPWnuR9955Lad/6DKuufM6Ljz3Am7+/NcZOvMZ+PExvDq893Mc6iACzBzQqbPbp85v5w/qmCVZsoD6tNHkGatKjIzPgBrWLF8ylwPRIMAHt2/Hz1RZ0p2nUDAkLqa9J4cdKBL0t2GzLegrEvQWCfva8F15Lvv0Q/zbDw7QUSpA3PBtKtYnBOqx6hAXp6I8cWjimpzymX/U+bmWcZp1dzW2RYApMuvXjE1usuVqmhbgPFpL6HUR69o8vzfguGKF8BcrhZcPKCdax8R4ndu313j2AsPJeWVyJkrrxZOYOI4IHQz29LEjjHj5f3yIN131AdpKbVz1kX/iD5/7IvZufYD3fe5TiAhe3cE6YCbutOFLzDjinJ9tjggFlzjyeeHsUxdyx4PjdPT0sXrFytSRLPPtPH52zx1I4jl5cRsECT5xuMTjnMc5zR59+lriiROPQZGeAq/5p4f43pZpKBpcomlhzGydZF8Zd6CC1hOsKpKkUSHJokPidF5v9Km+2bghfEsEHySGpf3A2HVTC/oflrbCKrz6SmzMT0eFwCjtU8qiNsepfXDWgpBXnFigGAq/GnfcsbfOi5YG9I44rt9bpacrxPq0558TTzEMae9bwCfvv4FtnznAV1+zgS++94PMzM7y0c9+gqc/8XSGnv9CavV6Kg2Zb8GWpsmngX5tGCeZWFZVrAi+XGf9cb0sXjXI92/+CWeuXUtnRw+JSxCEwIbUalWuve12NJ/jKauLkHicd02iMiXmuS4emRh1hEio1L1n72ya/wiKn5jlGcf38ZQ1nczUPf+x+QD7J2uYzgLq/LwRopluqIrGMZqkWT7aiBC1OGDGc9avtyMwa8enPhjU6oKxXrxgZ+sURIjE8HBduGq348/uqPOqH06z8eYpanHCG57UyTmLQz55VidvPzlHZaJOuepJkoRVBci7iFoSs6B7Ef858iAv+8I7mK2X+eL/8/c84YnreN273sb9D95PPpefj+JnvjLJwn1znLARYckylsGjlTpvfdFpzIwlXH/nTl7xvAuy3SjOK8ZYfvTTm7j7oQdp627jzONKUIsw6g+JXmRNLJudzZISukEwQWr561SVD7z6CfzkY+fw4dcfz2cvX8Zt/3Au5564AD9VSXXSrHHmXAF8Ztz4xrkdZQGw//sjGR52bNhgunfv+5fcZHlbllvuk1lPMloltEoBR18o9BcEcsKt08rbbpvlud/axz/eXWX7rPK3z17M9y5cyKn5mMnxMuW657yBNurVCOdjBrp7uPbAVv7wyvfR0d7OF9/3AWYrVS59z7uIkyhNSvBNRkji0/rdRlzZp9Vp4jzWCG5khueftojzn7WWz35zC8V8Ly993vNSi9aYNG7rPR/+ypcQFdYtL3Ly4gJU3XxnhEbyacNDp80Ocm0Kixv8dJWLn7yQt716DdXR/YzvHGHn3ffDQz/l4298Kl02QKNkLhw3FwNvtCBUnxG2wRxFobij4VbQoS1bZC9Ulor9QEe9LuoSNcZQ2zWLzsRgDYnT1MfmlHaBvmKID3NctbXO+Zv2cv6/bKenaLn+VSfynrOW8sCOKbTmOHegwGS5hk8i+roGufq+W3nv1z/NulOfwJ++9nJ+euMP+fy/fQURwblGpCS7NJkjWpxHMoIMVEimKqwo5fnkX1xCuVzkA58Z5m9efxndnT24xOGdIwhC/uVb13D9LzejQRsXrusll1NckqTJAabhujtCXkCzKycjIEmUlz59EVqewVUTtFYFhQM79tPvpzjj5KVopZYO0WnErH1GeC7GJ0lqxWtmnLQIsNkW2eQBOf9J677x4ieePimVipVMAJUfmkCi7E7OjIIogXqUUNKEpw4YXnJyJ3kb8LGbxvjFngp/c/4KfvL7TyRXT7h4dRedzuESwcU1Sr19vOc/v8wdW+7mr157OV1LlvDuz36K2akpCoV8FhZjPs2rwQ29JzCWeHyCASd87d2X6cqVp/Gmjd/muOOewBV/8FoSl+BUyeVy3Lf1Qa746N8hpQ562g0vfvogSSXdt0+Sg9u2HWJhH+SWyZJX1Qr9HYLUI1xUpz5boVqppaI5qtDXXUw5dVMHLmlYw1GSWcgmC3PHLQI89J631uo/XnnlyO+cdubeDa94LW73bg1zIUk5YXbLCBL71AfmPQN55Rl9Ab+3usTvrmrniQM5zlle5KkrSjw84djySJmzjuvhs694AhedOMAfrOljcrqM+rQCMmkr8Kdf/BB9vb289sJLGHn4QT571VfobCtB7FGfpIToFasQikHjhGT3Hs5ctJwfffIzPO0pr5YPfeYabrztYb75qU+nlXdJRD6XY+euXbzkijcwjkNnPH90Tj+rFxWo1mKccykBkumah6R56SF5ftYKrh4TJI6eIsSVKvVymWqlRhTFVOsJagJGxmczp7nLUrTIit4NPo5I4ihr0qAYY1tlmYfiuuuuC84991y3+Z57fvLJj37s5ANjB/ynrv43EyxYkBLhL0doW9ODFJSpGeG2suemvTXqTlLRnFmqYWhpt4azFnfyd+cfzxNWd/HWZyznu/eNsbVcIxRLrq2Dm+6/hx/eciNvecWr+cTX/5WPfPMbDHR1EpQ6MKSFS94prlzFVaos7O3nzZe+ibdf9ga1QV4/9JmPH/jmD+7q+PG/XV1aONCnUeKkmG/j57+8h1e87QrunRjBFkos73W89cWriCsRYPBxHbybn6TUSDxsdoxnRBhYIZmt02s9X3zXk1m3uo2JXSPUZ2eQuEJUi1iwoIv791W46769SCGP8y6dYZel8aiCixJ8lPoCRQwYDVoc8BDccMMNXkT0xut/9MlbNt+efPJd7+c9l72ZZGw01V0iobxllHgqIbYQOcWIpVSwdJdCuttDujrzFAoh1TDkezumOOezt7Lp5r0sXtbJx89fiUxU8FGE1CPIFXjvlz/LyuUrWXfKaewa3ctdux4hKc8QjYzgx8foiCOevvJ4PvKmP+fOr17DO954BTv37ZcPffrjBDa013/tG/nlixYDVnJBjs989cucc/lruHdynHx3F35qln+8/GQGe3IkMYj6OX+ca+QlNhNdUxQjCAzJeIVTekJ+/A/ncdHT+pkZn6ZWq4DGbJ+CWbX8eE8bl35mC9ONyAwG0dRfKE7oyAmLO4UDIxFVj1gRVWGqxQEPwcaNG/1VV11lL7nkkns++KF/+NpnP/VPr/6bN12RnLLm+ODNH3gfeybHMd291B6YJLeoiF2chrySKDlojptKutAd+YDZxPB7X7uLPVNl/uSi1bz93v287wfbCLpKSFDgprvv5Bf3/YqL1z+LW3+xmd7efi6/6GV0dXZx/PIVnLLmeNasWp0VuSuVapWxmWle9uJLzNIFCwcax/6jm37CB770GX5wx63Q3U2+LaS+Z5p3XLKG3z17IdF4hSCwJHVPPVIW9YUc1xOyZdJjCwbnfea6E4wxiBWSAzNc/NRFfO6vzqK/UGdqzxi1mQodQczVP6/zZ1dNYztyTFTKEIZQsPimaj/nLUzVeNMFBdYMGL56W001DqzxlYSR6GaOkqjc0dacyKiqikjvc174uzd++YtfPHlh/yAPb98mf/2RD/L14eugmENyJfLtlnBxO3Tn0uTlLDCvkuX/qWCBWJRoZIbPv2Qtl543yFPf/hNu21snFwREu/fytqFLecHTnsnZl7+Snr4F3L/pOwz0DTQ5Kl0mIQ92XWzbsV1/fOvP5Kvf+0+uu3sz5Ay2sxtEcftmeOkzB/naX55OUqljxOLrVeqzMyS1Ku2FgBsfrnLhh7dTKxaQoNEaOk1v9ePTvPVFJ/EPf/wEmJ2mPFmmMj0JlVkeGK1y0SfGGLM58pomMhhJJzClnYJTztoTwqvXhfzFs9vYV1ae94kJt8eHJjc68Z36fQ+/iCE4GpoVHY3dsawxxnnvn3fK05/83S9/5gvJGaeeZgH5zg+/z9996XP89Fd3g7FIqY22hR2YgSLaFqTjs7LefI1iI5O53OxYmR+8+VTaNeKMd96B7S7hKnVO6Bjg6vf8PeuveB0TB0a49mOf44JzzpsThdVKmZlKmT379/PIzp3cseWXbN5yD3c8tJWxqXHI55GODowIisdXEl62boCvbzgD4hrEpBZBrYqrzIJzJIkj3x3ytZsrvO7TO6jlLCYwJHGCKdf41BufzOVDxxGPjRPP1qlOjVGdnsLHCRd9ZoSfjxmMgdevy/GGJwdMVH1TmUGq5/V3WZb3CvePCn981ZT+bK9NAlcL5cH96+Kp0Ts5SjojHK3t2aw11rnAvbPr+BPe+6F3bYgvveQVASBxHPOf1/+Qz3/zKn5w123EsxUoFQn7uwgH2pFSiIZZ+pQKiShWhXrsWFiucc871vK2Lz3AlT+dJOjIk4xNcs27PsDfff3L3LblF5y55iQWdvTgE0fNJ+waO8BErcLYzDS+Vk8vWT6AYhs26yGYDvnKWHjseM4pA5QCT1xP0vCe93h1iGSRj2zl2zsKXHfvLBM1xdUj+q1w5dvO5AVnL6Q+MoMkCbWZGabHRunKK2/4ygG+cqcj7LLEidJnEv3HFxboazfETrL5IoIRqNZh885Ev3h7TfdEIaFxVh7Z89lo7/7LOYq6ZB3N/QEDa0zC4oEvuY7iay4673z3vjf+iTl17dq5Y77znru5+rrv8Z0bhvnl9ofRWgUKeWgvIqU8QamQ5hJaCIxhtuJ54XLD89b28Kdf2Y7PB2ji6MkViFQpu4QkiiBO5i9PLoDAYm2ANSbN1PceLzIXaWiMb2hc0LgSQ5Lpps3DQ5qdHz6LLZcCmI5YOxjwtfecxRNWFpndN4P4tJPWzNQUvWHCJ26a4W3fmCboyZM0esc4IFas8Xh/cE50o+sbOUNYq8CB8Q/Eu/b9JfOjoLRFgL/52IwRcbnVyz5dC83rS719+kfP/V132SW/F5x84klzH6zMznL3/fdy8z13cscvf8HdDz7I7pERpiqzEEdZi1wgF0KS7TkfNIKu6WqpzepHsvXJ3CQH1xJnRU0cXL87/z5N7Rk8c41dGyPBGo+hIQhSgyOpxpy3qsTVG8+kq0fQ8TI+TojrdVytTkFjvnfPNENfGCEpFlF1UI3Aq1cjEYnPe0Gb5xILqlYhUL9DZyp3uf0TH0lmZ2+Cw6aJtQjwtyFCwLWvWn5prbP0qYQ411Hq9C8+63d45YUXmd95ylMoFEsHfalWrbF3ZB8P7dzG7r37eWT3bqamJ0mShKnqDOUkxqpHPQTGYgNHT9HR3uYxxmONJTAQWIOYrKuWpMmpxgiY+foQ9WnM1fk6zkua9e8TvFc0iUlczHQ1oVxzVOoxs7Fn52TMvSNR2j0h8Tzz+A56C47KbFq7EsdprqHR9Hhueiim5i2EqlQiCmOTM+L9t3wcfak+ObsjTx4K8+VJBYB8no4DB/bugipw1HZIfSy06BXWYxkm6epqWxcvWvTBSmfpPOIYvPrTVqzU56x7sjn7KU+VU044kaWLF1MotP0Xdu+BA1Sn72V26mHqrkLkYsYmq0zMxET1GJdEJIlSrSaMzlaZnK4TR4r6BFVP7Bz1OKYaK+V6QhTHuMSBc6lh4pQodjiv+MSzazLmwfFkvqtVlKTjIEKDtWlxX2jnOWupEBBYRTEkDvbVia3VwD6858razr2X/lq+NjRk2bRJafWI/p8bJmT1XLkFfS80/b0fcu2l42NRqNXAe9fZ3qHL+gdk5cJFsqin3+TzeTo6ShSLJQSo1GrsHRmjXq4wUy6z98AB4riCek85qVIgJgiFIBTaAijmLEHBEhZCOgsBve0BpbY8oc2jJsBYQxjkCcI8+ZylkA8J8yGFXEBohMAqRtLPmEYrD5RcKBRDwWgCkpCTGOtrBBJRkIicqROYNMnUuyh1rwQh7b1d3L0jYv3f3JlI3gbhg7veUt+7/5OsJWDLEWeGHPVd8h9Lc0LSdmIbINo49h/sH/th26KBs8OOjstcW/4FvqsjP20tvxod4Vf79kAUp8HWtG1FlihnOG15J2sXt3HGmjaWnWVZ0NfJ4p52uroKLOgr0VEQJAggZyDQ1Mlrg/lWIeSyzWaPDS0hyP4Oml5rVg4PLfzwpD6aCPwklEehplCLoQ5Enih2xDVPgqWOUsxZ7t9ZQSOV0CRKVPsF4NkyN3/pMYfH6iioOW5IuuwnsqD/eO3sPNfmc8/0hqUS2sVqLSYXkAQBKql7YmG7pQgkcUxfu6WzaFKRZwQTWPLWENp0gKYVaC8E5HKWMLBZt3tAAkRCRGzaBs1ayP4OAiGwkjqfs7qTLDAGQOQ83jmcU3wco6JMlqeZmJplbLrKbDkicT4t80gcifdUEmW27jEmoOyMTppAwumpibaf33/cFEwcjcbF450A5w2UoSGyZotz6IOOSrF4YpLLuaCUe3q8bNEnkmLRi3qjtZhVAzlOXZTn9gen2TflIAgywsos10Z1mdcszJdZv/mM42V9p+es4kb3BNNkCTcOMctAmSORRgesRqehxPH8kwfobzd0hFAyEdbFaYTDQhCkjuVSscD2GcMnr9vrpK1gg70Hfhjf+/AFDA2ZQ8//sYTH8qiutMlJWtiUspj164UbbnBjIjNUq3dQrRJP8WCwoP9dlNoGrYq6WOSc47v44vtO5rNfvJ/Xf34Xuc48iWQ1FNYcLD3n2qZ5pKeU+hmz/DyMmevNPD9fzkLQ2I/MD6ppEKykk9GthaSScF6P8J9vfALUZ9OxDDMTMDVJXKmTJGltSWIs7cu7ufL7k0jFa1BI8NPlnwHKgQOP6YGGj5dZcan+Mzzc4D7pqq9bZ9m8uUylfpv08Luq6rRAcNvWWWrbZnjKmiKFvKUaJ2liZ4PzWTPHySSLtyKKzNbmR7tmLdjIupNqg6sFdn7QoTHz488byacmm+cRGJLRMhc/eTl+cpzaVAVxjrhSpTZdp16JcC5J0/sDRzIS84Uf7kPbAiuzVScz1e9m5+wfywv3eB3XmrodNm9OrcCJ6etNPRYvAmHIQ6M17t1R49QVBZ65Jgc1hzVysPg8wqPWE6jHcwQqWf8Y1SYjYy4TmfnOBI3RsBmxGhFcoizuzvHSU7uhHpOzgiGdE2IM87qkUTo6Q+7aVuXWh2edbcsjM+Vrk+np29iw4agbPNMiwMM5oyQHRr8ukzOTiLWB4GtVzw/vGSfIGV7zzC5Ikqxwh4NHqtI8LT3rpjBbxcyNWm3K4XOKZAVM2eiYLKVf50o5G40lxQg6XedN6/oY6BDiOEZdgk/quChCApP5GB3OeXL5gC/cMEKiOQ1qVdHx6SsBYePGx/z6Pf4JcP16C+yTqelPmSgWBU8+YNPN40yN1HjBE0uctaqAm00aUxnSHi1HaJeROoM8OlVJU96bG19mzSIlyQqYYpc+NupwswmZFsXN1lnbYfjjM7uIZ2YRl5BEdaJKJaXbWEnqdZLE0VE03Hx/mU23TDvbFQY6NvHTi0bGv5Ud1WN+XrDl8Y5s3q6fnr3HdLZf5kttBRMIuw/U5LRFOZ68usBgSdh0yww618Fe5jt2NFu0jXvWufStfIh4bfJ/6FybtGwCybwlTKOLvWCmqvzLS5ewtsdQK8cQRyT1GlF5Ftq7qB0YSxttAmEx5A1f3qfbynkX1so22Hvgorsr9b3MJxW0OOBRzwWHMMCIjE5+SJLYiMGRC/n7H4xzYEY5f22RN57djh+tE9imnsuZPndQy9vGklfrSC1qNIGZd9tkbT3UZ1wvTrJRX54AwY3MsuHsAc5fXWRmqoxEdaJalerEGLZnAfFsnXq9TKzQ12X5+PWT/PRhTcK8hrp/6mOVkamfMzR0kB+0xQGPdmxJz9XPlm8yQXiBdnQslxxu797E5HLKeScVefJxBTY/UuGhPQlhKZeNcTWZ7tdkizT/V09SF0yYcc4mf7DofCtdQbChkIzXeP3p7Xzwgn5mxsv4uEoSx9TGx7BdAwRdg0zdfw9OAvq7LNc9kPDWq6ed9BQC2T1yU/zIjj8GamzZoo+XpTk2CLBBO4LLT0x937e1XaYd7Xmbw9/8y7KsXdrGU09o53dO6+Vnv5hk10hE2B5mzQTmnchyUOPvVNhK7FJ3TWgPikc0RLAxaU/AZDTi5acW+fQLB6hOzRDXa7jYEU2OYwuddJx0BiN3/ZQ4iujpCLhvzPOHV467mWKbtWMTe3L37n9WTDzCYzjqcawToAI2gcl8YH6qYTCkbcXAAz/cPCtPOa7IGad08Nx1/dz5wAyPbJvFdObTIEjTcqcTiebVQgGIEsR5jLWNuTjpxRVJO+9OVfnTp7Tx8ef2EM1UiWoJ6iPiyWmk2EHvGc9gbPPPKI+NMNBTYMtYzCu/MOX2UrLBzPSeZNfos+Pq9LZsvfzjaVGOJQJsEGGQzFYeMc7dJrnCa+goSDVW/+83j8vS3hK/c1Y/rzhvGWMTCbfffQANAsK8ne9NnhHg/KjD7JlPOyikjmOLsYIrx/TENT58QS9vf3ob01Nl4sShcUQyNU1+YDHdT3o6+26/ifLeHQwMtHHd/TGv/fJ0stcWg9zM9FT8wJ4XMDN5N4fEv1sE+Jh2zRDolupWSVxZAnuudLYHNWzyzZ/sM5MTynlnLOTiF6/hiYNFbr1rP+P7K1AI0472zme2bVMLNNLuVhbFuARXc+is4zmLlCtf0sNzVxrGJmokcUI0OUmcKF2nPZXCklXs/+n12Kld5Do6+McbKvrn36m6mWIxCCcm9vDw7nN9ZfbnpBEr93hcDOFYxXoChknCUulUt2rZt2WwZ5Xi8GMVTl3Sxl+94nhe8fxVOA14/5d+yT98436mZxU68xCmDb/F2NQINuCcT7OrnGdNj3DF2e287EntOOeozNSIkxiMoX3ZCXQffwpufA/Ve29BXY1bdgf87Q/K3LrPYvNCODpxjT6w56116tser5zvWCdAATS3ZMnxPpSL2Dd6qy7of6X2d71SOkolV4mFap0Tl7Txe+et5Peet4p6rcZV1z3EpptH2TYDddHUDZwkEEEupzx5keHFp+Z43omWbquMzkYQ5Cn29tG9fBW9S5dhtMbkls3seXAbd+wTvna34QcPRuoLoeZ8NCa7D/xlfdf+Lza5yfzjfSGORQRAEizof4uuXvExXDIl0+UbjHenuL6eNRoaFWPF1SKYjSBQ1h3fzboT2imPVLjlkRm2Tzr6S8JJAwHPWBlyzmrLSQsMhTAgsUXC7m7a+xeQ7xuEMMf03hHuvec+7vjFNm7eJty0R9g+niUvFI0LcoH1E5Pf8ndseREbNgRs3Ogf78TXWIhjFj72HvWx7yh20lG6SBKXjezwgnPpiNRiiFPY/EiFrXurDJ3eyxUXDrB6sWX1gpAFnYZ8EDBbN8wmBaKwk4maYXS6zrYHRti77QHu3XqAX+ye4ZFKSM3nU6dizmA701xD7xQ3r0/azM/njxVOcMzCip9y3ocoNZJEVNXo3NC2tDuWZraubQ+JRbjm3imue3iWwKSBNmsCRITIK7VaQlxzTFQTXD2NgKQz7XKQ64FSw+pTVNP9o4pa40SM2HJ9qQfD2rXuWFmDY5UAHSC5WvyD+sTMDIVchzasiXkVsenjBo9QUajEwnjdN82OixsOwmx8VgAdOWxXOhKh0es53bLB2poOpEkDoQbBB2ZiBp2a/Q6QsGWjOVYWQo5hBpgaIr3tJ0tnz6VJMV/IRmAJgcnGrZKOOYW5theNKUomkIZTh7mSjywv0HvwR7i0B1sUac6gMXjrvLiJse+7sZn/4HEW6WihdQO2FuAoh2H9+qNhWsDRNci3hRZaaKGFFlpooYUW/heNEHOIQv5oCvIx451v4WiFqrB+rvtOCy38jxFQKj0hDEOhlFOTyDothL1pCY0T471iMKbidsjI9Oa6yMNAMjdToOUwbeF/KoLt2uOVJYNp64nsn89aHouk2RoaxVCuVKVcu8XvH/l3v3f000DEMZAu1ML/MgGa09d6XbEYXIKJImce2vkfzrmb1OlxJizmaQvW0tV5lvb1iOIx1Tq6e9+1/ldbXwM0imRaRPjY0/0PU7D+T0SwOC8kHkWU2Adm54G/iOv1h2DeLR90dDzdrF78Vb9s0TJfKERmzfLnBrH7l+SBRy5iw4aIjRvTwoj1TQbNML/Os99ou9t88r9NFMAyNJQ+O3BAGB52v8WFk6w7wsEYHNS5/WQH/BuOOd3X0JD5L/4+Bxl5Q0Pzi59OCdX/xe8dbnCuXy/ceGNyUKUVpMkUZ58dMDzcWHo97NqvR5rW7Mifmf+t34YpeTFPPElZvhhVVVOpiGzZ+uTkxFN/zsiIYWDAc845no0bPbncCfb0tXe6gd42rEZBuZb3P7//dX50/AuN9PbHBW/YsMGwcSP/C1z9v6sz/8917SEsV+Oa9mKBUmO/vSDjMH0Y0f//INmCueaKCqggiTiGh5O5AxgehrVrc2zZ8gBT0/9kB3ve6hKPbyt6M9DzLD86/gXO2eDDX330dAptZzifOJxaif12Nz5+3SEXUADNL+ha6cPCs1wcO8CGXnfXRyau/TUX2wA+P9j/OjrbfzdW503iKsnI5F9Qqex7lO8JoB39HSfUOjsvc+3tW1A1NheqL1efprgunMcrj5gw3G1nqrM6OvFgsnHjjUdY+PS4u7pW+77OD2lg1cTxZHF89s+mpqamfgsRZgEXrlj6ctNZfJk34kwtjuo79//Zrzn+ue/lFva+xLe3v8obNHR+e/2hXW8nrUD5zYSpKog4oNsO9p7LYM9Zms8/l3xhgVoJgGTKeTW1+iN2tnyHmyr/zO8fvT5Tr+bO3XZ3v9Dlg0FwZRsEifPBd9m7t9J07KEd7Hs+AbMu8YP0df2MKPJIU5cdVUmN1yJQhYf37gnIqrvmcYRhxgMDHhBTrd3hohgJAlHBaCl/KgAbN3q/evklcsLKv2yMbDFbt1/nxsevO6SDpwGc5kqn6fErPi/5ALEBfse+WxiZuPZRun02TrAzWdT/D7p6WZcmMZIkhPc+sj3eVnkn69fb7KY5lGhd3diTdPWyt9LVnjb99pr2dvGKGsGGFsTg6hFSrRIcGP9O8uDOvyaO72niAgJoXbUvWLXkYt/VAd5Ruf+RbqamXpx1onePKj5ByedXsrj/n+Klg12g6NgM7B75DLCvcayHnbfiEdrdwv6PsWrFEtTh6nXCenxPvGv/laxfHxzhvJuvmyDiw6WLXukHe96r/d2rpL0tfatWS5sniaDWQL53oUefJuXozeH+0RHdv28o2Td5Y+Pa6oqFf2eWLlyr3iOVKvbeh57j4DrSnNIYOE6WLvyWX9Cfdg9DnVpjGyMuUoGbdY0IAuzoWBztGjsl0N+Gu6dNEDWuVHdIFCcE1oKgEkRzxG1NWYMgUSs1FQqaC6aOIApgEzgfeR/ahEI+QkzO5uzkb+Ietrv7bO3t6vDi6wLiigUrPV2vYdvu9zM8XH20L7uaj0hc4sGJMcYcGBX3wPa/RWQ7bXmxbYUT6ep4sy7sDzQXIt0dLzBheJa/+/7TgP0HKezG1B0+Qb06Y9QO9F0c7N53ZrJp0x08WvXa0JCwaZMLFg+8ww/2dPkorouxxqsTJIl/7XkLjr7u8+jvXeJE63gvki9Y39P1Gnbtv5JzzvGZzvZoRoaY1cv/3R235ELaS6AO9o7Vg+nprybjM9f7pHarifSZtBVz2lFaK51tf6hLFnS6FYsGzOjY64FhBkdSnbdQmCAfJjgXq8uF6rUPgLUIW9L27B7vfCEUnPemHgfmwPjtXsyBbHqYxyXLrNMVUsjBdDlGxAdzhzrHBcNHu4s9yCJRrEcS49VKnOTmtEnFGO8CVAIVCfB6uOK/KWtskbMjkmigiVMx/sifbWD9ehgeVr+k76V0lozUkxyC+MQ729e91A72XuAOjH/z0QjAqkriCSROBBGDSyQ3NvHVCO5raNK2mPuZmJO+ov29OY/W7fLF/flK9S/rD+64IuMymlps0uFVAvVeNXHe93SIWbjwfUw/8vysV/WholS46ipPR8cAiwde5APrqUc5NaJiA0PY5qH2KHrbkLJpk9qFfS/TUpuaOMmr9/hAvHR2rLf50nlu48YfHeG8hSEMmyA46bjPs3rZhUnO1InivN2570bz0K4/jsrlX86tG2xlagb2goN/tNOVN5sFfX+icohO77wl8QHOCYnH5ooPeCZgS9P5JmolcYqqpVqrus2/vIC0ifrchzx0N/05Y0T1N4c1svBcUGo/lXxOAKeoaq320DxzMBw0rcw8eoqdCQoziKKNcUO/zvobHk7Is0o6Sxcj4s1DO2dNueZQRdsKaF/X5dmC/RaRHMCr8wHtrCdgDXmeuybvqtE3defIf4jzFq/GB0ZdsfAioJ0bbnCsy5LnRc9OZ32kdKuK06WDF5ienkvYtMmx/pBC//XrLSJqlwy+X/t7+kl8OihM1Yu1BKE9J/3cYUuQqSK5k+noeCmq3uzaPymJV1W8dJdgWd952W/IYb+5CRcsW/yXumLRH7hQauI1Z/aN73X33H9RXC7/kvXrgyyilc6XWE+Qddx6yD3wyBX2/offRbX+MwAeLur85VNAjKIalEoHDtV959uSZK2cBgbyDA1Z1q9P95++PAlMZZs3qM41WlT0SBrgXGM835Z/sQYGUGNmyiLjU1+aN6j9HBP9reJ0Coe5Ag4nfAMQDCwYkr7eLjNTNrptzx8xM/ugiFiPqvR0Pg0YyHQw8yiKeOpmSvlvZBJmGSZhKwnVrQ6wFh0WlyAiHlVxbfm9QJ13v1toT7/pA2PVpGn5qUhxaEe7yrLBdwIhg0PafL0YHnbk86vp736Vd6pmcjYnCNkIYjSbqvVo5y2Len7P93TlmKkY/8C2d5mZckUg8KFFOkq/3w79mSvo4N/M5Y7XpQve6or5hEQDqdRERsb/BJhk7docw8NJ5rXwQPq8cf2GhmztwPh7k7HpzwLwghe4+fXKiFAVH0WHicrGSD5trGu5nLqMhoc9mzb5LHpmmO9sglHm57igEASBZT0B60gpd8MGYXg4MX2dl9Hf/QRFakYkx66Ru92Bsf9g3bqwwQFTVT2djeHxwvr1ATMzQXrHrQ9YuzZg/fogUrrSAxY9WPwfgnPO8YD4vp7zNR+qjk9v87XaN5gsX5OqT1Knu7PTLlvwljl968juprTWI0XRk/4+ALPrUivRmBJiG5aaSrW+ogtKbNw4f4fngl9qLsSMTwdm37hRa413zjPYd4pZ0PPibBFtExGpXbn4L3Vhb0H2jozojr3XiDXZyFbFFXK3NvlMDz1vawa6L5RiqIxPPeDL1c/J5OxPjaqqp6793cuiwb5nZqRx8G8uWfBX2tfZQ5Io1gQyOl52O3bfAAhbtvw6d5lvupHdEb3Ujf6dUj/omCPStZemvtjtnYuzGbXis8f0eVOnxaw1dzZt3HuSiYlJhknYTMzwcMLGjZhFg5fJmpUf165SZLwWZNu+abd73+WAMjVlaPaaSWr0Gad1hocTrr02fRweTtiyJWJ4ODFjE0/KzsLpr1PCN270tq/rHOlsfxZRLDI1/XUgMXsOXMPEjIr3oYYB9HW/Bshx9dXut3L8BwGsXx+wZk3AnXfGqBrfVrzUBwZF1TgVM1O9ZQqmUsfz+oYIOl6MRZNkhB17NpkoEUHUt+WVRQveDXSxYYMHUuu0VDpHB3svJfawf/TvZaD3E3hFDQnGIM4/4whiNGDjRjX9PS/Rvu4nUo9EJ6euAmpuYuJqoigdENtWVLd44CVz+iJIZhGX6Gl/jg+Mol5EPdSiu4FRNmz4rR3Eh19C/2tDJrkjvDa7b2se1RDVXPaYbgedrJkvHRQrmBULXyjOP4x6a2z4TNdVWi99vWdoMY+Zmoa9Yze6h3a8ec5NsWSJY+vWea+l9wbAt5eeak9Y/QU/dy4ejDV48eSCU7EGdd5KYB5N/ArDw/jujkukpxMmp5yMjn0DIK5UfiETM3fQ3/Nk9RpJT/cyO9D7Qjcy/o0jGiPNeq73mCSZzhYrAXL2+JUfZcWiE71QNybI664Ds2739J8ByqZN2iCQoNQeOmNQa0fcyPhldt/o2SxfNKjeJSzsP8ksXXiF37hxI2vXBmzZglk88C4Geg3b9uz2u/Z9OOzq/EPnuuZmiATteYkfxeiS/t4LtasT2Xeg7PdPfB4QPzX6HTu5eJQF+T7vvbeF/MvJ5d7Dpk0PNs67B4KptraSONKZsV7xXocB5YYb/tvt3YRsPEXWtL12iO0UzYdBhMRBLl8wT33izVqPFWn03BaHNZby7C/8fdteCGjQNF5AyBWQFUs/jPOpPBeDqEcmpsd0+/R9Zrb8qXjXga81sf05vWuO0ASjXmHx4Aqx9rXmIOU065SsHo0TxLm0q+MR7rdMt+kxXZ0v8IFBJqZ/lUxX786s0iiYmvmcr1Sf7Nry6ktFpLfrUkbGv5lZo0dUOUUVLeRJVi55f1gs3K2Wp/lSaYX2d52oYQ5TreVl3+gOt33/q6hPPdLkB0zvkmIuUmMgdiVgUvePf0wGet7vcyGSC70s7H0Tu/Z9kqGhcT760fNkUf+5VGvoyNiHAa/T00/HDyKZuuLDQI5gdDnaWERH27NVFMambqdW28nQ2pBNW/b6qdl/NwM9l3rRmJ6OgiwZeLU+svtdjRt2AtQa6+ZuORVEpPw/DvQ2dPZMWysUDrff5zuFCWpF6GxfmunLqXgGJJfDeC1F6cd9MEcdIipRLOzc/2GXxLsNRkwUJWaiclNYmdpTgb1+3i18BMepn1tmMYLZc2DET83eIz2lG7QSrSJJVoiqwcgo1p4sSxed6o1x4tUcZjqkcWJnBnteS1/XUqnUYGL682zY4Pj+9/MMDWn87W//0I5NxlJYlENUTXfH+T6fX86mTdsONUbmrHPnRHu7sN1dF3vRi9Vmd3XinezYs9eMTv59smPvP2cW2mGhKJfoIAYEdQrW793/aTPQ9SazYslCn/jEDvb221VL3uw2btxgTj1hg/b3qjy0Y4ffue/z6SW2N4j3r/Xqs0yjMDrM+BgeToLeBa/Wvp4FMlNWqdQ+wdCQYedOy9CQNT/+8TUsrF5Ke9H6XIjp7fh99wjvafYJqpk3FkQE9UeUkP/1gKBI89U8TAQ7FLwqVqBWS8wvt77cVeoPKgg5NCSXqgrGRI2PB2TDVlIGmRAc2P0JN1V/pLkzTjwf0jHoo0xm9Kl4w4hDTKgzs8O6dduQHkGRNd2db2Th4CcpWIeawx2PN6hDRKW3Z0hLbSo79sRu1/6rs4Y9VW65BWCbn5z+Z1k0+DpvTM33dhbswr4r3PY9V2QL2RwCSn/eBJiJyVqyb+xPrPerWbbw7dpZisVIIIhJduz9Z0SmUA1oHoGQLa5G0TNE00jKGgi2wiT7x/9UBnr+jULeeBOoWTzwmnwlGY0XD/wO5YrogYkPk8VZ40olMYmDMBBFoBKd2bx/brjBIZLXnu7f17Y8bB/d6nbv+0bG0avccgsOvmtGeu6SUtvpJBrT3bXCDPa93G/c+K8o0iPIdD0y0lFCUYMRrDXPTJp/57+FLPdAf9MEWEnZrpfYmfD7lMfLqUUMMeUjxYIz0shYpevo6edJJ+5MkxG2+MxCa8T03G/i0o1nJgxDv2GD4dZbQzo6EtauVTZtCjjlFMcNP2qfM3xFDyVni4ijq+t0+rpOV+9Vi22hfdoZXxNr6l5E1Eo6os3rygT1uCSnYYD0dL+K7Xv+hhuHZ2hqO6Lp+QkWpVoLeWjHjxx81gZ2lW0vXeLwkS4ZXGyqlU3+3m3nZ3rY4RerkE8SBYmcbAWHqniRb5ie9nvMcctP81Hstb20Ilmz+ONazKvZunOP27v/yrlQnXMTePUoFoEgMCsigHe/W9m40SLigv7us3xPxyneRc52tg+aZ575/bl73IpIag0sVO886sW3tSE9na/nwNi/YkQnUGenZ+v096h4FQ1AC/YMoI+NG//7kzXn6O7IX011QG36rBeSpCsN+h7xN32qc6iCz+adqZLUqg2LteEr+q1SjrwhG2fQGOiiysaNno6O1Me0caNnyxbHpk0OkZ3plEknqKaGc7PxAdju0h9oRylHLcYEodCWX6+58HzJh88xQfBswTxHxRxvYm9AjDr10tvZZwe7z0MR1qyxh+ov6hTB2CAIFjA0ZN2D298ku/ftM0ig3keybMlzgqWL38nwcML69Yf1zVFjDOrxaRIFvPvdAjg5MP0eZsqCsaCC6+2KzXRFdGLy/wFmuO22hquqH1UjqqlxENh4zkRPHenie7r+SjtKaiqJFUwXueB8yQXnSy4831j7HDHmAoxZZLyajIF46e14CsXgzMzPNutnq1+ROBY1ouqc077ebrNwcAjwrFsX/JYC1x6uYWVeM+cPM0Iy30vqTW6MrbC2IS2PtGUcEJ1fIFXCI6cj/FYpa80B50cxtlLfT9j+sEvnamT6nx6a49dFV8crNJ9X2bNvj9y/80WJ+JVETrBWs8W0vl4ftSsXXy7HLR9S1cS1FXK2p/uPOTD57+RyOu8gzTi8yRoDJUmU+btGdOe+P6ar/Ru0dxrN2USWL/gbZso/Y3j4sDCXs6YOAmHuJiDhhhsCNmzAbdz4LbOv6xazpnSWFyJxGur+kVv8npFPZeldSaonWUm8kmTNiVwq5pVLLkk5ZD6/ivb2cwkDke17t/kdu98pEkQ4NxdocKqpCXPC0rebxQtP997FdHfk7YLBl7hte+5gAyb825HPuYGuP5JFgyWNYmgrepb0v5N9B67mzjtHWUfI5uy3j5QzmJ6zO2JOmKZaYJ6DjZAQQk09fZp6HZSiqlSanM5HIhojSoL6RNFElOQ3BscelQV6j2rq2lCXSJoCdEQq9fXZs8RrgmoddYnzmn52924LaNjX/QLt7eohjtWMTn86mZ6+g6nZq6lWNzE7ezWzs1f76el/o16/3uzc/34zOe1AVb2Ptbvr6eTzq9myJU4Vf1GcJqKaqGqSHWN6jmvW5N341DWy48BXxSeBRlHsujtssHzws0AxS2MyvPvdCnTg/SJVn4CbT35Ik3Gd3T/+RjMx7cjnvMyURQ6Mv6fp/dRDNVPfrFFSRRHUJ0Z1AWlsNL04vR0X0tdpTLnmZar8cT9d/oqbmtrkZmc3udnZq93s7NWUy1f5cvnfzN7Rz1Cre7w6NWFCX/fFQI4b1psoih6QXQc+Ysq1gDBIfJTEDPYvDp5w4qdQ7WDzo6ZyNdSsjraengsA2LJFUr7inXqf4H2iqkmt+TuqEsMejOxEnUM1Ua9JJRqpMV9NqUfYnFFrAkIbYG1IYAO1wX+rZZtCSYIgQGjH2gDvuh6dWbqAIAhEbDtBEIhqugivXOKA0Pf3/JX0dFkzOWXM6P5NGeHmMr1uflu3LowrlfsYn9xjgiAPhDLYUwoW9P/d3A1rNEdgA6zJi7UhoQ3mMi62bvVs2GDctp1/IntHDpALigpWly88zh6/4kpULevWWUQ0D/3G2LVYG4RIz0Ha+dCQjaem7vLjM9+2UGBs8mY3OnFt00QjBYii2XF1vihBEKoxgc3llpcIl3L1JgcU6ev9a+3uDJiYMmb/yHey8zz0vHNAkOwb+56MTRhyts1DIH09JwWL+t/I8HDCmjX5ZN/o++XhnV81tShPaPNqjejqpUP29JO3m5VL3lJY3LMs4/ANDmWKvb1LzOqlfxicuPoXrhC8GYBf/cpmUqRHwiCQwIZiTQFVc7g94RcQ2EADG4iYDsL+4wo9PcsKi3qWFxb3LEu3xem2cOGKYl/fRYEm7p+pJ+CcEjkJCEeS/0qNQJbabsTc4uvRPyPEJC5U7+9M03XW6iGmFGEhd00UJadhcCTeivIrAN5zYwK0+c7SMHF0h5ma3RHNRA9lxxId9tsv2GzYTGwq1Xcks5VnY61z1ljTXhwB8kBdsduIkn8mSTxehMiJzbMvqWfHk3Ko0WD/2GuS3q6XO2uds2B7uixdXcvYvHkb6c6myuhnqUZ5cf7Gg9L6N21SQIK49nYe3jXtR6Y+71Mn9qFHXFeXfIF6PcCBc4kGbeEolRh6ega0s+071GrGzJS3R1G0NZtblxzhbheEHTJbfpfUouPUkWhorHS2K3tH4fTTEx7a6pJtu18Zet0mJ6xY4kCdNSoL+wtSyK3X0em+3ILc7dHMzB309k61xfGzkrbcaTrQcwal4q1utv5hAE45xbFlC4j5utaj43BOiZ3SY6fZP5d7oEBeE7eJKE6I01wRaS+8Io6dN4GZd6YaA2LwRiQX26W08NvnT7TO6X/jIA+19v7rhTbz+l1zm7Nf327s4EKhwWFlU9Nnm4/p0TN+D3bdNMdTD/7tw4uSjnyOh7dpO/S3G8eVJuj6R70Gj/4+v+Z6zx/nodfjUbOFCBpx6kc5riMXZD36Ocxfg0PfHxqy8wVcR1yXI11nPQZv/BZaaKGFFlpooYUWWmihhRZaaKGFFlpooYUWWmihhRZaaKGFFlpooYUWWmihhRZaaKGFFlpooYUWWmihhRZaaKGFFlpooYX/Dfy/pJ5WpcoFwzwAAAAASUVORK5CYII=" alt="Logo Pharmacie Diabaté & Frères"></span>
@@ -2864,6 +3017,39 @@
             <p style="color:var(--text-muted); font-size:0.9em; margin-top:-8px;">
                 Valide les nouveaux comptes et gère les rôles de l'équipe. <strong>PDG</strong> : accès total (y compris Finances). <strong>Administrateur</strong> : tout sauf Finances, peut valider les comptes. <strong>Agent de commerce</strong> : Ventes, Clients, Ordonnances, Produits, Stock. <strong>Caissier</strong> : Tableau de bord, Ventes, Clients, Ordonnances.
             </p>
+
+            <div style="background:var(--bg-alt, rgba(0,0,0,0.03)); border:1px solid var(--line); border-radius:10px; padding:14px; margin:14px 0;">
+                <div style="font-weight:600; margin-bottom:8px;">➕ Créer directement un compte employé</div>
+                <p style="color:var(--text-muted); font-size:0.85em; margin:0 0 10px;">
+                    Le compte est actif immédiatement avec le rôle choisi — pas besoin que la personne s'inscrive elle-même ni d'attendre une validation.
+                </p>
+                <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:flex-end;">
+                    <div style="flex:1; min-width:140px;">
+                        <label style="font-size:0.8em; color:var(--text-muted);">Nom</label>
+                        <input type="text" id="newUserName" placeholder="Ex: Mamadou Camara">
+                    </div>
+                    <div style="flex:1; min-width:160px;">
+                        <label style="font-size:0.8em; color:var(--text-muted);">Email</label>
+                        <input type="email" id="newUserEmail" placeholder="Ex: mamadou@pharmacie.com">
+                    </div>
+                    <div style="flex:1; min-width:140px;">
+                        <label style="font-size:0.8em; color:var(--text-muted);">Mot de passe</label>
+                        <input type="text" id="newUserPassword" placeholder="6 caractères min.">
+                    </div>
+                    <div style="min-width:160px;">
+                        <label style="font-size:0.8em; color:var(--text-muted);">Rôle</label>
+                        <select id="newUserRole">
+                            <option value="caissier">Caissier</option>
+                            <option value="agent">Agent de commerce</option>
+                            <option value="admin">Administrateur</option>
+                            <option value="pdg">PDG</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-success" onclick="createEmployeeAccount()" style="width:auto; padding:8px 16px;">Créer le compte</button>
+                </div>
+                <p id="newUserFeedback" style="display:none; font-size:0.85em; margin:8px 0 0;"></p>
+            </div>
+
             <div id="usersListWrap" style="margin-top:12px;">
                 <p style="color:var(--text-muted); font-size:0.85em;">Chargement…</p>
             </div>
@@ -3074,6 +3260,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
 <script>
 
 // ---------- Sécurité : échappement HTML (anti-XSS) ----------
@@ -3219,11 +3406,27 @@ let FIREBASE_CONFIG = storedFirebaseConfig || DEFAULT_FIREBASE_CONFIG;
 let FIREBASE_CONFIGURED = !!(FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.projectId && typeof firebase !== 'undefined');
 let fbAuth = null;
 let fbDb = null;
+let fbStorage = null; // Firebase Storage : héberge les photos (produits, ordonnances, logo) — seule leur URL est stockée dans Firestore.
 if (FIREBASE_CONFIGURED) {
     try {
         firebase.initializeApp(FIREBASE_CONFIG);
         fbAuth = firebase.auth();
         fbDb = firebase.firestore();
+        fbStorage = FIREBASE_CONFIG.storageBucket ? firebase.storage() : null;
+        // Persistance offline native : Firestore garde un cache local des données et des
+        // écritures en attente, et se resynchronise automatiquement au retour du réseau.
+        // Doit être appelé avant toute lecture/écriture Firestore.
+        fbDb.enablePersistence({ synchronizeTabs: true }).catch(function (err) {
+            if (err.code === 'failed-precondition') {
+                // Plusieurs onglets ouverts sans synchronizeTabs : la persistance ne peut être
+                // active que dans un seul onglet à la fois. Rare pour un usage pharmacie normal.
+                console.warn('Persistance offline Firestore : plusieurs onglets ouverts, désactivée sur celui-ci.');
+            } else if (err.code === 'unimplemented') {
+                console.warn('Persistance offline Firestore non supportée par ce navigateur.');
+            } else {
+                console.error('Erreur activation persistance offline Firestore :', err);
+            }
+        });
     } catch (e) {
         console.error('Erreur d\'initialisation Firebase :', e);
         FIREBASE_CONFIGURED = false;
@@ -3374,12 +3577,15 @@ async function fetchOrCreateProfile(user, fallbackName) {
         if (!snap.exists) {
             // Premier profil créé pour ce compte : PDG (actif immédiatement) si aucun autre profil n'existe encore,
             // sinon le compte est créé "en attente" avec rôle à définir par un PDG/Administrateur.
-            let isFirst = true;
+            // Sécurité : si le comptage échoue pour une raison quelconque, on part du principe qu'il existe déjà
+            // des profils (repli prudent) plutôt que d'auto-promouvoir PDG par défaut.
+            let isFirst = false;
             try {
                 const countSnap = await fbDb.collection('profiles').limit(1).get();
                 isFirst = countSnap.empty;
             } catch (countErr) {
                 console.error('Erreur de comptage des profils :', countErr);
+                isFirst = false;
             }
             try {
                 await docRef.set({
@@ -3399,6 +3605,84 @@ async function fetchOrCreateProfile(user, fallbackName) {
     } catch (err) {
         console.error('Erreur de chargement du profil / rôle :', err);
         return { role: null, status: 'pending' }; // repli prudent en cas d'erreur : accès bloqué
+    }
+}
+
+// Crée un compte employé actif immédiatement, sans passer par l'auto-inscription + validation,
+// et sans déconnecter le PDG/Admin qui effectue l'opération.
+// Astuce : createUserWithEmailAndPassword() connecte automatiquement le nouveau compte sur
+// l'instance Firebase utilisée. Pour éviter que ça déconnecte le PDG en cours de session,
+// on crée une 2e instance Firebase temporaire (même projet), on l'utilise uniquement pour
+// créer ce compte-là, puis on la détruit — la session du PDG sur l'instance principale
+// n'est jamais touchée.
+async function createEmployeeAccount() {
+    const feedback = document.getElementById('newUserFeedback');
+    function showFeedback(msg, ok) {
+        if (!feedback) return;
+        feedback.textContent = msg;
+        feedback.style.color = ok ? 'var(--ok)' : 'var(--danger)';
+        feedback.style.display = 'block';
+    }
+    if (!canManageUsers()) { showFeedback('Action réservée au PDG / Administrateur.', false); return; }
+    if (!fbDb || !FIREBASE_CONFIGURED) { showFeedback('Connecte d\'abord Firebase dans les paramètres.', false); return; }
+
+    const name = (document.getElementById('newUserName').value || '').trim();
+    const email = (document.getElementById('newUserEmail').value || '').trim();
+    const password = document.getElementById('newUserPassword').value || '';
+    const role = document.getElementById('newUserRole').value;
+
+    if (!name) { showFeedback('Merci de renseigner le nom.', false); return; }
+    if (!email || !email.includes('@')) { showFeedback('Adresse email invalide.', false); return; }
+    if (password.length < 6) { showFeedback('Le mot de passe doit faire au moins 6 caractères.', false); return; }
+    if (role === 'pdg' && !confirm('Confirmer la création d\'un compte PDG (accès total, y compris Finances) ?')) return;
+
+    showFeedback('Création en cours…', true);
+
+    // Nom unique pour l'instance temporaire, pour ne jamais entrer en conflit avec l'instance
+    // principale ("[DEFAULT]") ni avec une éventuelle création précédente encore en cours.
+    const tempAppName = 'employee-creation-' + Date.now();
+    let tempApp = null;
+    try {
+        tempApp = firebase.initializeApp(FIREBASE_CONFIG, tempAppName);
+        const tempAuth = tempApp.auth();
+        const tempDb = tempApp.firestore();
+
+        const cred = await tempAuth.createUserWithEmailAndPassword(email, password);
+        const newUid = cred.user.uid;
+
+        // Profil créé directement actif, avec le rôle choisi — pas de statut "pending".
+        await tempDb.collection('profiles').doc(newUid).set({
+            email: email,
+            name: name,
+            role: role,
+            status: 'active'
+        });
+
+        // On se déconnecte de l'instance temporaire (elle ne gardera plus de session),
+        // puis on la détruit proprement.
+        await tempAuth.signOut();
+
+        showFeedback('✓ Compte créé pour ' + name + ' (' + ROLE_LABELS[role] + ').', true);
+        document.getElementById('newUserName').value = '';
+        document.getElementById('newUserEmail').value = '';
+        document.getElementById('newUserPassword').value = '';
+        // Note : si l'écriture du profil échoue après la création du compte Auth (rare — ex.
+        // règles Firestore incorrectes), l'employé pourra quand même se connecter ; son profil
+        // sera alors recréé automatiquement en statut "pending" par fetchOrCreateProfile lors
+        // de sa première connexion, et il faudra le valider manuellement comme avant.
+        loadUsersList();
+    } catch (err) {
+        console.error('Erreur de création de compte employé :', err);
+        let msg = 'Impossible de créer le compte.';
+        if (err && err.code === 'auth/email-already-in-use') msg = 'Un compte existe déjà avec cet email.';
+        else if (err && err.code === 'auth/invalid-email') msg = 'Adresse email invalide.';
+        else if (err && err.code === 'auth/weak-password') msg = 'Mot de passe trop faible (6 caractères minimum).';
+        else if (err && err.message) msg = err.message;
+        showFeedback(msg, false);
+    } finally {
+        if (tempApp) {
+            try { await tempApp.delete(); } catch (deleteErr) { console.error('Erreur nettoyage instance temporaire :', deleteErr); }
+        }
     }
 }
 
@@ -3441,8 +3725,8 @@ async function loadUsersList() {
                 : '';
             return '<div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:10px 0; border-bottom:1px solid var(--line);">' +
                 '<div style="flex:1; min-width:180px;">' +
-                    '<div style="font-weight:600;">' + (p.name || p.email) + badge + '</div>' +
-                    '<div style="font-size:0.8em; color:var(--text-muted);">' + p.email + '</div>' +
+                    '<div style="font-weight:600;">' + escapeHtml(p.name || p.email) + badge + '</div>' +
+                    '<div style="font-size:0.8em; color:var(--text-muted);">' + escapeHtml(p.email) + '</div>' +
                 '</div>' +
                 '<select id="roleSelect_' + p.id + '" style="width:auto;">' + options + '</select>' +
                 actionBtn +
@@ -3548,6 +3832,7 @@ function updateUserBadge() {
 function showAuthScreen() {
     const el = document.getElementById('authScreen');
     if (el) el.classList.remove('hidden');
+    applyRememberedEmail();
 }
 function hideAuthScreen() {
     const el = document.getElementById('authScreen');
@@ -3631,6 +3916,14 @@ async function handleAuthSubmit() {
     btn.textContent = authMode === 'signup' ? 'Création…' : 'Connexion…';
 
     try {
+        const rememberBox = document.getElementById('authRememberMe');
+        try {
+            if (rememberBox && rememberBox.checked) {
+                localStorage.setItem(AUTH_REMEMBER_KEY, email);
+            } else {
+                localStorage.removeItem(AUTH_REMEMBER_KEY);
+            }
+        } catch (e) {}
         if (authMode === 'signup') {
             const cred = await fbAuth.createUserWithEmailAndPassword(email, password);
             if (cred.user && name) {
@@ -3650,6 +3943,54 @@ async function handleAuthSubmit() {
         btn.disabled = false;
         btn.textContent = authMode === 'signup' ? 'Créer mon compte' : 'Se connecter';
     }
+}
+
+const AUTH_REMEMBER_KEY = 'diabate_pharma_remember_email_v1';
+async function handleForgotPassword() {
+    const errBox = document.getElementById('authError');
+    const emailInput = document.getElementById('authEmail');
+    const email = emailInput ? emailInput.value.trim() : '';
+    errBox.classList.remove('show');
+
+    if (!FIREBASE_CONFIGURED) {
+        errBox.style.background = 'var(--danger-bg)';
+        errBox.style.color = 'var(--danger)';
+        errBox.textContent = 'La récupération de mot de passe nécessite la synchronisation en ligne, non configurée sur cette copie. Contacte HABATECH (627 54 19 25).';
+        errBox.classList.add('show');
+        return;
+    }
+    if (!email) {
+        errBox.style.background = 'var(--danger-bg)';
+        errBox.style.color = 'var(--danger)';
+        errBox.textContent = 'Renseigne ton email ci-dessus, puis clique à nouveau sur "Mot de passe oublié ?".';
+        errBox.classList.add('show');
+        emailInput.focus();
+        return;
+    }
+    try {
+        await fbAuth.sendPasswordResetEmail(email);
+        errBox.style.background = 'var(--ok-bg)';
+        errBox.style.color = 'var(--ok)';
+        errBox.textContent = 'Un email de réinitialisation a été envoyé à ' + email + '.';
+        errBox.classList.add('show');
+    } catch (err) {
+        errBox.style.background = 'var(--danger-bg)';
+        errBox.style.color = 'var(--danger)';
+        errBox.textContent = translateAuthError(err.code || err.message);
+        errBox.classList.add('show');
+    }
+}
+
+function applyRememberedEmail() {
+    try {
+        const saved = localStorage.getItem(AUTH_REMEMBER_KEY);
+        const emailInput = document.getElementById('authEmail');
+        const rememberBox = document.getElementById('authRememberMe');
+        if (saved && emailInput) {
+            emailInput.value = saved;
+            if (rememberBox) rememberBox.checked = true;
+        }
+    } catch (e) {}
 }
 
 function translateAuthError(code) {
@@ -3933,6 +4274,7 @@ async function pullRemoteData() {
             isApplyingRemoteData = true;
             data = normalizeData(row.payload);
             localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+            lastKnownRemoteUpdatedMs = (row.updated_at && row.updated_at.toMillis) ? row.updated_at.toMillis() : Date.now();
             refreshAllViews();
             isApplyingRemoteData = false;
         } else {
@@ -3956,18 +4298,63 @@ function normalizeData(raw) {
 }
 
 let lastPushAt = 0; // horodatage (ms) de notre dernière écriture, pour ignorer les échos
+let lastKnownRemoteUpdatedMs = 0; // horodatage (ms) de la dernière version serveur connue de ce device
 
 async function pushRemoteData() {
     if (!fbDb || !currentUser) return;
+    const docRef = fbDb.collection('pharmacy_data').doc(PHARMACY_ROW_ID);
     try {
         lastPushAt = Date.now();
-        await fbDb.collection('pharmacy_data').doc(PHARMACY_ROW_ID).set({
-            payload: data,
-            updated_at: firebase.firestore.FieldValue.serverTimestamp(),
-            updated_by: currentUser.email
+        const nowMs = Date.now();
+        let conflict = false;
+        await fbDb.runTransaction(async function (tx) {
+            const snap = await tx.get(docRef);
+            if (snap.exists) {
+                const existing = snap.data();
+                const existingMs = (existing.updated_at && existing.updated_at.toMillis) ? existing.updated_at.toMillis() : 0;
+                // Si la version serveur est plus récente que la dernière version que ce device connaît,
+                // et que ce n'est pas nous qui l'avons écrite, un autre appareil a modifié entre-temps.
+                if (existingMs > lastKnownRemoteUpdatedMs && existing.updated_by !== (currentUser && currentUser.email)) {
+                    conflict = true;
+                    return;
+                }
+            }
+            tx.set(docRef, {
+                payload: data,
+                updated_at: firebase.firestore.FieldValue.serverTimestamp(),
+                updated_by: currentUser.email
+            });
         });
+        if (conflict) {
+            // On ne pousse pas par-dessus les changements d'un collègue : on récupère sa version
+            // pour éviter toute perte de données, et on prévient l'utilisateur.
+            await pullRemoteData();
+            showToast('Un(e) collègue vient de modifier ces données ailleurs. Votre écran a été mis à jour avec la dernière version — vérifiez vos derniers changements.', 'warn', 6000);
+            setSyncStatus('online', 'Synchronisé (conflit résolu)');
+            return;
+        }
+        lastKnownRemoteUpdatedMs = Date.now();
         setSyncStatus('online', 'Synchronisé');
     } catch (err) {
+        // Hors ligne : les transactions Firestore nécessitent une lecture fraîche du serveur et
+        // échouent donc systématiquement sans réseau. On bascule alors sur une écriture simple,
+        // mise en file d'attente automatiquement par la persistance offline et envoyée dès le
+        // retour de la connexion. Pas de détection de conflit possible dans ce cas (rare : il
+        // faudrait deux appareils hors ligne modifiant en même temps), on privilégie ne jamais
+        // perdre le travail de l'utilisateur plutôt que de bloquer la saisie.
+        if (err && err.code === 'unavailable') {
+            try {
+                docRef.set({
+                    payload: data,
+                    updated_at: firebase.firestore.FieldValue.serverTimestamp(),
+                    updated_by: currentUser.email
+                }); // pas de await : Firestore met en file d'attente localement et confirmera plus tard
+                setSyncStatus('offline', 'Hors ligne (enregistré localement, en attente de synchro)');
+                return;
+            } catch (fallbackErr) {
+                console.error('Erreur d\'écriture hors ligne :', fallbackErr);
+            }
+        }
         console.error('Erreur de synchronisation (écriture) :', err);
         setSyncStatus('offline', 'Hors ligne (non synchronisé)');
     }
@@ -3979,6 +4366,7 @@ function subscribeRealtime() {
         .onSnapshot(function (snap) {
             if (!snap.exists) return;
             const row = snap.data();
+            lastKnownRemoteUpdatedMs = (row.updated_at && row.updated_at.toMillis) ? row.updated_at.toMillis() : Date.now();
             // Ignore les échos de nos propres écritures (même utilisateur, quelques secondes après)
             if (row.updated_by === (currentUser && currentUser.email) && (Date.now() - lastPushAt) < 2000) return;
             isApplyingRemoteData = true;
@@ -4014,6 +4402,21 @@ function refreshAllViews() {
     try { renderAlertsCenter(); } catch(e) {}
     try { renderFinances(); } catch(e) {}
 }
+
+// Reflète la coupure/reprise réseau du navigateur sur le badge de statut, en plus des
+// statuts déjà mis à jour lors des lectures/écritures Firestore. L'app continue de
+// fonctionner hors ligne (lecture/écriture en cache, resynchro auto au retour du réseau) ;
+// ce badge sert juste à informer l'utilisateur de l'état de la connexion.
+window.addEventListener('offline', function () {
+    if (FIREBASE_CONFIGURED && currentUser) {
+        setSyncStatus('offline', 'Hors ligne (les modifications seront synchronisées au retour du réseau)');
+    }
+});
+window.addEventListener('online', function () {
+    if (FIREBASE_CONFIGURED && currentUser) {
+        setSyncStatus('online', 'Connexion rétablie, synchronisation…');
+    }
+});
 
 async function initAuth() {
     if (!FIREBASE_CONFIGURED) {
@@ -4757,8 +5160,11 @@ function handleLogoSelect(event) {
         alert('Veuillez sélectionner une image.');
         return;
     }
-    resizeImage(file, 160, 160, 0.85).then(dataUrl => {
-        data.logo = dataUrl;
+    resizeImage(file, 160, 160, 0.85).then(async dataUrl => {
+        const oldLogo = data.logo;
+        const photoUrl = await uploadPhotoToStorage(dataUrl, 'logo');
+        data.logo = photoUrl;
+        if (oldLogo && oldLogo !== photoUrl) deletePhotoFromStorage(oldLogo);
         saveData();
         renderLogo();
         renderSettingsLogo();
@@ -4822,6 +5228,38 @@ function resizeImage(file, maxW, maxH, quality) {
         reader.onerror = reject;
         reader.readAsDataURL(file);
     });
+}
+
+// Upload une image (déjà redimensionnée en data URL) vers Firebase Storage et retourne son
+// URL de téléchargement. Si Firebase Storage n'est pas configuré (ou hors ligne / erreur),
+// on retombe sur la data URL elle-même : l'app continue de fonctionner comme avant
+// (photo stockée en base64 dans Firestore), juste sans les bénéfices de Storage.
+// folder : "products", "ordonnances" ou "logo" — pour ranger les fichiers proprement.
+async function uploadPhotoToStorage(dataUrl, folder) {
+    if (!fbStorage || !currentUser) return dataUrl;
+    try {
+        const path = folder + '/' + currentUser.id + '_' + Date.now() + '_' + Math.round(Math.random() * 1e6) + '.jpg';
+        const ref = fbStorage.ref().child(path);
+        await ref.putString(dataUrl, 'data_url', { contentType: 'image/jpeg' });
+        return await ref.getDownloadURL();
+    } catch (err) {
+        console.error('Erreur upload photo vers Firebase Storage (repli en local) :', err);
+        return dataUrl;
+    }
+}
+
+// Supprime une photo de Firebase Storage à partir de son URL (si c'en est bien une — une
+// data URL base64 encore présente pour d'anciennes données, ou en cas de repli, est ignorée
+// silencieusement). Best-effort : une erreur ici ne doit jamais bloquer l'action de l'utilisateur.
+function deletePhotoFromStorage(url) {
+    if (!fbStorage || !url || typeof url !== 'string' || !url.startsWith('https://')) return;
+    try {
+        fbStorage.refFromURL(url).delete().catch(function (err) {
+            console.warn('Suppression photo Storage impossible (ignorée) :', err);
+        });
+    } catch (err) {
+        console.warn('Suppression photo Storage impossible (ignorée) :', err);
+    }
 }
 
 function showPhotoPreview(dataUrl) {
@@ -4902,13 +5340,13 @@ function populateStockFilterOptions() {
     if (catSel) {
         const current = catSel.value;
         const categories = [...new Set(data.products.map(p => p.category).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'fr'));
-        catSel.innerHTML = '<option value="">Toutes les catégories</option>' + categories.map(c => `<option value="${c}">${c}</option>`).join('');
+        catSel.innerHTML = '<option value="">Toutes les catégories</option>' + categories.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
         catSel.value = current;
     }
     if (supSel) {
         const current = supSel.value;
         const suppliers = [...new Set(data.products.map(p => p.supplier).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'fr'));
-        supSel.innerHTML = '<option value="">Tous les fournisseurs</option>' + suppliers.map(s => `<option value="${s}">${s}</option>`).join('');
+        supSel.innerHTML = '<option value="">Tous les fournisseurs</option>' + suppliers.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
         supSel.value = current;
     }
 }
@@ -4931,7 +5369,7 @@ function renderCategoryList() {
     const dl = document.getElementById('categoryList');
     if (!dl) return;
     const categories = [...new Set(data.products.map(p => p.category).filter(Boolean))].sort((a, b) => a.localeCompare(b));
-    dl.innerHTML = categories.map(c => `<option value="${c}">`).join('');
+    dl.innerHTML = categories.map(c => `<option value="${escapeHtml(c)}">`).join('');
     populateBrowseCategoryFilter();
     renderBrowseProducts();
     populateFinanceCategoryFilter();
@@ -5058,7 +5496,7 @@ function generateProductCode() {
     return candidate;
 }
 
-function saveProductForm() {
+async function saveProductForm() {
     const editingCode = document.getElementById('editingCode').value;
     let code = document.getElementById('newCode').value.trim();
     const name = document.getElementById('newName').value.trim();
@@ -5074,6 +5512,18 @@ function saveProductForm() {
         return;
     }
 
+    // Upload de la photo vers Firebase Storage si une nouvelle photo a été sélectionnée
+    // (une data URL base64 fraîchement redimensionnée) ; si c'est déjà une URL Storage
+    // existante (photo inchangée) ou si Storage n'est pas configuré, on la garde telle quelle.
+    const saveBtn = document.querySelector('#addProductForm button.btn-success');
+    let photoUrl = pendingPhoto || '';
+    const oldPhoto = editingCode ? (data.products.find(p => p.code === editingCode) || {}).photo : '';
+    if (pendingPhoto && pendingPhoto.startsWith('data:')) {
+        if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = 'Envoi de la photo…'; }
+        photoUrl = await uploadPhotoToStorage(pendingPhoto, 'products');
+        if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = 'Enregistrer'; }
+    }
+
     if (editingCode) {
         if (!code) code = editingCode;
         // Mode édition
@@ -5084,7 +5534,8 @@ function saveProductForm() {
         const p = data.products.find(p => p.code === editingCode);
         const oldStock = p.stock;
         const oldLot = p.lot || '';
-        Object.assign(p, {code, name, category, supplier, lot, stock, price, expiry, photo: pendingPhoto || ''});
+        Object.assign(p, {code, name, category, supplier, lot, stock, price, expiry, photo: photoUrl});
+        if (oldPhoto && oldPhoto !== photoUrl) deletePhotoFromStorage(oldPhoto);
 
         const notes = [];
         if (oldLot !== lot) notes.push(`Lot : "${oldLot || '—'}" → "${lot || '—'}"`);
@@ -5104,7 +5555,7 @@ function saveProductForm() {
             return;
         }
         // Mode ajout
-        data.products.push({code, name, category, supplier, lot, stock, price, expiry, photo: pendingPhoto || ''});
+        data.products.push({code, name, category, supplier, lot, stock, price, expiry, photo: photoUrl});
         logMovement({
             code, name, lot,
             type: 'creation',
@@ -5130,6 +5581,7 @@ function deleteProduct(code) {
             stockAfter: 0,
             note: 'Produit retiré du référentiel'
         });
+        if (p.photo) deletePhotoFromStorage(p.photo);
     }
     data.products = data.products.filter(p => p.code !== code);
     saveData();
@@ -6632,7 +7084,7 @@ function openEditOrdonnanceForm(id) {
     document.getElementById('addOrdonnanceForm').scrollIntoView({behavior:'smooth', block:'center'});
 }
 
-function saveOrdonnanceForm() {
+async function saveOrdonnanceForm() {
     const editingId = document.getElementById('editingOrdId').value;
     const clientId = document.getElementById('ordClientSelect').value;
     const client = data.clients.find(c => c.id === clientId);
@@ -6651,6 +7103,16 @@ function saveOrdonnanceForm() {
         return;
     }
 
+    // Upload vers Firebase Storage si une nouvelle photo (data URL) a été sélectionnée.
+    const saveBtn = document.querySelector('#addOrdonnanceForm button.btn-success');
+    let photoUrl = pendingOrdPhoto || '';
+    const oldPhoto = editingId ? (data.ordonnances.find(o => o.id === editingId) || {}).photo : '';
+    if (pendingOrdPhoto && pendingOrdPhoto.startsWith('data:')) {
+        if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = 'Envoi de la photo…'; }
+        photoUrl = await uploadPhotoToStorage(pendingOrdPhoto, 'ordonnances');
+        if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = 'Enregistrer l\'ordonnance'; }
+    }
+
     if (editingId) {
         const o = data.ordonnances.find(o => o.id === editingId);
         if (o) {
@@ -6659,8 +7121,9 @@ function saveOrdonnanceForm() {
                 clientName: patientName,
                 doctor, date, notes,
                 items: items.map(it => ({code: it.code, name: it.name, qty: it.qty, posologie: it.posologie})),
-                photo: pendingOrdPhoto || ''
+                photo: photoUrl
             });
+            if (oldPhoto && oldPhoto !== photoUrl) deletePhotoFromStorage(oldPhoto);
         }
     } else {
         data.ordonnances.push({
@@ -6669,7 +7132,7 @@ function saveOrdonnanceForm() {
             clientName: patientName,
             doctor, date, notes,
             items: items.map(it => ({code: it.code, name: it.name, qty: it.qty, posologie: it.posologie})),
-            photo: pendingOrdPhoto || '',
+            photo: photoUrl,
             status: 'en_attente',
             dispensedDate: null,
             saleRef: null
@@ -6749,6 +7212,8 @@ function dispenserOrdonnance(id) {
 
 function deleteOrdonnance(id) {
     if (!confirm('Supprimer définitivement cette ordonnance ?')) return;
+    const o = data.ordonnances.find(o => o.id === id);
+    if (o && o.photo) deletePhotoFromStorage(o.photo);
     data.ordonnances = data.ordonnances.filter(o => o.id !== id);
     saveData();
     renderOrdonnancesTable();
