@@ -4101,6 +4101,24 @@ function viewParametres(){
       </div>
     </div>
   </div>
+  ${window.__currentUserRole === 'admin' ? `
+  <div class="panel">
+    <div class="panel-head"><div><h2>Passer en production</h2><div class="panel-sub">Efface les données de test et remet l'application à zéro pour un démarrage réel, sans perdre la structure déjà configurée.</div></div></div>
+    <div class="panel-body">
+      <div class="settings-row">
+        <div>
+          <b>Réinitialiser toutes les valeurs pour la mise en production</b>
+          <div class="hint">
+            Remet le stock de <strong>tous les articles</strong> à 0 sur tous les dépôts, et supprime définitivement l'historique
+            des sorties, entrées, transferts, sessions d'inventaire et commandes fournisseurs.
+            Le catalogue d'articles, les catégories, les dépôts, les fournisseurs et les comptes utilisateurs sont conservés.
+          </div>
+          <div class="hint" style="color:var(--danger,#d9435c);margin-top:6px;">⚠ Action irréversible — téléchargez une sauvegarde avant de continuer.</div>
+        </div>
+        <button class="btn btn-danger" id="btnGoProduction">🚀 Passer en production</button>
+      </div>
+    </div>
+  </div>` : ''}
   <div class="panel">
     <div class="panel-head"><div><h2>Exports CSV / Excel</h2><div class="panel-sub">Exports détaillés par module, compatibles Excel (séparateur point-virgule, encodage UTF-8).</div></div></div>
     <div class="panel-body">
@@ -4127,7 +4145,10 @@ function viewParametres(){
 }
 
 function wireParametres(){
-  if(window.__currentUserRole === 'admin'){ loadUsersIntoParametres(); wireCreateUserForm(); wirePermissionsPanel(); }
+  if(window.__currentUserRole === 'admin'){
+    loadUsersIntoParametres(); wireCreateUserForm(); wirePermissionsPanel();
+    document.getElementById('btnGoProduction')?.addEventListener('click', openGoProductionModal);
+  }
   renderCategoryList();
   renderSiteList();
 
@@ -4168,6 +4189,63 @@ function wireParametres(){
 
   document.getElementById('btnPrintStockReport').addEventListener('click', printStockReport);
   document.getElementById('btnPrintAlertsReport').addEventListener('click', printAlertList);
+}
+
+/* ---------------------------------------------------------
+   Passer en production : remet le stock de tous les articles
+   à 0 et efface tout l'historique (mouvements, transferts,
+   inventaires, commandes). Conserve le catalogue d'articles,
+   catégories, dépôts, fournisseurs et comptes utilisateurs.
+   Action réservée aux administrateurs, protégée par une
+   confirmation textuelle car irréversible.
+   --------------------------------------------------------- */
+function openGoProductionModal(){
+  openModal(`
+    <div class="modal-head"><h3>Passer en production</h3><button class="close-x" onclick="closeModal()">✕</button></div>
+    <div class="modal-body">
+      <p class="hint">Cette action va :</p>
+      <ul style="margin:8px 0 14px 18px;font-size:12.5px;color:var(--text-muted);line-height:1.7;">
+        <li>Remettre le stock de <strong>tous les articles</strong> à 0, sur tous les dépôts</li>
+        <li>Supprimer tout l'historique : sorties, entrées, transferts, sessions d'inventaire, commandes fournisseurs</li>
+        <li>Conserver le catalogue d'articles, les catégories, les dépôts, les fournisseurs et les comptes utilisateurs</li>
+      </ul>
+      <p class="hint" style="color:var(--danger,#d9435c);"><strong>⚠ Action irréversible.</strong> Téléchargez une sauvegarde avant de continuer si besoin.</p>
+      <div class="field" style="margin-top:14px;">
+        <label>Tapez <strong>PRODUCTION</strong> pour confirmer</label>
+        <input type="text" id="goProdConfirmInput" placeholder="PRODUCTION" autocomplete="off">
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeModal()">Annuler</button>
+      <button class="btn btn-danger" id="btnConfirmGoProduction" disabled>Réinitialiser et passer en production</button>
+    </div>`);
+  const input = document.getElementById('goProdConfirmInput');
+  const confirmBtn = document.getElementById('btnConfirmGoProduction');
+  input.addEventListener('input', ()=>{
+    confirmBtn.disabled = input.value.trim().toUpperCase() !== 'PRODUCTION';
+  });
+  input.addEventListener('keydown', (e)=>{
+    if(e.key==='Enter' && !confirmBtn.disabled) confirmBtn.click();
+  });
+  confirmBtn.addEventListener('click', ()=>{
+    if(input.value.trim().toUpperCase() !== 'PRODUCTION') return;
+    resetForProduction();
+    closeModal();
+  });
+}
+
+function resetForProduction(){
+  DB.articles.forEach(a=>{
+    if(!a.stocks) a.stocks = {};
+    Object.keys(a.stocks).forEach(siteId=>{ a.stocks[siteId] = 0; });
+    DB.sites.forEach(s=>{ if(!(s.id in a.stocks)) a.stocks[s.id] = 0; });
+  });
+  DB.mouvements = [];
+  DB.inventaires = [];
+  DB.commandes = [];
+  saveDB(DB);
+  toast('Application réinitialisée — prête pour la production', 'success');
+  navigate('general');
 }
 
 /* ---------------------------------------------------------
