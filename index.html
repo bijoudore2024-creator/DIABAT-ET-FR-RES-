@@ -917,18 +917,25 @@ th.num{text-align:right;}
 <div id="syncIndicator" style="position:fixed;bottom:calc(16px + env(safe-area-inset-bottom));left:16px;z-index:1900;font-family:'IBM Plex Mono',monospace;font-size:11px;background:#fff;border:1px solid #e3e6ee;color:#6b7488;padding:6px 12px;border-radius:20px;box-shadow:0 4px 14px rgba(17,29,61,.12);display:flex;align-items:center;gap:7px;max-width:calc(100vw - 32px);">
   <span id="syncDot" style="width:8px;height:8px;border-radius:50%;background:#d99a2b;flex-shrink:0;"></span>
   <span id="syncText">Chargement local…</span>
+  <button id="btnManualSync" class="hidden" type="button" style="margin-left:2px;background:#0d1730;color:#f0b400;border:none;border-radius:14px;padding:4px 10px;font-size:10.5px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;">🔄 Synchroniser</button>
 </div>
 
 <script type="module">
 /* =========================================================
    MORALI WEST AFRICA — GESTION DE STOCK
    Stockage : Firebase Firestore (base partagée en temps réel,
-   multi-dépôts, multi-utilisateurs). Authentification : Firebase
-   Authentication, avec un identifiant + code PIN à 6 chiffres
-   (au lieu d'un e-mail + mot de passe libre) — le PIN est envoyé
-   à Firebase comme mot de passe, la validation à 6 chiffres est
-   faite côté formulaire. Aucune donnée n'est stockée en
-   localStorage — tout transite par Firebase.
+   multi-dépôts, multi-utilisateurs), avec un cache local
+   (localStorage) qui permet à l'application de démarrer et de
+   fonctionner entièrement SANS connexion internet : toutes les
+   actions (sorties, entrées, articles, etc.) restent utilisables
+   hors-ligne et sont conservées sur l'appareil. Dès qu'une
+   connexion est disponible, l'utilisateur synchronise
+   manuellement ses modifications vers Firebase via le bouton
+   "🔄 Synchroniser" (indicateur en bas à gauche). Authentification :
+   Firebase Authentication, avec un identifiant + code PIN à 6
+   chiffres (au lieu d'un e-mail + mot de passe libre) — le PIN est
+   envoyé à Firebase comme mot de passe, la validation à 6 chiffres
+   est faite côté formulaire.
    ========================================================= */
 
 import { initializeApp, deleteApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -1006,13 +1013,15 @@ function waitForFirebase(){
   });
 }
 
-function setSyncStatus(state, label){
+function setSyncStatus(state, label, opts){
   const dot = document.getElementById('syncDot');
   const txt = document.getElementById('syncText');
+  const btn = document.getElementById('btnManualSync');
   if(!dot || !txt) return;
   const colors = {ok:'#3c9a5f', pending:'#d99a2b', offline:'#d9435c', connecting:'#d99a2b'};
   dot.style.background = colors[state] || '#9aa2b3';
   txt.textContent = label;
+  if(btn) btn.classList.toggle('hidden', !(opts && opts.showSyncButton));
 }
 
 function showApp(displayName, email){
@@ -2479,6 +2488,33 @@ let DB = null;
 let currentView = 'general';
 let achatsTab = 'fournisseurs'; // onglet actif du module Achats (fournisseurs / commandes)
 let __applyingRemoteSnapshot = false; // évite les boucles d'écriture lors d'un snapshot distant
+let __syncOffline = false;   // évite de spammer le toast à chaque échec réseau répété
+let __listenerActive = false; // évite d'attacher plusieurs onSnapshot en parallèle
+
+/* ---------------------------------------------------------
+   Cache local (localStorage) : permet à l'application de
+   démarrer et de fonctionner intégralement hors-ligne. Chaque
+   écriture (saveDB) met à jour ce cache immédiatement, avant
+   même toute tentative réseau.
+   --------------------------------------------------------- */
+const LOCAL_DB_KEY = 'morali_stock_local_db_v1';
+const LOCAL_PENDING_KEY = 'morali_stock_pending_sync_v1';
+
+function saveLocalDB(db){
+  try{ localStorage.setItem(LOCAL_DB_KEY, JSON.stringify(db)); }
+  catch(err){ console.error('Erreur d\'écriture du cache local', err); }
+}
+function loadLocalDB(){
+  try{
+    const raw = localStorage.getItem(LOCAL_DB_KEY);
+    return raw ? JSON.parse(raw) : null;
+  }catch(err){ console.error('Erreur de lecture du cache local', err); return null; }
+}
+function hasPendingSync(){ return localStorage.getItem(LOCAL_PENDING_KEY) === '1'; }
+function setPendingSync(flag){
+  if(flag) localStorage.setItem(LOCAL_PENDING_KEY, '1');
+  else localStorage.removeItem(LOCAL_PENDING_KEY);
+}
 
 async function loadDBFromFirestore(){
   try{
@@ -2490,45 +2526,132 @@ async function loadDBFromFirestore(){
   }
 }
 
+// Écriture vers Firestore. N'est appelée que lorsqu'on pense être en ligne ;
+// en cas d'échec (réseau coupé entre-temps, etc.), les données restent de
+// toute façon disponibles localement et un bouton "Synchroniser" apparaît.
 async function persistDB(db){
   try{
     await setDoc(DB_DOC_REF(), db);
+    setPendingSync(false);
     setSyncStatus('ok', 'Synchronisé');
+    if(__syncOffline) toast('Connexion rétablie — données synchronisées avec Firebase', 'success');
+    __syncOffline = false;
   }catch(err){
     console.error('Erreur d\'écriture Firestore', err);
-    setSyncStatus('offline', 'Erreur de synchronisation — vérifiez la connexion');
-    toast('Impossible de synchroniser avec Firebase — vérifiez votre connexion internet', 'danger');
+    setPendingSync(true);
+    setSyncStatus('offline', 'Hors ligne — modifications en attente', {showSyncButton:true});
+    if(!__syncOffline) toast('Connexion perdue — vos modifications restent enregistrées sur cet appareil', 'danger');
+    __syncOffline = true;
   }
 }
 
+// Enregistrement d'une modification : toujours écrite localement et à
+// l'écran immédiatement (fonctionne sans internet). La synchronisation vers
+// Firebase n'est tentée que si le navigateur signale une connexion active ;
+// sinon la modification reste "en attente" jusqu'à une synchronisation
+// manuelle (bouton 🔄 Synchroniser) ou automatique à la reconnexion.
 function saveDB(db){
   DB = db;
   render(); // retour visuel immédiat, sans attendre le réseau
-  persistDB(db); // écriture asynchrone vers Firestore (les autres postes seront notifiés)
+  saveLocalDB(db);
+  if(navigator.onLine){
+    persistDB(db);
+  }else{
+    setPendingSync(true);
+    setSyncStatus('offline', 'Hors ligne — modifications en attente', {showSyncButton:true});
+  }
+}
+
+// Synchronisation manuelle déclenchée par l'utilisateur (bouton 🔄).
+async function manualSync(){
+  if(!navigator.onLine){
+    toast('Aucune connexion internet détectée pour le moment', 'danger');
+    return;
+  }
+  if(!DB) return;
+  setSyncStatus('connecting', 'Synchronisation en cours…');
+  try{
+    await setDoc(DB_DOC_REF(), DB);
+    setPendingSync(false);
+    __syncOffline = false;
+    setSyncStatus('ok', 'Synchronisé');
+    toast('Données synchronisées avec Firebase', 'success');
+    if(!__listenerActive) listenToFirestoreChanges();
+  }catch(err){
+    console.error('Erreur de synchronisation manuelle', err);
+    setSyncStatus('offline', 'Échec de synchronisation — réessayez', {showSyncButton:true});
+    toast('Échec de la synchronisation — vérifiez votre connexion', 'danger');
+  }
 }
 
 // Écoute en temps réel : dès qu'un autre appareil modifie la base,
 // ce poste reçoit la mise à jour et se rafraîchit automatiquement.
 function listenToFirestoreChanges(){
+  if(__listenerActive) return; // évite d'empiler plusieurs écouteurs
+  __listenerActive = true;
   onSnapshot(DB_DOC_REF(), (snap)=>{
     if(!snap.exists()) return;
     if(snap.metadata.hasPendingWrites){
       // C'est notre propre écriture en cours de confirmation : on l'a déjà appliquée localement.
       return;
     }
+    if(hasPendingSync()){
+      // Des modifications locales n'ont pas encore été envoyées : on ne les
+      // écrase pas avec la version distante tant qu'elles ne sont pas synchronisées.
+      return;
+    }
     DB = snap.data();
+    saveLocalDB(DB);
     setSyncStatus('ok', 'Synchronisé');
     applyNavPermissions();
     if(!hasModuleAccess(currentView)){ navigate('general'); return; }
     render();
   }, (err)=>{
     console.error('Erreur d\'écoute Firestore', err);
-    setSyncStatus('offline', 'Connexion à Firebase perdue');
+    __listenerActive = false;
+    setSyncStatus('offline', 'Connexion à Firebase perdue', {showSyncButton: hasPendingSync()});
   });
 }
 
+// Démarrage de l'application : priorité absolue au cache local pour un
+// affichage instantané et un fonctionnement complet hors-ligne. Si une
+// connexion est disponible et qu'aucune modification locale n'est en
+// attente, les données Firebase (éventuellement plus récentes, saisies
+// depuis un autre poste) prennent le relais et l'écoute temps réel démarre.
 async function initFirestoreData(){
-  setSyncStatus('connecting', 'Connexion à Firebase…');
+  const local = loadLocalDB();
+  const pending = hasPendingSync();
+
+  if(local){
+    DB = local;
+    applyNavPermissions();
+    navigate('general');
+    if(pending){
+      setSyncStatus(navigator.onLine ? 'pending' : 'offline',
+        navigator.onLine ? 'Modifications non synchronisées' : 'Hors ligne — modifications en attente',
+        {showSyncButton:true});
+    }else{
+      setSyncStatus(navigator.onLine ? 'connecting' : 'offline',
+        navigator.onLine ? 'Vérification de la synchronisation…' : 'Hors ligne — données locales');
+    }
+  }else{
+    setSyncStatus(navigator.onLine ? 'connecting' : 'offline',
+      navigator.onLine ? 'Connexion à Firebase…' : 'Hors ligne — aucune donnée locale');
+  }
+
+  if(!navigator.onLine){
+    // Pas de réseau au démarrage : on reste sur le cache local (ou, à
+    // défaut, l'utilisateur devra se reconnecter au moins une fois).
+    return;
+  }
+
+  if(local && pending){
+    // Des modifications locales attendent d'être synchronisées : on ne
+    // touche pas aux données tant que l'utilisateur n'a pas cliqué sur
+    // "Synchroniser" — l'écoute temps réel démarrera après coup.
+    return;
+  }
+
   let data = await loadDBFromFirestore();
   if(!data){
     data = seedData();
@@ -2560,6 +2683,8 @@ async function initFirestoreData(){
     await persistDB(data);
   }
   DB = data;
+  saveLocalDB(data);
+  setPendingSync(false);
   setSyncStatus('ok', 'Données synchronisées');
   applyNavPermissions();
   listenToFirestoreChanges();
@@ -4594,6 +4719,22 @@ document.addEventListener('keydown', (e)=>{
     navigate(VIEW_BY_KEY[e.key]);
     return;
   }
+});
+
+/* ---------- Synchronisation manuelle + détection connexion ---------- */
+document.getElementById('btnManualSync')?.addEventListener('click', manualSync);
+window.addEventListener('online', ()=>{
+  if(!DB) return;
+  if(hasPendingSync()){
+    setSyncStatus('pending', 'Connexion rétablie — synchronisation possible', {showSyncButton:true});
+    toast('Connexion internet rétablie — cliquez sur "Synchroniser" pour envoyer vos modifications', 'success');
+  }else{
+    setSyncStatus('ok', 'Synchronisé');
+    if(!__listenerActive) listenToFirestoreChanges();
+  }
+});
+window.addEventListener('offline', ()=>{
+  setSyncStatus('offline', 'Hors ligne — les modifications restent enregistrées sur cet appareil', {showSyncButton: hasPendingSync()});
 });
 
 /* ---------- Init : PWA (service worker + bouton d'installation) ---------- */
