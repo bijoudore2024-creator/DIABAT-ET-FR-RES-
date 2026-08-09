@@ -1297,43 +1297,6 @@
     }
     .auth-submit svg { width: 17px; height: 17px; }
     .auth-submit:disabled { opacity: 0.6; cursor: wait; }
-
-    /* ---------- Sélecteur de profil + PIN à points (écran de connexion locale) ---------- */
-    .profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 4px 0 18px; }
-    .profile-card {
-        display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
-        padding: 20px 10px; border-radius: 16px;
-        border: 1.5px solid var(--line, rgba(255,255,255,0.12));
-        background: rgba(255,255,255,0.03);
-        cursor: pointer; user-select: none;
-        transition: border-color .15s, background .15s, transform .1s;
-        font-family: 'Work Sans', sans-serif;
-    }
-    .profile-card:active { transform: scale(0.97); }
-    .profile-card .profile-icon { font-size: 2em; line-height: 1; }
-    .profile-card .profile-name { font-weight: 700; color: var(--text-muted); font-size: 0.98em; }
-    .profile-card.selected {
-        border-color: var(--accent-soft);
-        background: color-mix(in srgb, var(--accent-soft) 14%, transparent);
-        box-shadow: 0 0 0 1px var(--accent-soft) inset;
-    }
-    .profile-card.selected .profile-name { color: var(--accent-soft); }
-    .pin-dots-field {
-        display: flex; align-items: center; justify-content: center; gap: 14px;
-        border: 1.5px solid var(--line, rgba(255,255,255,0.12));
-        border-radius: 14px; background: rgba(255,255,255,0.03);
-        padding: 18px 12px; margin-bottom: 16px; min-height: 24px; position: relative;
-    }
-    .pin-dots-field input {
-        position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer;
-    }
-    .pin-dot {
-        width: 10px; height: 10px; border-radius: 50%;
-        background: var(--text-muted); opacity: 0.35;
-        transition: opacity .12s, background .12s, transform .12s;
-    }
-    .pin-dot.filled { opacity: 1; background: var(--accent-soft); transform: scale(1.15); }
-    .pin-caret { width: 1.5px; height: 20px; background: var(--accent-soft); opacity: 0.8; }
     .auth-switch {
         text-align: center; margin-top: 16px; font-size: 0.8em; color: var(--text-muted);
     }
@@ -1902,11 +1865,11 @@
                     </div>
                 </div>
                 <div class="auth-field">
-                    <label for="authPassword">Code PIN</label>
+                    <label for="authPassword">Mot de passe</label>
                     <div class="auth-field-icon" style="position:relative;">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
-                        <input type="password" id="authPassword" inputmode="numeric" autocomplete="off" placeholder="••••" maxlength="8" style="padding-right:42px;">
-                        <button type="button" id="togglePasswordBtn" onclick="togglePasswordVisibility()" aria-label="Afficher le code PIN" style="position:absolute; right:6px; top:50%; transform:translateY(-50%); background:none; border:none; padding:6px; cursor:pointer; color:var(--text-muted); display:flex; align-items:center;">
+                        <input type="password" id="authPassword" autocomplete="current-password" placeholder="••••••••" style="padding-right:42px;">
+                        <button type="button" id="togglePasswordBtn" onclick="togglePasswordVisibility()" aria-label="Afficher le mot de passe" style="position:absolute; right:6px; top:50%; transform:translateY(-50%); background:none; border:none; padding:6px; cursor:pointer; color:var(--text-muted); display:flex; align-items:center;">
                             <svg id="eyeIconShow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px; height:18px;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                             <svg id="eyeIconHide" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px; height:18px; display:none;"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a20.3 20.3 0 0 1 4.22-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a20.3 20.3 0 0 1-2.68 3.9M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
                         </button>
@@ -1914,7 +1877,7 @@
                 </div>
                 <div class="auth-row">
                     <label class="auth-remember"><input type="checkbox" id="authRememberMe">Se souvenir de moi</label>
-                    <button type="button" class="auth-forgot" onclick="handleForgotPassword()">Code PIN oublié ?</button>
+                    <button type="button" class="auth-forgot" onclick="handleForgotPassword()">Mot de passe oublié ?</button>
                 </div>
                 <button type="submit" class="auth-submit" id="authSubmitBtn" onclick="handleAuthSubmit()">Se connecter
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
@@ -1980,14 +1943,19 @@
         </div>
         <div class="auth-card">
             <h2>Diabaté &amp; Frères Sarl</h2>
-            <p class="auth-sub">Choisis ton profil pour ouvrir la caisse.</p>
+            <p class="auth-sub">Connexion locale de l'équipe</p>
             <div class="auth-error" id="localLoginError"></div>
             <form id="localLoginForm" onsubmit="return false;">
-                <div class="profile-grid" id="localLoginProfileGrid"></div>
-                <select id="localLoginUser" style="display:none;"></select>
-                <div class="pin-dots-field" id="localLoginPinField">
-                    <input type="password" id="localLoginPassword" inputmode="numeric" autocomplete="off" maxlength="8" oninput="renderLocalLoginPinDots()" onkeydown="if(event.key==='Enter'){handleLocalLoginSubmit();}">
-                    <div id="localLoginPinDots" style="display:flex; align-items:center; gap:14px;"></div>
+                <div class="auth-field">
+                    <label for="localLoginUser">Compte</label>
+                    <select id="localLoginUser"></select>
+                </div>
+                <div class="auth-field">
+                    <label for="localLoginPassword">Mot de passe</label>
+                    <div class="auth-field-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+                        <input type="password" id="localLoginPassword" autocomplete="current-password" placeholder="••••••••" onkeydown="if(event.key==='Enter'){handleLocalLoginSubmit();}">
+                    </div>
                 </div>
                 <button type="submit" class="auth-submit" onclick="handleLocalLoginSubmit()">Se connecter
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
@@ -3083,8 +3051,8 @@
                         <input type="email" id="newUserEmail" placeholder="Ex: mamadou@pharmacie.com">
                     </div>
                     <div style="flex:1; min-width:140px;">
-                        <label style="font-size:0.8em; color:var(--text-muted);">Code PIN</label>
-                        <input type="text" id="newUserPassword" inputmode="numeric" placeholder="6 à 8 chiffres" maxlength="8">
+                        <label style="font-size:0.8em; color:var(--text-muted);">Mot de passe</label>
+                        <input type="text" id="newUserPassword" placeholder="6 caractères min.">
                     </div>
                     <div style="min-width:160px;">
                         <label style="font-size:0.8em; color:var(--text-muted);">Rôle</label>
@@ -3141,41 +3109,15 @@
                     <li>Colle les valeurs ci-dessus puis clique sur "Enregistrer la config"</li>
                 </ol>
             </details>
-
-            <div style="border-top:1px solid var(--line); margin-top:18px; padding-top:16px;">
-                <h4 style="margin:0 0 6px;">Compte de synchronisation de cet appareil</h4>
-                <p style="color:var(--text-muted); font-size:0.85em; margin:0 0 12px;">
-                    Ce compte sert uniquement à sauvegarder et synchroniser les données en ligne. L'ouverture de l'application se fait toujours via le profil/rôle ci-dessous — ce compte n'est jamais demandé au démarrage.
-                </p>
-                <div class="auth-error" id="syncAuthError"></div>
-
-                <div id="syncAccountSignedIn" style="display:none;">
-                    <div style="padding:10px 14px; border-radius:8px; background:var(--ok-bg); color:var(--ok); font-size:0.9em; margin-bottom:10px;">
-                        Connecté : <strong id="syncAccountEmail"></strong>
-                    </div>
-                    <button class="btn btn-danger" onclick="handleSyncAccountSignOut()" style="width:auto;">Déconnecter la synchronisation</button>
-                </div>
-
-                <div id="syncAccountSignedOut" style="display:none;">
-                    <label style="display:block; font-size:0.85em; color:var(--text-muted); margin-bottom:4px;">Email du compte de synchronisation</label>
-                    <input type="email" id="syncAuthEmail" placeholder="sync@pharmacie.gn" autocomplete="username">
-                    <label style="display:block; font-size:0.85em; color:var(--text-muted); margin:10px 0 4px;">Code PIN (6 à 8 chiffres)</label>
-                    <input type="password" id="syncAuthPassword" inputmode="numeric" maxlength="8" autocomplete="current-password">
-                    <div style="display:flex; gap:10px; margin-top:12px; flex-wrap:wrap;">
-                        <button class="btn btn-success" onclick="handleSyncAccountSignIn()" style="width:auto;">Se connecter</button>
-                        <button class="btn" onclick="handleSyncAccountSignUp()" style="width:auto;">Créer ce compte</button>
-                    </div>
-                </div>
-            </div>
         </div>
 
         <div class="fin-panel" id="localSecurityPanel" style="margin-bottom:20px; display:none;">
             <h3 style="margin-top:0;">Sécurité locale (sans internet)</h3>
             <p style="color:var(--text-muted); font-size:0.9em; margin-top:-8px;">
-                Fonctionne même sans Firebase : protège l'ouverture de l'application par un code PIN, et un code PIN distinct par rôle pour identifier qui est connecté sur cet appareil.
+                Fonctionne même sans Firebase : protège l'ouverture de l'application par un code PIN, et permet de créer des comptes locaux par rôle pour plusieurs employés sur le même appareil.
             </p>
 
-            <h4 style="margin-bottom:6px;">Code PIN d'accès à l'appareil</h4>
+            <h4 style="margin-bottom:6px;">Code PIN d'accès</h4>
             <div id="localPinStatus" style="margin:6px 0 10px; padding:8px 12px; border-radius:8px; font-size:0.85em;"></div>
             <label style="display:block; font-size:0.85em; color:var(--text-muted); margin-bottom:4px;">Nouveau code PIN</label>
             <input type="password" id="settLocalPinNew" inputmode="numeric" placeholder="Ex: 4821">
@@ -3184,15 +3126,23 @@
                 <button class="btn btn-danger" onclick="removeLocalPinFromSettings()" style="width:auto;">Supprimer le PIN</button>
             </div>
 
-            <h4 style="margin:20px 0 6px;">Login à rôles</h4>
-            <div style="display:flex; align-items:flex-start; gap:10px; margin-bottom:14px;">
-                <input type="checkbox" id="settRequireRoleLogin" onchange="toggleRequireRoleLogin()" style="width:20px; height:20px; margin-top:2px; accent-color: var(--accent-dim);">
-                <label for="settRequireRoleLogin" style="font-size:0.92em; cursor:pointer;">Demander un profil (rôle) à l'ouverture</label>
-            </div>
-            <div id="localRoleCodesWrap"></div>
-            <p style="color:var(--text-muted); font-size:0.82em; margin-top:14px;">
-                Chaque rôle se connecte avec son propre code PIN. Les actions sensibles restent réservées au PDG et à l'Administrateur selon les permissions habituelles. Codes gardés sur cet appareil, hors synchronisation.
+            <h4 style="margin:20px 0 6px;">Comptes locaux par rôle</h4>
+            <p style="color:var(--text-muted); font-size:0.85em; margin-top:-4px;">
+                Si au moins un compte local existe, l'application demande de choisir un compte et un mot de passe à l'ouverture (en plus du PIN si configuré).
             </p>
+            <div id="localUsersListWrap" style="margin:10px 0;"></div>
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                <input type="text" id="newLocalUserName" placeholder="Nom complet" style="flex:1; min-width:140px;">
+                <input type="text" id="newLocalUserUsername" placeholder="Identifiant" style="flex:1; min-width:120px;">
+                <input type="password" id="newLocalUserPassword" placeholder="Mot de passe" style="flex:1; min-width:120px;">
+                <select id="newLocalUserRole" style="flex:1; min-width:140px;">
+                    <option value="pdg">PDG</option>
+                    <option value="admin">Administrateur</option>
+                    <option value="agent" selected>Agent de commerce</option>
+                    <option value="caissier">Caissier</option>
+                </select>
+            </div>
+            <button class="btn btn-primary" onclick="createLocalUserFromSettings()" style="width:auto; margin-top:8px;">+ Ajouter le compte</button>
         </div>
 
         <div class="fin-panel" id="dangerZonePanel" style="display:none; margin-top:20px; border-color: rgba(224,99,106,0.4);">
@@ -3568,7 +3518,8 @@ function injectShortcutBar(n) {
 
 function getUserRole() {
     if (currentUser && currentUser.role) return currentUser.role;
-    return 'pdg'; // pas de login par rôle activé sur cet appareil = accès total (comportement historique)
+    if (!FIREBASE_CONFIGURED) return 'pdg'; // mode local sans compte créé = accès total
+    return null; // compte connecté mais sans rôle assigné (en attente) : aucun accès tant que non validé
 }
 function isAdmin() {
     // Conservé pour compat interne : "a un rôle de direction complet" (Finances incluses) = PDG.
@@ -3580,7 +3531,7 @@ function canManageUsers() {
     return r === 'pdg' || r === 'admin';
 }
 function canAccessTab(n) {
-    if (!(currentUser && currentUser.role)) return true; // pas de login par rôle activé : pas de restriction
+    if (!FIREBASE_CONFIGURED && !(currentUser && currentUser.role)) return true; // pas de compte local configuré : pas de restriction
     const allowed = TAB_ROLES[n];
     if (!allowed) return true;
     return allowed.indexOf(getUserRole()) !== -1;
@@ -3680,7 +3631,7 @@ async function createEmployeeAccount() {
 
     if (!name) { showFeedback('Merci de renseigner le nom.', false); return; }
     if (!email || !email.includes('@')) { showFeedback('Adresse email invalide.', false); return; }
-    if (!/^\d{6,8}$/.test(password)) { showFeedback('Le code PIN doit contenir entre 6 et 8 chiffres.', false); return; }
+    if (password.length < 6) { showFeedback('Le mot de passe doit faire au moins 6 caractères.', false); return; }
     if (role === 'pdg' && !confirm('Confirmer la création d\'un compte PDG (accès total, y compris Finances) ?')) return;
 
     showFeedback('Création en cours…', true);
@@ -3723,7 +3674,7 @@ async function createEmployeeAccount() {
         let msg = 'Impossible de créer le compte.';
         if (err && err.code === 'auth/email-already-in-use') msg = 'Un compte existe déjà avec cet email.';
         else if (err && err.code === 'auth/invalid-email') msg = 'Adresse email invalide.';
-        else if (err && err.code === 'auth/weak-password') msg = 'Code PIN trop faible (6 chiffres minimum).';
+        else if (err && err.code === 'auth/weak-password') msg = 'Mot de passe trop faible (6 caractères minimum).';
         else if (err && err.message) msg = err.message;
         showFeedback(msg, false);
     } finally {
@@ -3949,12 +3900,7 @@ async function handleAuthSubmit() {
     const name = document.getElementById('authName').value.trim();
 
     if (!email || !password) {
-        errBox.textContent = 'Merci de renseigner ton email et ton code PIN.';
-        errBox.classList.add('show');
-        return;
-    }
-    if (!/^\d{6,8}$/.test(password)) {
-        errBox.textContent = 'Le code PIN doit contenir entre 6 et 8 chiffres.';
+        errBox.textContent = 'Merci de renseigner ton email et ton mot de passe.';
         errBox.classList.add('show');
         return;
     }
@@ -3981,12 +3927,11 @@ async function handleAuthSubmit() {
             if (cred.user && name) {
                 try { await cred.user.updateProfile({ displayName: name }); } catch (e) {}
             }
-            await onSyncAccountConnected(cred.user);
+            await onAuthenticated(cred.user, name);
         } else {
             const cred = await fbAuth.signInWithEmailAndPassword(email, password);
-            await onSyncAccountConnected(cred.user);
+            await onAuthenticated(cred.user);
         }
-        hideAuthScreen();
     } catch (err) {
         errBox.style.background = 'var(--danger-bg)';
         errBox.style.color = 'var(--danger)';
@@ -4008,14 +3953,14 @@ async function handleForgotPassword() {
     if (!FIREBASE_CONFIGURED) {
         errBox.style.background = 'var(--danger-bg)';
         errBox.style.color = 'var(--danger)';
-        errBox.textContent = 'La récupération de code PIN nécessite la synchronisation en ligne, non configurée sur cette copie. Contacte HABATECH (627 54 19 25).';
+        errBox.textContent = 'La récupération de mot de passe nécessite la synchronisation en ligne, non configurée sur cette copie. Contacte HABATECH (627 54 19 25).';
         errBox.classList.add('show');
         return;
     }
     if (!email) {
         errBox.style.background = 'var(--danger-bg)';
         errBox.style.color = 'var(--danger)';
-        errBox.textContent = 'Renseigne ton email ci-dessus, puis clique à nouveau sur "Code PIN oublié ?".';
+        errBox.textContent = 'Renseigne ton email ci-dessus, puis clique à nouveau sur "Mot de passe oublié ?".';
         errBox.classList.add('show');
         emailInput.focus();
         return;
@@ -4048,35 +3993,45 @@ function applyRememberedEmail() {
 
 function translateAuthError(code) {
     if (!code) return 'Une erreur est survenue. Réessaie.';
-    if (code.includes('wrong-password') || code.includes('invalid-credential') || code.includes('user-not-found')) return 'Email ou code PIN incorrect.';
+    if (code.includes('wrong-password') || code.includes('invalid-credential') || code.includes('user-not-found')) return 'Email ou mot de passe incorrect.';
     if (code.includes('email-already-in-use')) return 'Un compte existe déjà avec cet email. Connecte-toi plutôt.';
-    if (code.includes('weak-password')) return 'Le code PIN doit contenir au moins 6 chiffres.';
+    if (code.includes('weak-password')) return 'Le mot de passe doit contenir au moins 6 caractères.';
     if (code.includes('invalid-email')) return 'Adresse email invalide.';
     return code;
 }
 
 async function handleSignOut() {
-    // Ferme uniquement la session du profil/rôle local en cours sur cet appareil. Le compte de
-    // synchronisation Firebase (s'il y en a un) reste connecté en fond et n'est pas affecté —
-    // il se gère séparément depuis Paramètres > Synchronisation.
     if (!confirm('Se déconnecter de votre espace pharmacie ?')) return;
+    if (FIREBASE_CONFIGURED) {
+        if (realtimeUnsubscribe) {
+            realtimeUnsubscribe();
+            realtimeUnsubscribe = null;
+        }
+        if (fbAuth) await fbAuth.signOut();
+        currentUser = null;
+        updateUserBadge();
+        applyRolePermissions();
+        setSyncStatus('offline', 'Hors ligne');
+        hidePendingScreen();
+        showAuthScreen();
+        return;
+    }
+    // Mode local (sans Firebase) : on referme la session du compte local en cours.
     currentUser = null;
     updateUserBadge();
     applyRolePermissions();
     if (isLocalPinSet()) {
         showLocalPinScreen();
-    } else if (isRequireRoleLoginEnabled() && anyRoleCodeConfigured()) {
+    } else if (loadLocalUsers().length > 0) {
         showLocalLoginScreen();
     } else {
-        setSyncStatus('offline', syncUser ? ('Synchro : ' + syncUser.email) : 'Mode local (pas de synchronisation)');
+        setSyncStatus('offline', 'Mode local (pas de synchronisation)');
     }
 }
 
-// ==================== Sécurité locale (PIN d'appareil + code PIN par rôle, sans internet) ====================
+// ==================== Sécurité locale (PIN + comptes par rôle, sans internet) ====================
 const LOCAL_PIN_KEY = 'diabate_pharma_local_pin_v1';
-const LOCAL_ROLE_CODES_KEY = 'diabate_pharma_local_role_codes_v1';
-const LOCAL_REQUIRE_ROLE_LOGIN_KEY = 'diabate_pharma_local_require_role_login_v1';
-const ROLE_ICONS = { pdg: '👑', admin: '🛡️', agent: '💼', caissier: '🧾' };
+const LOCAL_USERS_KEY = 'diabate_pharma_local_users_v1';
 
 async function hashText(text) {
     try {
@@ -4101,27 +4056,27 @@ async function verifyLocalPin(pin) {
     return (await hashText(pin)) === stored;
 }
 
-// ---------- Codes PIN par rôle (un seul code fixe par rôle, pas de comptes nommés) ----------
-function loadRoleCodes() {
-    try { const raw = localStorage.getItem(LOCAL_ROLE_CODES_KEY); return raw ? JSON.parse(raw) : {}; }
-    catch (e) { return {}; }
+function loadLocalUsers() {
+    try { const raw = localStorage.getItem(LOCAL_USERS_KEY); return raw ? JSON.parse(raw) : []; }
+    catch (e) { return []; }
 }
-function saveRoleCodes(codes) { localStorage.setItem(LOCAL_ROLE_CODES_KEY, JSON.stringify(codes)); }
-async function setRoleCode(role, pin) {
-    const codes = loadRoleCodes();
-    codes[role] = await hashText(pin);
-    saveRoleCodes(codes);
+function saveLocalUsers(list) { localStorage.setItem(LOCAL_USERS_KEY, JSON.stringify(list)); }
+async function addLocalUser(name, username, password, role) {
+    const users = loadLocalUsers();
+    const uname = username.trim().toLowerCase();
+    if (users.some(u => u.username === uname)) throw new Error('Cet identifiant existe déjà.');
+    users.push({ id: 'lu' + Date.now(), name: name.trim(), username: uname, passwordHash: await hashText(password), role });
+    saveLocalUsers(users);
+    return users;
 }
-function isRoleCodeSet(role) { return !!loadRoleCodes()[role]; }
-async function verifyRoleCode(role, pin) {
-    const codes = loadRoleCodes();
-    const stored = codes[role];
-    if (!stored) return false;
-    return (await hashText(pin)) === stored;
+function deleteLocalUser(id) { const users = loadLocalUsers().filter(u => u.id !== id); saveLocalUsers(users); return users; }
+function updateLocalUserRole(id, role) {
+    const users = loadLocalUsers();
+    const u = users.find(x => x.id === id);
+    if (u) u.role = role;
+    saveLocalUsers(users);
+    return users;
 }
-function isRequireRoleLoginEnabled() { return localStorage.getItem(LOCAL_REQUIRE_ROLE_LOGIN_KEY) === '1'; }
-function setRequireRoleLogin(enabled) { localStorage.setItem(LOCAL_REQUIRE_ROLE_LOGIN_KEY, enabled ? '1' : '0'); }
-function anyRoleCodeConfigured() { const codes = loadRoleCodes(); return ROLE_ORDER.some(r => !!codes[r]); }
 
 // ---------- Écran PIN ----------
 function showLocalPinScreen() {
@@ -4152,75 +4107,20 @@ async function handleLocalPinSubmit() {
     }
 }
 function proceedAfterLocalPin() {
-    if (isRequireRoleLoginEnabled() && anyRoleCodeConfigured()) {
+    if (loadLocalUsers().length > 0) {
         showLocalLoginScreen();
     } else {
-        // Pas de login par rôle activé : accès direct, comme avant. currentUser reste null
-        // (getUserRole()/canAccessTab() traitent déjà ce cas comme un accès total en mode local).
-        currentUser = { id: 'local', email: null, name: '', role: null, local: true };
-        updateUserBadge();
+        setSyncStatus('offline', 'Mode local (pas de synchronisation)');
         applyRolePermissions();
-        finishLocalSessionStart();
     }
 }
 
-// Après l'ouverture d'une session locale (PIN d'appareil et/ou choix du profil de rôle) : si un
-// compte de synchronisation Firebase est déjà connecté sur cet appareil, on lance le pull + le
-// suivi temps réel. Sinon l'app reste en mode local, comme aujourd'hui.
-async function finishLocalSessionStart() {
-    if (FIREBASE_CONFIGURED && syncUser) {
-        setSyncStatus('offline', 'Synchronisation…');
-        await pullRemoteData();
-        subscribeRealtime();
-    } else {
-        setSyncStatus('offline', 'Mode local' + (FIREBASE_CONFIGURED ? ' (aucun compte de synchro connecté)' : ' (pas de synchronisation)'));
-    }
-}
-
-// ---------- Écran de connexion locale par rôle ----------
-let selectedLocalLoginRole = null;
+// ---------- Écran de connexion locale par compte ----------
 function populateLocalLoginSelect() {
-    const grid = document.getElementById('localLoginProfileGrid');
-    const codes = loadRoleCodes();
-    const availableRoles = ROLE_ORDER.filter(r => !!codes[r]);
-    if (grid) {
-        if (availableRoles.length === 0) {
-            grid.innerHTML = '<p style="grid-column:1/-1; color:var(--text-muted); font-size:0.85em;">Aucun code de rôle configuré — ajoute-en un dans Paramètres.</p>';
-        } else {
-            grid.innerHTML = availableRoles.map(r =>
-                '<div class="profile-card" data-role="' + r + '" onclick="selectLocalLoginProfile(\'' + r + '\')">' +
-                    '<span class="profile-icon">' + (ROLE_ICONS[r] || '👤') + '</span>' +
-                    '<span class="profile-name">' + (ROLE_LABELS[r] || r) + '</span>' +
-                '</div>'
-            ).join('');
-        }
-    }
-    selectedLocalLoginRole = availableRoles.length > 0 ? availableRoles[0] : null;
-    updateLocalLoginProfileSelection();
-}
-function selectLocalLoginProfile(role) {
-    selectedLocalLoginRole = role;
-    updateLocalLoginProfileSelection();
-    const pin = document.getElementById('localLoginPassword');
-    if (pin) { pin.value = ''; renderLocalLoginPinDots(); setTimeout(() => pin.focus(), 30); }
-}
-function updateLocalLoginProfileSelection() {
-    document.querySelectorAll('#localLoginProfileGrid .profile-card').forEach(card => {
-        card.classList.toggle('selected', card.getAttribute('data-role') === selectedLocalLoginRole);
-    });
-}
-function renderLocalLoginPinDots() {
-    const input = document.getElementById('localLoginPassword');
-    const dotsWrap = document.getElementById('localLoginPinDots');
-    if (!input || !dotsWrap) return;
-    const len = input.value.length;
-    const maxDots = Math.max(4, len);
-    let html = '';
-    for (let i = 0; i < maxDots; i++) {
-        html += '<span class="pin-dot' + (i < len ? ' filled' : '') + '"></span>';
-    }
-    html += '<span class="pin-caret"></span>';
-    dotsWrap.innerHTML = html;
+    const sel = document.getElementById('localLoginUser');
+    if (!sel) return;
+    const users = loadLocalUsers();
+    sel.innerHTML = users.map(u => '<option value="' + escapeHtml(u.id) + '">' + escapeHtml(u.name) + ' (' + (ROLE_LABELS[u.role] || u.role) + ')</option>').join('');
 }
 function showLocalLoginScreen() {
     populateLocalLoginSelect();
@@ -4230,34 +4130,35 @@ function showLocalLoginScreen() {
     if (errBox) errBox.classList.remove('show');
     const pw = document.getElementById('localLoginPassword');
     if (pw) pw.value = '';
-    renderLocalLoginPinDots();
 }
 function hideLocalLoginScreen() {
     const el = document.getElementById('localLoginScreen');
     if (el) el.classList.add('hidden');
 }
 async function handleLocalLoginSubmit() {
+    const sel = document.getElementById('localLoginUser');
     const pwInput = document.getElementById('localLoginPassword');
     const errBox = document.getElementById('localLoginError');
-    const role = selectedLocalLoginRole;
-    if (!role) { errBox.textContent = 'Choisis un profil.'; errBox.classList.add('show'); return; }
-    if (!(await verifyRoleCode(role, pwInput.value))) {
-        errBox.textContent = 'Code PIN incorrect.';
+    const userId = sel.value;
+    const users = loadLocalUsers();
+    const user = users.find(u => u.id === userId);
+    if (!user) return;
+    if ((await hashText(pwInput.value)) !== user.passwordHash) {
+        errBox.textContent = 'Mot de passe incorrect.';
         errBox.classList.add('show');
         pwInput.value = '';
-        renderLocalLoginPinDots();
         return;
     }
-    currentUser = { id: 'role_' + role, email: null, name: ROLE_LABELS[role] || role, role: role, local: true };
+    currentUser = { id: user.id, email: user.username, name: user.name, role: user.role, local: true };
     hideLocalLoginScreen();
     updateUserBadge();
     applyRolePermissions();
+    setSyncStatus('offline', 'Mode local — ' + user.name);
     const activeTab = document.querySelector('.tab-content.active');
     if (activeTab) {
         const activeN = parseInt(activeTab.id.replace('tab', ''), 10);
         if (!canAccessTab(activeN)) openTab(0);
     }
-    finishLocalSessionStart();
 }
 
 // ---------- Panneau "Sécurité locale" (onglet Paramètres) ----------
@@ -4274,26 +4175,6 @@ function removeLocalPinFromSettings() {
     removeLocalPin();
     renderLocalSecurityPanel();
 }
-function toggleRequireRoleLogin() {
-    const box = document.getElementById('settRequireRoleLogin');
-    setRequireRoleLogin(!!(box && box.checked));
-}
-async function saveRoleCodeFromSettings(role) {
-    const input = document.getElementById('settRoleCode_' + role);
-    if (!input) return;
-    const val = input.value.trim();
-    if (!/^\d{4,6}$/.test(val)) { alert('Le code doit contenir entre 4 et 6 chiffres.'); return; }
-    await setRoleCode(role, val);
-    input.value = '';
-    renderLocalSecurityPanel();
-}
-function removeRoleCodeFromSettings(role) {
-    if (!confirm('Supprimer le code PIN du rôle ' + (ROLE_LABELS[role] || role) + ' ?')) return;
-    const codes = loadRoleCodes();
-    delete codes[role];
-    saveRoleCodes(codes);
-    renderLocalSecurityPanel();
-}
 function renderLocalSecurityPanel() {
     const statusBox = document.getElementById('localPinStatus');
     if (statusBox) {
@@ -4307,106 +4188,83 @@ function renderLocalSecurityPanel() {
             statusBox.textContent = "⚠ Aucun code PIN défini — l'application s'ouvre librement sur cet appareil.";
         }
     }
-    const requireBox = document.getElementById('settRequireRoleLogin');
-    if (requireBox) requireBox.checked = isRequireRoleLoginEnabled();
-
-    const wrap = document.getElementById('localRoleCodesWrap');
+    const wrap = document.getElementById('localUsersListWrap');
     if (wrap) {
-        const codes = loadRoleCodes();
-        wrap.innerHTML = ROLE_ORDER.map(function (r) {
-            const set = !!codes[r];
-            const statusLine = set
-                ? '<span style="color:var(--ok); font-size:0.82em;">✓ Code défini</span>'
-                : '<span style="color:var(--text-muted); font-size:0.82em;">Aucun code défini</span>';
-            return '<div style="padding:12px 0; border-bottom:1px solid var(--line);">' +
-                '<div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">' +
-                    '<strong>' + (ROLE_ICONS[r] || '') + ' ' + ROLE_LABELS[r] + '</strong>' + statusLine +
-                '</div>' +
-                '<div style="display:flex; gap:8px; flex-wrap:wrap;">' +
-                    '<input type="password" id="settRoleCode_' + r + '" inputmode="numeric" autocomplete="off" maxlength="6" placeholder="4 à 6 chiffres" style="flex:1; min-width:120px;">' +
-                    '<button class="btn btn-success" style="width:auto;" onclick="saveRoleCodeFromSettings(\'' + r + '\')">💾 ' + (set ? 'Changer le code' : 'Définir le code') + '</button>' +
-                    (set ? '<button class="btn btn-danger" style="width:auto;" onclick="removeRoleCodeFromSettings(\'' + r + '\')">Supprimer</button>' : '') +
-                '</div>' +
-            '</div>';
-        }).join('');
+        const users = loadLocalUsers();
+        if (users.length === 0) {
+            wrap.innerHTML = '<p style="color:var(--text-muted); font-size:0.85em;">Aucun compte local créé — l\'ouverture de l\'app ne demande pas de compte (uniquement le PIN, si défini).</p>';
+        } else {
+            wrap.innerHTML = users.map(function (u) {
+                const roleOptions = ROLE_ORDER.map(r => '<option value="' + r + '"' + (r === u.role ? ' selected' : '') + '>' + ROLE_LABELS[r] + '</option>').join('');
+                return '<div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; padding:8px 0; border-bottom:1px solid var(--line);">' +
+                    '<strong style="min-width:120px;">' + escapeHtml(u.name) + '</strong>' +
+                    '<span style="color:var(--text-muted); font-size:0.85em; min-width:100px;">@' + escapeHtml(u.username) + '</span>' +
+                    '<select style="width:auto; margin:0;" onchange="changeLocalUserRole(\'' + u.id + '\', this.value)">' + roleOptions + '</select>' +
+                    '<button class="btn btn-danger" style="width:auto; padding:6px 10px;" onclick="removeLocalUser(\'' + u.id + '\')">🗑</button>' +
+                    '</div>';
+            }).join('');
+        }
     }
 }
-
-// Compte Firebase utilisé UNIQUEMENT pour la synchronisation en fond (sauvegarde/multi-appareils).
-// Distinct de `currentUser`, qui représente le profil/rôle local actif de la personne devant l'écran.
-let syncUser = null; // { id, email, name }
-
-function updateSyncBadgeUI() {
-    const box = document.getElementById('settFirebaseStatus');
-    // Le panneau Paramètres se re-rend via renderSettingsFirebasePanel(); on se contente ici de
-    // rafraîchir le badge réseau si aucune session locale n'est encore ouverte.
-    if (!currentUser) setSyncStatus(syncUser ? 'online' : 'offline', syncUser ? ('Synchro : ' + syncUser.email) : 'Mode local');
-    if (typeof renderSettingsFirebasePanel === 'function') renderSettingsFirebasePanel();
-}
-
-// Appelé quand un compte Firebase (email/PIN) vient de se connecter — que ce soit une reconnexion
-// silencieuse au démarrage ou une connexion manuelle depuis Paramètres > Synchronisation.
-// Ne touche jamais currentUser / au rôle actif : seule la sauvegarde/synchro des données en profite.
-async function onSyncAccountConnected(user) {
-    syncUser = { id: user.uid, email: user.email, name: user.displayName || user.email };
-    updateSyncBadgeUI();
-    if (currentUser) {
-        // Une session locale (rôle/PIN) est déjà ouverte : on lance tout de suite le pull + le
-        // suivi temps réel pour que les données se mettent à jour en fond, sans rien interrompre.
-        setSyncStatus('offline', 'Synchronisation…');
-        await pullRemoteData();
-        subscribeRealtime();
+async function createLocalUserFromSettings() {
+    const name = document.getElementById('newLocalUserName').value.trim();
+    const username = document.getElementById('newLocalUserUsername').value.trim();
+    const password = document.getElementById('newLocalUserPassword').value;
+    const role = document.getElementById('newLocalUserRole').value;
+    if (!name || !username || !password) { alert('Merci de remplir nom, identifiant et mot de passe.'); return; }
+    if (password.length < 4) { alert('Le mot de passe doit contenir au moins 4 caractères.'); return; }
+    try {
+        await addLocalUser(name, username, password, role);
+        document.getElementById('newLocalUserName').value = '';
+        document.getElementById('newLocalUserUsername').value = '';
+        document.getElementById('newLocalUserPassword').value = '';
+        renderLocalSecurityPanel();
+    } catch (e) {
+        alert(e.message);
     }
 }
+function changeLocalUserRole(id, role) { updateLocalUserRole(id, role); renderLocalSecurityPanel(); }
+function removeLocalUser(id) {
+    if (!confirm('Supprimer ce compte local ?')) return;
+    deleteLocalUser(id);
+    renderLocalSecurityPanel();
+}
 
-// Connexion manuelle du compte de synchronisation depuis Paramètres (ne concerne jamais l'ouverture
-// de l'application, qui reste toujours l'écran local par rôle/PIN).
-async function handleSyncAccountSignIn() {
-    const errBox = document.getElementById('syncAuthError');
-    if (errBox) errBox.classList.remove('show');
-    if (!FIREBASE_CONFIGURED) return;
-    const email = (document.getElementById('syncAuthEmail') || {}).value;
-    const password = (document.getElementById('syncAuthPassword') || {}).value;
-    if (!email || !password) {
-        if (errBox) { errBox.textContent = 'Renseigne l\'email et le code PIN du compte de synchronisation.'; errBox.classList.add('show'); }
+async function onAuthenticated(user, signupName) {
+    const fallbackName = signupName || user.displayName || user.email;
+    currentUser = {
+        id: user.uid,
+        email: user.email,
+        name: fallbackName,
+        role: null
+    };
+    const profile = await fetchOrCreateProfile(user, fallbackName);
+    if (profile.status === 'pending' || !profile.role) {
+        currentUser.role = null;
+        updateUserBadge();
+        showPendingScreen(user.email);
+        setSyncStatus('offline', 'En attente de validation');
         return;
     }
-    try {
-        const cred = await fbAuth.signInWithEmailAndPassword(email.trim(), password);
-        await onSyncAccountConnected(cred.user);
-    } catch (err) {
-        if (errBox) { errBox.textContent = translateAuthError(err.code || err.message); errBox.classList.add('show'); }
+    hidePendingScreen();
+    currentUser.role = profile.role;
+    if (profile.name) currentUser.name = profile.name;
+    updateUserBadge();
+    applyRolePermissions();
+    hideAuthScreen();
+    setSyncStatus('offline', 'Synchronisation…');
+    await pullRemoteData();
+    subscribeRealtime();
+    // Si l'onglet actuellement affiché n'est pas autorisé pour ce rôle, on retombe sur le Tableau de bord.
+    const activeTab = document.querySelector('.tab-content.active');
+    if (activeTab) {
+        const activeN = parseInt(activeTab.id.replace('tab', ''), 10);
+        if (!canAccessTab(activeN)) openTab(0);
     }
-}
-
-async function handleSyncAccountSignUp() {
-    const errBox = document.getElementById('syncAuthError');
-    if (errBox) errBox.classList.remove('show');
-    if (!FIREBASE_CONFIGURED) return;
-    const email = (document.getElementById('syncAuthEmail') || {}).value;
-    const password = (document.getElementById('syncAuthPassword') || {}).value;
-    if (!email || !/^\d{6,8}$/.test(password || '')) {
-        if (errBox) { errBox.textContent = 'Email requis, code PIN entre 6 et 8 chiffres.'; errBox.classList.add('show'); }
-        return;
-    }
-    try {
-        const cred = await fbAuth.createUserWithEmailAndPassword(email.trim(), password);
-        await onSyncAccountConnected(cred.user);
-    } catch (err) {
-        if (errBox) { errBox.textContent = translateAuthError(err.code || err.message); errBox.classList.add('show'); }
-    }
-}
-
-async function handleSyncAccountSignOut() {
-    if (!confirm('Déconnecter le compte de synchronisation de cet appareil ? Les données resteront disponibles localement.')) return;
-    if (realtimeUnsubscribe) { realtimeUnsubscribe(); realtimeUnsubscribe = null; }
-    if (fbAuth) { try { await fbAuth.signOut(); } catch (e) {} }
-    syncUser = null;
-    updateSyncBadgeUI();
 }
 
 async function pullRemoteData() {
-    if (!fbDb || !syncUser) return;
+    if (!fbDb || !currentUser) return;
     try {
         const snap = await fbDb.collection('pharmacy_data').doc(PHARMACY_ROW_ID).get();
         const row = snap.exists ? snap.data() : null;
@@ -4440,19 +4298,9 @@ function normalizeData(raw) {
 let lastPushAt = 0; // horodatage (ms) de notre dernière écriture, pour ignorer les échos
 let lastKnownRemoteUpdatedMs = 0; // horodatage (ms) de la dernière version serveur connue de ce device
 
-function syncWriterLabel() {
-    // Identifie l'auteur d'une écriture pour la détection de conflit et l'affichage "modifié par…" :
-    // le compte de synchro reste l'identité technique Firebase, mais on affiche le rôle local actif
-    // si connu (ex: "sync@pharmacie.gn (Caissier)"), plus parlant pour un(e) collègue sur un autre appareil.
-    if (!syncUser) return null;
-    const roleName = (currentUser && currentUser.name) ? currentUser.name : null;
-    return roleName ? (syncUser.email + ' (' + roleName + ')') : syncUser.email;
-}
-
 async function pushRemoteData() {
-    if (!fbDb || !syncUser) return;
+    if (!fbDb || !currentUser) return;
     const docRef = fbDb.collection('pharmacy_data').doc(PHARMACY_ROW_ID);
-    const writer = syncWriterLabel();
     try {
         lastPushAt = Date.now();
         const nowMs = Date.now();
@@ -4464,7 +4312,7 @@ async function pushRemoteData() {
                 const existingMs = (existing.updated_at && existing.updated_at.toMillis) ? existing.updated_at.toMillis() : 0;
                 // Si la version serveur est plus récente que la dernière version que ce device connaît,
                 // et que ce n'est pas nous qui l'avons écrite, un autre appareil a modifié entre-temps.
-                if (existingMs > lastKnownRemoteUpdatedMs && existing.updated_by !== writer) {
+                if (existingMs > lastKnownRemoteUpdatedMs && existing.updated_by !== (currentUser && currentUser.email)) {
                     conflict = true;
                     return;
                 }
@@ -4472,7 +4320,7 @@ async function pushRemoteData() {
             tx.set(docRef, {
                 payload: data,
                 updated_at: firebase.firestore.FieldValue.serverTimestamp(),
-                updated_by: writer
+                updated_by: currentUser.email
             });
         });
         if (conflict) {
@@ -4497,7 +4345,7 @@ async function pushRemoteData() {
                 docRef.set({
                     payload: data,
                     updated_at: firebase.firestore.FieldValue.serverTimestamp(),
-                    updated_by: writer
+                    updated_by: currentUser.email
                 }); // pas de await : Firestore met en file d'attente localement et confirmera plus tard
                 setSyncStatus('offline', 'Hors ligne (enregistré localement, en attente de synchro)');
                 return;
@@ -4518,7 +4366,7 @@ function subscribeRealtime() {
             const row = snap.data();
             lastKnownRemoteUpdatedMs = (row.updated_at && row.updated_at.toMillis) ? row.updated_at.toMillis() : Date.now();
             // Ignore les échos de nos propres écritures (même utilisateur, quelques secondes après)
-            if (row.updated_by === syncWriterLabel() && (Date.now() - lastPushAt) < 2000) return;
+            if (row.updated_by === (currentUser && currentUser.email) && (Date.now() - lastPushAt) < 2000) return;
             isApplyingRemoteData = true;
             data = normalizeData(row.payload);
             localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
@@ -4558,39 +4406,40 @@ function refreshAllViews() {
 // fonctionner hors ligne (lecture/écriture en cache, resynchro auto au retour du réseau) ;
 // ce badge sert juste à informer l'utilisateur de l'état de la connexion.
 window.addEventListener('offline', function () {
-    if (FIREBASE_CONFIGURED && syncUser) {
+    if (FIREBASE_CONFIGURED && currentUser) {
         setSyncStatus('offline', 'Hors ligne (les modifications seront synchronisées au retour du réseau)');
     }
 });
 window.addEventListener('online', function () {
-    if (FIREBASE_CONFIGURED && syncUser) {
+    if (FIREBASE_CONFIGURED && currentUser) {
         setSyncStatus('online', 'Connexion rétablie, synchronisation…');
     }
 });
 
 async function initAuth() {
-    // L'écran d'ouverture est TOUJOURS l'écran local par rôle/PIN (comme sur un appareil de caisse
-    // classique), que Firebase soit configuré ou non. Firebase, si configuré et si un compte de
-    // synchronisation a déjà été connecté sur cet appareil, se reconnecte en silence en fond pour
-    // la sauvegarde/synchro des données — il ne conditionne jamais l'ouverture de l'application.
-    if (isLocalPinSet()) {
-        showLocalPinScreen();
-    } else {
+    if (!FIREBASE_CONFIGURED) {
+        // Pas de Firebase configuré : sécurité locale optionnelle (PIN + comptes par rôle),
+        // sinon comportement historique (accès complet immédiat).
+        if (isLocalPinSet()) {
+            showLocalPinScreen();
+            return;
+        }
         proceedAfterLocalPin();
+        return;
     }
-
-    if (FIREBASE_CONFIGURED) {
-        setSyncStatus('offline', FIREBASE_CONFIGURED ? 'Mode local' : 'Hors ligne');
-        fbAuth.onAuthStateChanged(async function (user) {
-            if (user) {
-                await onSyncAccountConnected(user);
-            } else {
-                syncUser = null;
-                updateSyncBadgeUI();
-                if (realtimeUnsubscribe) { realtimeUnsubscribe(); realtimeUnsubscribe = null; }
-            }
-        });
-    }
+    setSyncStatus('offline', 'Connexion…');
+    let firstCheck = true;
+    fbAuth.onAuthStateChanged(async function (user) {
+        if (user) {
+            if (firstCheck) await onAuthenticated(user);
+        } else {
+            currentUser = null;
+            updateUserBadge();
+            setSyncStatus('offline', 'Hors ligne');
+            showAuthScreen();
+        }
+        firstCheck = false;
+    });
 }
 
 // ---------- Logo officiel Pharmacie Diabaté & Frères ----------
@@ -4833,7 +4682,7 @@ function renderSettingsTab() {
     document.getElementById('settFirebaseDatabaseURL').value = FIREBASE_CONFIG.databaseURL || '';
 
     renderSettingsLogo();
-    renderSettingsFirebasePanel();
+    renderFirebaseStatus();
     renderLocalSecurityPanel();
     applyRolePermissions();
     if (canManageUsers()) loadUsersList();
@@ -4846,33 +4695,20 @@ function renderSettingsLogo() {
     el.innerHTML = '<img src="' + src + '" alt="Logo" style="width:100%; height:100%; object-fit:cover;">';
 }
 
-function renderSettingsFirebasePanel() {
+function renderFirebaseStatus() {
     const el = document.getElementById('settFirebaseStatus');
-    if (el) {
-        if (FIREBASE_CONFIGURED && fbDb) {
-            if (syncUser) {
-                el.style.background = 'var(--ok-bg)';
-                el.style.color = 'var(--ok)';
-                el.textContent = '✓ Synchronisation active — compte connecté : ' + syncUser.email;
-            } else {
-                el.style.background = 'var(--warn-bg)';
-                el.style.color = 'var(--warn)';
-                el.textContent = '○ Firebase configuré, mais aucun compte de synchronisation connecté sur cet appareil. L\'app fonctionne en local en attendant.';
-            }
-        } else {
-            el.style.background = 'var(--warn-bg)';
-            el.style.color = 'var(--warn)';
-            el.textContent = '○ Non configuré — l\'application fonctionne en local sur cet appareil uniquement.';
-        }
+    if (!el) return;
+    if (FIREBASE_CONFIGURED && fbDb) {
+        el.style.background = 'var(--ok-bg)';
+        el.style.color = 'var(--ok)';
+        el.textContent = currentUser
+            ? ('✓ Connecté à Firebase (' + currentUser.email + ')')
+            : '✓ Firebase configuré. Connexion en cours ou en attente d\'authentification…';
+    } else {
+        el.style.background = 'var(--warn-bg)';
+        el.style.color = 'var(--warn)';
+        el.textContent = '○ Non configuré — l\'application fonctionne en local sur cet appareil uniquement.';
     }
-
-    const signedInBox = document.getElementById('syncAccountSignedIn');
-    const signedOutBox = document.getElementById('syncAccountSignedOut');
-    const emailEl = document.getElementById('syncAccountEmail');
-    const showForms = FIREBASE_CONFIGURED && fbDb;
-    if (signedInBox) signedInBox.style.display = (showForms && syncUser) ? 'block' : 'none';
-    if (signedOutBox) signedOutBox.style.display = (showForms && !syncUser) ? 'block' : 'none';
-    if (emailEl && syncUser) emailEl.textContent = syncUser.email;
 }
 
 
@@ -5322,21 +5158,14 @@ function handleLogoSelect(event) {
         alert('Veuillez sélectionner une image.');
         return;
     }
-    resizeImage(file, 160, 160, 0.85).then(dataUrl => {
+    resizeImage(file, 160, 160, 0.85).then(async dataUrl => {
         const oldLogo = data.logo;
-        data.logo = dataUrl;
+        const photoUrl = await uploadPhotoToStorage(dataUrl, 'logo');
+        data.logo = photoUrl;
+        if (oldLogo && oldLogo !== photoUrl) deletePhotoFromStorage(oldLogo);
         saveData();
         renderLogo();
         renderSettingsLogo();
-        // Envoi vers Firebase Storage en arrière-plan, sans bloquer l'enregistrement.
-        uploadPhotoToStorage(dataUrl, 'logo').then(uploadedUrl => {
-            if (!uploadedUrl || uploadedUrl === dataUrl) return;
-            data.logo = uploadedUrl;
-            if (oldLogo && oldLogo !== uploadedUrl) deletePhotoFromStorage(oldLogo);
-            saveData();
-            renderLogo();
-            renderSettingsLogo();
-        }).catch(err => console.warn('Upload logo en arrière-plan échoué :', err));
     }).catch(() => alert('Impossible de charger cette image.'));
     event.target.value = '';
 }
@@ -5405,26 +5234,12 @@ function resizeImage(file, maxW, maxH, quality) {
 // (photo stockée en base64 dans Firestore), juste sans les bénéfices de Storage.
 // folder : "products", "ordonnances" ou "logo" — pour ranger les fichiers proprement.
 async function uploadPhotoToStorage(dataUrl, folder) {
-    if (!fbStorage || !syncUser) return dataUrl;
-    // Délai de sécurité : si l'upload traîne (réseau lent/instable), on abandonne
-    // et on retombe sur la data URL plutôt que de bloquer indéfiniment le bouton Enregistrer.
-    const UPLOAD_TIMEOUT_MS = 12000;
-    const timeout = new Promise((resolve) => {
-        setTimeout(() => resolve({ __timedOut: true }), UPLOAD_TIMEOUT_MS);
-    });
-    const doUpload = (async () => {
-        const path = folder + '/' + syncUser.id + '_' + Date.now() + '_' + Math.round(Math.random() * 1e6) + '.jpg';
+    if (!fbStorage || !currentUser) return dataUrl;
+    try {
+        const path = folder + '/' + currentUser.id + '_' + Date.now() + '_' + Math.round(Math.random() * 1e6) + '.jpg';
         const ref = fbStorage.ref().child(path);
         await ref.putString(dataUrl, 'data_url', { contentType: 'image/jpeg' });
         return await ref.getDownloadURL();
-    })();
-    try {
-        const result = await Promise.race([doUpload, timeout]);
-        if (result && result.__timedOut) {
-            console.warn('Upload photo trop long (>' + UPLOAD_TIMEOUT_MS + 'ms), repli en local.');
-            return dataUrl;
-        }
-        return result;
     } catch (err) {
         console.error('Erreur upload photo vers Firebase Storage (repli en local) :', err);
         return dataUrl;
@@ -5695,14 +5510,17 @@ async function saveProductForm() {
         return;
     }
 
-    // On enregistre tout de suite avec la photo en base64 (rapide, pas d'attente réseau).
-    // L'envoi vers Firebase Storage (si configuré) se fait ensuite en arrière-plan ;
-    // une fois terminé, on remplace juste l'URL de la photo dans la fiche, sans bloquer
-    // le bouton Enregistrer ni faire attendre l'utilisateur.
+    // Upload de la photo vers Firebase Storage si une nouvelle photo a été sélectionnée
+    // (une data URL base64 fraîchement redimensionnée) ; si c'est déjà une URL Storage
+    // existante (photo inchangée) ou si Storage n'est pas configuré, on la garde telle quelle.
+    const saveBtn = document.querySelector('#addProductForm button.btn-success');
     let photoUrl = pendingPhoto || '';
     const oldPhoto = editingCode ? (data.products.find(p => p.code === editingCode) || {}).photo : '';
-    const needsBackgroundUpload = pendingPhoto && pendingPhoto.startsWith('data:');
-    const codeForUpload = code || editingCode;
+    if (pendingPhoto && pendingPhoto.startsWith('data:')) {
+        if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = 'Envoi de la photo…'; }
+        photoUrl = await uploadPhotoToStorage(pendingPhoto, 'products');
+        if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = 'Enregistrer'; }
+    }
 
     if (editingCode) {
         if (!code) code = editingCode;
@@ -5748,21 +5566,6 @@ async function saveProductForm() {
     saveData();
     closeProductForm();
     renderStockTable();
-
-    // Envoi de la photo vers Firebase Storage en arrière-plan (si configuré) : n'empêche
-    // plus l'enregistrement d'attendre le réseau. Une fois terminé, on met juste à jour
-    // l'URL de la photo dans la fiche produit et on sauvegarde à nouveau, silencieusement.
-    if (needsBackgroundUpload) {
-        uploadPhotoToStorage(pendingPhoto, 'products').then(uploadedUrl => {
-            if (!uploadedUrl || uploadedUrl === photoUrl) return;
-            const p = data.products.find(p => p.code === codeForUpload);
-            if (p) {
-                p.photo = uploadedUrl;
-                saveData();
-                renderStockTable();
-            }
-        }).catch(err => console.warn('Upload photo produit en arrière-plan échoué :', err));
-    }
 }
 
 function deleteProduct(code) {
@@ -7298,12 +7101,15 @@ async function saveOrdonnanceForm() {
         return;
     }
 
-    // On enregistre tout de suite avec la photo en base64 (pas d'attente réseau).
-    // L'envoi vers Firebase Storage (si configuré) se fait ensuite en arrière-plan.
+    // Upload vers Firebase Storage si une nouvelle photo (data URL) a été sélectionnée.
+    const saveBtn = document.querySelector('#addOrdonnanceForm button.btn-success');
     let photoUrl = pendingOrdPhoto || '';
     const oldPhoto = editingId ? (data.ordonnances.find(o => o.id === editingId) || {}).photo : '';
-    const needsBackgroundUpload = pendingOrdPhoto && pendingOrdPhoto.startsWith('data:');
-    let idForUpload = editingId;
+    if (pendingOrdPhoto && pendingOrdPhoto.startsWith('data:')) {
+        if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = 'Envoi de la photo…'; }
+        photoUrl = await uploadPhotoToStorage(pendingOrdPhoto, 'ordonnances');
+        if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = 'Enregistrer l\'ordonnance'; }
+    }
 
     if (editingId) {
         const o = data.ordonnances.find(o => o.id === editingId);
@@ -7318,9 +7124,8 @@ async function saveOrdonnanceForm() {
             if (oldPhoto && oldPhoto !== photoUrl) deletePhotoFromStorage(oldPhoto);
         }
     } else {
-        idForUpload = generateOrdonnanceId();
         data.ordonnances.push({
-            id: idForUpload,
+            id: generateOrdonnanceId(),
             clientId: clientId || null,
             clientName: patientName,
             doctor, date, notes,
@@ -7335,19 +7140,6 @@ async function saveOrdonnanceForm() {
     saveData();
     closeOrdonnanceForm();
     renderOrdonnancesTable();
-
-    // Envoi de la photo en arrière-plan, sans bloquer l'enregistrement ni l'interface.
-    if (needsBackgroundUpload) {
-        uploadPhotoToStorage(pendingOrdPhoto, 'ordonnances').then(uploadedUrl => {
-            if (!uploadedUrl || uploadedUrl === photoUrl) return;
-            const o = data.ordonnances.find(o => o.id === idForUpload);
-            if (o) {
-                o.photo = uploadedUrl;
-                saveData();
-                renderOrdonnancesTable();
-            }
-        }).catch(err => console.warn('Upload photo ordonnance en arrière-plan échoué :', err));
-    }
 }
 
 function dispenserOrdonnance(id) {
