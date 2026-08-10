@@ -4427,19 +4427,46 @@ async function initAuth() {
         proceedAfterLocalPin();
         return;
     }
+
+    // Hors ligne dès le départ ET un PIN local est configuré : on bascule directement
+    // sur l'écran PIN local sans attendre/tenter Firebase (évite l'erreur
+    // "auth/network-request-failed" et permet une vraie ouverture sans internet).
+    if (!navigator.onLine && isLocalPinSet()) {
+        showLocalPinScreen();
+        return;
+    }
+
     setSyncStatus('offline', 'Connexion…');
     let firstCheck = true;
     fbAuth.onAuthStateChanged(async function (user) {
         if (user) {
             if (firstCheck) await onAuthenticated(user);
+            firstCheck = false;
         } else {
+            firstCheck = false;
             currentUser = null;
             updateUserBadge();
             setSyncStatus('offline', 'Hors ligne');
-            showAuthScreen();
+            // Pas de session Firebase active. Si un PIN local est configuré, on préfère
+            // l'écran PIN local (fonctionne sans internet) plutôt que le formulaire
+            // Firebase, qui échouera systématiquement hors ligne.
+            if (!navigator.onLine && isLocalPinSet()) {
+                showLocalPinScreen();
+            } else {
+                showAuthScreen();
+            }
         }
-        firstCheck = false;
     });
+
+    // Filet de sécurité : si Firebase ne répond pas du tout (pas d'erreur, pas de
+    // callback) après un court délai et qu'on est hors ligne, on bascule quand même
+    // sur le PIN local plutôt que de laisser l'utilisateur bloqué sur le formulaire Firebase.
+    setTimeout(() => {
+        if (firstCheck && !navigator.onLine && isLocalPinSet()) {
+            firstCheck = false;
+            showLocalPinScreen();
+        }
+    }, 4000);
 }
 
 // ---------- Logo officiel Pharmacie Diabaté & Frères ----------
