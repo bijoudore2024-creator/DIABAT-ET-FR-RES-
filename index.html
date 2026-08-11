@@ -1888,6 +1888,7 @@
                 <button id="authSwitchBtn" onclick="toggleAuthMode()">Créer un compte</button>
             </div>
             <p class="auth-offline-note" id="authOfflineNote"></p>
+            <p id="authPinDiag" style="text-align:center; font-size:0.78em; color:var(--text-muted); margin:6px 0 0;"></p>
             <p class="auth-dev-credit">Développé par HABATECH · 627 54 19 25</p>
         </div>
     </div>
@@ -3836,6 +3837,14 @@ function showAuthScreen() {
     const el = document.getElementById('authScreen');
     if (el) el.classList.remove('hidden');
     applyRememberedEmail();
+    const diag = document.getElementById('authPinDiag');
+    if (diag) {
+        if (!navigator.onLine && !isLocalPinSet()) {
+            diag.textContent = "Vous êtes hors ligne et aucun code PIN n'est encore configuré sur cet appareil. Connectez-vous ici dès que le réseau revient, puis définissez un code PIN dans Paramètres pour pouvoir ouvrir l'application sans internet la prochaine fois.";
+        } else {
+            diag.textContent = '';
+        }
+    }
 }
 function hideAuthScreen() {
     const el = document.getElementById('authScreen');
@@ -4018,7 +4027,14 @@ async function handleSignOut() {
         applyRolePermissions();
         setSyncStatus('offline', 'Hors ligne');
         hidePendingScreen();
-        showAuthScreen();
+        // Si un PIN local est configuré et qu'on est hors ligne, on préfère l'écran PIN
+        // (fonctionne sans internet) plutôt que le formulaire Firebase, qui échouera
+        // systématiquement sans réseau.
+        if (!navigator.onLine && isLocalPinSet()) {
+            showLocalPinScreen();
+        } else {
+            showAuthScreen();
+        }
         return;
     }
     // Mode local (sans Firebase) : on referme la session du compte local en cours.
