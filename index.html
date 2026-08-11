@@ -3525,6 +3525,11 @@ function injectShortcutBar(n) {
 function getUserRole() {
     if (currentUser && currentUser.role) return currentUser.role;
     if (!FIREBASE_CONFIGURED) return 'pdg'; // mode local sans compte créé = accès total
+    // Firebase configuré mais non joignable (hors ligne, ouverture via PIN local) et
+    // aucun compte local par rôle n'a été créé : on accorde un accès complet plutôt que
+    // de bloquer toute la navigation, sinon l'app hors ligne est inutilisable dès que le
+    // PDG/gérant n'a pas pris le temps de créer des comptes locaux par rôle au préalable.
+    if (!navigator.onLine && !currentUser && loadLocalUsers().length === 0 && isLocalPinSet()) return 'pdg';
     return null; // compte connecté mais sans rôle assigné (en attente) : aucun accès tant que non validé
 }
 function isAdmin() {
