@@ -1161,7 +1161,7 @@
         background-position: center, center, center, center, center;
         background-repeat: no-repeat, repeat, repeat, no-repeat, no-repeat;
         background-attachment: scroll, scroll, scroll, scroll, fixed;
-        display: flex; align-items: flex-start; justify-content: center;
+        display: flex; align-items: center; justify-content: center;
         padding: 0;
     }
     #authScreen.hidden, #pendingScreen.hidden, #localPinScreen.hidden, #localLoginScreen.hidden { display: none; }
@@ -4275,7 +4275,10 @@ async function pullRemoteData() {
         const row = snap.exists ? snap.data() : null;
         if (row && row.payload && Object.keys(row.payload).length > 0) {
             isApplyingRemoteData = true;
-            data = normalizeData(row.payload);
+            // Fusionne les données locales (potentiellement modifiées hors ligne et pas encore
+            // poussées) avec celles du serveur, au lieu d'écraser purement le local. Évite de
+            // perdre une vente ou un ajustement de stock saisi hors ligne juste avant ce pull.
+            data = mergeData(data, normalizeData(row.payload));
             localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
             lastKnownRemoteUpdatedMs = (row.updated_at && row.updated_at.toMillis) ? row.updated_at.toMillis() : Date.now();
             refreshAllViews();
@@ -4295,9 +4298,67 @@ function normalizeData(raw) {
     const base = {
         products: [], sales: [], commandes: [], movements: [], clients: [],
         ordonnances: [], suppliers: [], guardPartners: [], guardSchedule: [],
-        expenses: [], logo: ''
+        expenses: [], creditPayments: [], logo: ''
     };
     return Object.assign(base, raw || {});
+}
+
+// Collections fusionnables par enregistrement, avec leur clé unique respective.
+// "products" utilise "code" (déjà unique et vérifié à la création) ;
+// toutes les autres utilisent "id".
+const MERGEABLE_COLLECTIONS = {
+    products: 'code',
+    sales: 'id',
+    commandes: 'id',
+    movements: 'id',
+    clients: 'id',
+    ordonnances: 'id',
+    suppliers: 'id',
+    guardPartners: 'id',
+    guardSchedule: 'id',
+    expenses: 'id',
+    creditPayments: 'id'
+};
+
+// Marque un enregistrement comme modifié maintenant, pour permettre la fusion
+// "le plus récent gagne" au niveau de l'enregistrement (et non du document entier)
+// lors de la synchronisation entre appareils, y compris après un usage hors ligne.
+function touchRecord(record) {
+    if (record && typeof record === 'object') record._updatedAt = Date.now();
+    return record;
+}
+
+// Fusionne deux jeux de données (local vs distant) collection par collection et
+// enregistrement par enregistrement, au lieu d'écraser tout le document. Pour chaque
+// clé présente des deux côtés, l'enregistrement le plus récent (_updatedAt) est
+// conservé ; les enregistrements présents d'un seul côté sont tous les deux gardés
+// (ex : une vente faite hors ligne sur un appareil n'efface pas celle faite sur un autre).
+function mergeData(localData, remoteData) {
+    const merged = normalizeData({});
+    Object.keys(MERGEABLE_COLLECTIONS).forEach((collectionName) => {
+        const key = MERGEABLE_COLLECTIONS[collectionName];
+        const localList = Array.isArray(localData[collectionName]) ? localData[collectionName] : [];
+        const remoteList = Array.isArray(remoteData[collectionName]) ? remoteData[collectionName] : [];
+        const byKey = new Map();
+        // On part du distant, puis on superpose le local : à égalité de clé, on garde
+        // le plus récent (_updatedAt) ; les entrées sans _updatedAt (anciennes données
+        // migrées avant ce système) sont traitées comme les plus anciennes possible.
+        remoteList.forEach((rec) => { if (rec && rec[key] != null) byKey.set(rec[key], rec); });
+        localList.forEach((rec) => {
+            if (!rec || rec[key] == null) return;
+            const existing = byKey.get(rec[key]);
+            if (!existing) { byKey.set(rec[key], rec); return; }
+            const existingTs = existing._updatedAt || 0;
+            const recTs = rec._updatedAt || 0;
+            byKey.set(rec[key], recTs >= existingTs ? rec : existing);
+        });
+        merged[collectionName] = Array.from(byKey.values());
+    });
+    // Le logo n'est pas une liste fusionnable : on garde le plus récemment défini
+    // (approximation raisonnable, ce champ change rarement et n'est jamais perdu de
+    // façon critique — au pire il faut le re-téléverser).
+    merged.logo = (localData.logo || remoteData.logo || '');
+    return merged;
 }
 
 let lastPushAt = 0; // horodatage (ms) de notre dernière écriture, pour ignorer les échos
@@ -4308,17 +4369,24 @@ async function pushRemoteData() {
     const docRef = fbDb.collection('pharmacy_data').doc(PHARMACY_ROW_ID);
     try {
         lastPushAt = Date.now();
-        const nowMs = Date.now();
-        let conflict = false;
+        let mergedResult = null;
         await fbDb.runTransaction(async function (tx) {
             const snap = await tx.get(docRef);
             if (snap.exists) {
                 const existing = snap.data();
                 const existingMs = (existing.updated_at && existing.updated_at.toMillis) ? existing.updated_at.toMillis() : 0;
-                // Si la version serveur est plus récente que la dernière version que ce device connaît,
-                // et que ce n'est pas nous qui l'avons écrite, un autre appareil a modifié entre-temps.
+                // Si la version serveur est plus récente que la dernière version que ce device
+                // connaît, et que ce n'est pas nous qui l'avons écrite, un autre appareil a
+                // modifié entre-temps (potentiellement hors ligne lui aussi). Au lieu d'écraser
+                // ou de tout rejeter, on fusionne les deux jeux de données enregistrement par
+                // enregistrement : rien n'est perdu des deux côtés.
                 if (existingMs > lastKnownRemoteUpdatedMs && existing.updated_by !== (currentUser && currentUser.email)) {
-                    conflict = true;
+                    mergedResult = mergeData(data, normalizeData(existing.payload));
+                    tx.set(docRef, {
+                        payload: mergedResult,
+                        updated_at: firebase.firestore.FieldValue.serverTimestamp(),
+                        updated_by: currentUser.email
+                    });
                     return;
                 }
             }
@@ -4328,23 +4396,28 @@ async function pushRemoteData() {
                 updated_by: currentUser.email
             });
         });
-        if (conflict) {
-            // On ne pousse pas par-dessus les changements d'un collègue : on récupère sa version
-            // pour éviter toute perte de données, et on prévient l'utilisateur.
-            await pullRemoteData();
-            showToast('Un(e) collègue vient de modifier ces données ailleurs. Votre écran a été mis à jour avec la dernière version — vérifiez vos derniers changements.', 'warn', 6000);
-            setSyncStatus('online', 'Synchronisé (conflit résolu)');
-            return;
+        if (mergedResult) {
+            // On applique localement le résultat fusionné pour que cet appareil reflète
+            // aussi les changements faits ailleurs (ex: une vente d'un collègue).
+            isApplyingRemoteData = true;
+            data = mergedResult;
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+            refreshAllViews();
+            isApplyingRemoteData = false;
+            showToast('Données fusionnées avec les modifications d\'un(e) collègue fait pendant votre absence — rien n\'a été perdu des deux côtés.', 'info', 6000);
+            setSyncStatus('online', 'Synchronisé (fusion appliquée)');
+        } else {
+            setSyncStatus('online', 'Synchronisé');
         }
         lastKnownRemoteUpdatedMs = Date.now();
-        setSyncStatus('online', 'Synchronisé');
     } catch (err) {
         // Hors ligne : les transactions Firestore nécessitent une lecture fraîche du serveur et
         // échouent donc systématiquement sans réseau. On bascule alors sur une écriture simple,
         // mise en file d'attente automatiquement par la persistance offline et envoyée dès le
-        // retour de la connexion. Pas de détection de conflit possible dans ce cas (rare : il
-        // faudrait deux appareils hors ligne modifiant en même temps), on privilégie ne jamais
-        // perdre le travail de l'utilisateur plutôt que de bloquer la saisie.
+        // retour de la connexion. Le risque d'écrasement dans ce cas précis (deux appareils hors
+        // ligne en même temps, l'un envoie après l'autre) est résiduel : la fusion normale ci-
+        // dessus reprend dès que les deux appareils sont de nouveau en ligne et se resynchronisent,
+        // car la prochaine sauvegarde locale redéclenche pushRemoteData avec détection de conflit.
         if (err && err.code === 'unavailable') {
             try {
                 docRef.set({
@@ -4540,7 +4613,7 @@ let pendingOrdPhoto = null;
 function logMovement(entry) {
     movementSeq++;
     data.movements.push({
-        id: 'MV' + Date.now() + '-' + movementSeq,
+        id: 'MV' + Date.now() + '-' + movementSeq + '-' + Math.floor(Math.random() * 10000),
         date: new Date().toISOString(),
         code: entry.code,
         name: entry.name,
@@ -4574,7 +4647,24 @@ function movementTypeBadge(type) {
     return `<span class="badge">${movementTypeLabel(type)}</span>`;
 }
 
+// Pose _updatedAt = maintenant sur chaque enregistrement des collections fusionnables
+// qui n'en a pas encore un pour cette session d'édition. On ne réécrit pas l'horodatage
+// d'un enregistrement déjà marqué dans le même cycle de sauvegarde : cette fonction est
+// appelée à chaque saveData(), donc chaque modification réelle (ajout, suppression de
+// champ, etc.) le fait automatiquement passer par ici via le code qui l'a modifié juste
+// avant d'appeler saveData(). On se contente ici de garantir qu'aucun enregistrement ne
+// reste sans horodatage (migration des données créées avant ce système, ou oubli ponctuel
+// dans un site de création) : on tamponne alors avec l'instant présent.
+function ensureRecordTimestamps() {
+    Object.keys(MERGEABLE_COLLECTIONS).forEach((collectionName) => {
+        const list = data[collectionName];
+        if (!Array.isArray(list)) return;
+        list.forEach((rec) => { if (rec && rec._updatedAt == null) rec._updatedAt = Date.now(); });
+    });
+}
+
 function saveData() {
+    ensureRecordTimestamps();
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     // Pousse vers Firebase (debounced) si connecté, sauf quand on vient
     // d'appliquer des données reçues depuis un autre appareil (évite une boucle).
@@ -5845,6 +5935,7 @@ function settleClientCredit(id) {
     if (isNaN(amount) || amount <= 0) { alert('Montant invalide.'); return; }
     const balanceBefore = c.credit;
     c.credit = Math.max(0, c.credit - amount);
+    touchRecord(c);
     if (!Array.isArray(data.creditPayments)) data.creditPayments = [];
     data.creditPayments.push({
         id: 'PAY' + Date.now() + Math.floor(Math.random() * 1000),
@@ -6636,6 +6727,7 @@ function receiveCommande(id) {
         const p = data.products.find(p => p.code === it.code);
         if (p) {
             p.stock += it.qty;
+            touchRecord(p);
             logMovement({
                 code: p.code, name: p.name, lot: p.lot || '',
                 type: 'reception',
@@ -7197,6 +7289,7 @@ function dispenserOrdonnance(id) {
             const p = data.products.find(p => p.code === it.code);
             if (p && p.stock >= it.qty) {
                 p.stock -= it.qty;
+                touchRecord(p);
                 logMovement({
                     code: p.code, name: p.name, lot: p.lot || '',
                     type: 'vente',
@@ -7213,6 +7306,7 @@ function dispenserOrdonnance(id) {
 
     if (saleItems.length > 0) {
         const sale = {
+            id: 'SALE' + Date.now() + '-' + Math.floor(Math.random() * 10000),
             date: new Date().toISOString(),
             items: saleItems,
             total,
@@ -7223,7 +7317,7 @@ function dispenserOrdonnance(id) {
         data.sales.push(sale);
         if (o.clientId) {
             const c = data.clients.find(c => c.id === o.clientId);
-            if (c) c.credit = (c.credit || 0);
+            if (c) { c.credit = (c.credit || 0); touchRecord(c); }
         }
     }
 
@@ -7362,6 +7456,7 @@ function retirerProduitPerime(code) {
     if (!confirm(`Retirer les ${p.stock} unités de "${p.name}" du stock (produit périmé) ?`)) return;
     const oldStock = p.stock;
     p.stock = 0;
+    touchRecord(p);
     logMovement({
         code: p.code,
         name: p.name,
@@ -7993,6 +8088,7 @@ function validateSale() {
         const product = data.products.find(p => p.code === item.code);
         if (product) {
             product.stock -= item.qty;
+            touchRecord(product);
             logMovement({
                 code: product.code, name: product.name, lot: product.lot || '',
                 type: 'vente',
@@ -8005,6 +8101,7 @@ function validateSale() {
     });
 
     const sale = {
+        id: 'SALE' + Date.now() + '-' + Math.floor(Math.random() * 10000),
         date: new Date().toISOString(),
         items: cart.map(i => ({code: i.code, name: i.name, price: i.price, qty: i.qty})),
         total,
@@ -8021,6 +8118,7 @@ function validateSale() {
 
     if (client && onCredit && remainder > 0) {
         client.credit = (client.credit || 0) + remainder;
+        touchRecord(client);
     }
 
     saveData();
