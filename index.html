@@ -1888,12 +1888,6 @@
                 <button id="authSwitchBtn" onclick="toggleAuthMode()">Créer un compte</button>
             </div>
             <p class="auth-offline-note" id="authOfflineNote"></p>
-            <div style="text-align:center; margin-top:14px; padding-top:14px; border-top:1px solid var(--line);">
-                <button type="button" onclick="openQuickLocalSetup()" style="background:none; border:none; cursor:pointer; color:var(--text-muted); font-size:0.85em; display:inline-flex; align-items:center; gap:6px; padding:6px;">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px; height:15px;"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
-                    Configurer l'accès hors-ligne (code PIN)
-                </button>
-            </div>
             <p class="auth-dev-credit">Développé par HABATECH · 627 54 19 25</p>
         </div>
     </div>
@@ -1907,32 +1901,6 @@
         <p class="auth-sub">Ton compte a bien été créé. Un PDG ou un Administrateur doit encore le valider et t'assigner un rôle avant que tu puisses accéder à l'application.</p>
         <p class="auth-offline-note" id="pendingEmailNote"></p>
         <button type="button" class="auth-submit" onclick="handleSignOut()">Se déconnecter</button>
-    </div>
-</div>
-
-<!-- Configuration rapide du code PIN local, accessible directement depuis l'écran de connexion -->
-<div id="quickLocalSetupScreen" class="hidden">
-    <div class="auth-card">
-        <div class="auth-mark">🔒</div>
-        <h2>Accès hors-ligne</h2>
-        <p class="auth-sub">Définis un code PIN pour ouvrir l'application sur cet appareil, même sans connexion internet. Une fois défini, ce code te sera demandé à chaque ouverture au lieu du formulaire email / mot de passe quand tu n'as pas de réseau.</p>
-        <div class="auth-error" id="quickLocalSetupError"></div>
-        <div class="auth-error" id="quickLocalSetupSuccess" style="display:none; background:var(--ok-bg, rgba(92,183,135,0.12)); color:var(--ok, #2f8f4e);"></div>
-        <form id="quickLocalSetupForm" onsubmit="return false;">
-            <div class="auth-field">
-                <label for="quickPinNew">Nouveau code PIN (4 chiffres minimum)</label>
-                <input type="password" id="quickPinNew" inputmode="numeric" autocomplete="off" placeholder="••••">
-            </div>
-            <div class="auth-field">
-                <label for="quickPinConfirm">Confirmer le code PIN</label>
-                <input type="password" id="quickPinConfirm" inputmode="numeric" autocomplete="off" placeholder="••••" onkeydown="if(event.key==='Enter'){handleQuickLocalSetupSubmit();}">
-            </div>
-            <button type="submit" class="auth-submit" onclick="handleQuickLocalSetupSubmit()">Définir le code PIN</button>
-        </form>
-        <div style="text-align:center; margin-top:14px;">
-            <button type="button" onclick="closeQuickLocalSetup()" style="background:none; border:none; cursor:pointer; color:var(--text-muted); font-size:0.9em; text-decoration:underline; padding:6px;">← Retour à la connexion</button>
-        </div>
-        <p class="auth-dev-credit">Développé par HABATECH · 627 54 19 25</p>
     </div>
 </div>
 
@@ -3143,13 +3111,11 @@
             </details>
         </div>
 
-        <div class="fin-panel" id="localSecurityPanel" style="margin-bottom:20px; display:none;">
-            <h3 style="margin-top:0;">Sécurité locale (sans internet)</h3>
+        <div class="fin-panel" id="localPinOnlyPanel" style="margin-bottom:20px;">
+            <h3 style="margin-top:0;">Accès hors-ligne (code PIN)</h3>
             <p style="color:var(--text-muted); font-size:0.9em; margin-top:-8px;">
-                Fonctionne même sans Firebase : protège l'ouverture de l'application par un code PIN, et permet de créer des comptes locaux par rôle pour plusieurs employés sur le même appareil.
+                Protège l'ouverture de l'application sur cet appareil par un code PIN. Fonctionne même sans internet : ce code remplace le formulaire email / mot de passe quand tu n'as pas de connexion.
             </p>
-
-            <h4 style="margin-bottom:6px;">Code PIN d'accès</h4>
             <div id="localPinStatus" style="margin:6px 0 10px; padding:8px 12px; border-radius:8px; font-size:0.85em;"></div>
             <label style="display:block; font-size:0.85em; color:var(--text-muted); margin-bottom:4px;">Nouveau code PIN</label>
             <input type="password" id="settLocalPinNew" inputmode="numeric" placeholder="Ex: 4821">
@@ -3157,8 +3123,15 @@
                 <button class="btn btn-success" onclick="saveLocalPinFromSettings()" style="width:auto;">💾 Définir / Modifier le PIN</button>
                 <button class="btn btn-danger" onclick="removeLocalPinFromSettings()" style="width:auto;">Supprimer le PIN</button>
             </div>
+        </div>
 
-            <h4 style="margin:20px 0 6px;">Comptes locaux par rôle</h4>
+        <div class="fin-panel" id="localSecurityPanel" style="margin-bottom:20px; display:none;">
+            <h3 style="margin-top:0;">Sécurité locale (sans internet)</h3>
+            <p style="color:var(--text-muted); font-size:0.9em; margin-top:-8px;">
+                Fonctionne même sans Firebase : permet de créer des comptes locaux par rôle pour plusieurs employés sur le même appareil.
+            </p>
+
+            <h4 style="margin:0 0 6px;">Comptes locaux par rôle</h4>
             <p style="color:var(--text-muted); font-size:0.85em; margin-top:-4px;">
                 Si au moins un compte local existe, l'application demande de choisir un compte et un mot de passe à l'ouverture (en plus du PIN si configuré).
             </p>
@@ -4191,58 +4164,6 @@ async function handleLocalLoginSubmit() {
         const activeN = parseInt(activeTab.id.replace('tab', ''), 10);
         if (!canAccessTab(activeN)) openTab(0);
     }
-}
-
-// ---------- Configuration rapide du PIN depuis l'écran de connexion ----------
-function openQuickLocalSetup() {
-    const authEl = document.getElementById('authScreen');
-    if (authEl) authEl.classList.add('hidden');
-    const el = document.getElementById('quickLocalSetupScreen');
-    if (el) el.classList.remove('hidden');
-    const errBox = document.getElementById('quickLocalSetupError');
-    if (errBox) { errBox.classList.remove('show'); errBox.textContent = ''; }
-    const okBox = document.getElementById('quickLocalSetupSuccess');
-    if (okBox) okBox.style.display = 'none';
-    const f1 = document.getElementById('quickPinNew');
-    const f2 = document.getElementById('quickPinConfirm');
-    if (f1) f1.value = '';
-    if (f2) f2.value = '';
-    if (isLocalPinSet()) {
-        const sub = document.querySelector('#quickLocalSetupScreen .auth-sub');
-        if (sub) sub.textContent = "Un code PIN est déjà configuré sur cet appareil. Tu peux le redéfinir ci-dessous.";
-    }
-    setTimeout(() => { if (f1) f1.focus(); }, 50);
-}
-function closeQuickLocalSetup() {
-    const el = document.getElementById('quickLocalSetupScreen');
-    if (el) el.classList.add('hidden');
-    const authEl = document.getElementById('authScreen');
-    if (authEl) authEl.classList.remove('hidden');
-}
-async function handleQuickLocalSetupSubmit() {
-    const f1 = document.getElementById('quickPinNew');
-    const f2 = document.getElementById('quickPinConfirm');
-    const errBox = document.getElementById('quickLocalSetupError');
-    const okBox = document.getElementById('quickLocalSetupSuccess');
-    const pin = (f1.value || '').trim();
-    const confirmPin = (f2.value || '').trim();
-    errBox.classList.remove('show');
-    okBox.style.display = 'none';
-    if (!pin || pin.length < 4) {
-        errBox.textContent = 'Le code PIN doit contenir au moins 4 caractères.';
-        errBox.classList.add('show');
-        return;
-    }
-    if (pin !== confirmPin) {
-        errBox.textContent = 'Les deux codes PIN ne correspondent pas.';
-        errBox.classList.add('show');
-        return;
-    }
-    await setLocalPin(pin);
-    okBox.textContent = '✓ Code PIN défini. Il te sera demandé automatiquement à l\'ouverture de l\'application quand tu n\'as pas de connexion internet.';
-    okBox.style.display = 'block';
-    f1.value = '';
-    f2.value = '';
 }
 
 // ---------- Panneau "Sécurité locale" (onglet Paramètres) ----------
