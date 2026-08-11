@@ -3281,6 +3281,39 @@
     </div>
 </div>
 
+<!-- Modale d'édition d'une vente déjà enregistrée : modifier les articles/quantités/prix
+     existants, ou en ajouter de nouveaux. Le stock est réajusté automatiquement selon
+     l'écart entre l'ancienne et la nouvelle version de la vente. -->
+<div id="editSaleModal" class="action-modal-overlay" onclick="if(event.target===this) closeEditSaleModal();">
+    <div class="action-modal" style="max-width:560px; text-align:left;" onclick="event.stopPropagation()">
+        <h3>✏️ Modifier la vente</h3>
+        <p class="sub" id="editSaleModalSub"></p>
+        <div class="auth-error" id="editSaleError"></div>
+        <div style="max-height:44vh; overflow-y:auto; margin:10px 0;">
+            <table class="table" style="width:100%;">
+                <thead><tr><th>Article</th><th style="width:70px;">Qté</th><th style="width:100px;">Prix (GNF)</th><th style="width:36px;"></th></tr></thead>
+                <tbody id="editSaleItemsBody"></tbody>
+            </table>
+        </div>
+        <div style="display:flex; gap:8px; align-items:flex-end; flex-wrap:wrap; margin-bottom:12px; padding-top:10px; border-top:1px solid var(--line);">
+            <div style="flex:1; min-width:160px;">
+                <label style="display:block; font-size:0.8em; color:var(--text-muted); margin-bottom:4px;">Ajouter un article</label>
+                <select id="editSaleAddProduct" style="width:100%;"></select>
+            </div>
+            <div style="width:80px;">
+                <label style="display:block; font-size:0.8em; color:var(--text-muted); margin-bottom:4px;">Qté</label>
+                <input type="number" id="editSaleAddQty" value="1" min="1" style="width:100%;">
+            </div>
+            <button class="btn btn-success" onclick="addItemToEditingSale()" style="width:auto; padding:8px 14px;">+ Ajouter</button>
+        </div>
+        <p style="text-align:right; font-weight:600; margin:0 0 14px;">Nouveau total : <span id="editSaleNewTotal" class="mono">0 GNF</span></p>
+        <div class="action-modal-buttons">
+            <button class="btn btn-success" onclick="saveEditedSale()">💾 Enregistrer les modifications</button>
+        </div>
+        <button class="action-modal-close" onclick="closeEditSaleModal()">Annuler</button>
+    </div>
+</div>
+
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
@@ -3538,6 +3571,12 @@ function isAdmin() {
 }
 function canManageUsers() {
     // PDG et Administrateur peuvent valider les comptes et assigner des rôles.
+    const r = getUserRole();
+    return r === 'pdg' || r === 'admin';
+}
+function canEditSales() {
+    // Modifier une vente déjà enregistrée impacte le stock et les finances :
+    // réservé à PDG et Administrateur, comme la gestion des utilisateurs.
     const r = getUserRole();
     return r === 'pdg' || r === 'admin';
 }
@@ -8221,6 +8260,7 @@ function renderReports() {
                     <button class="btn" onclick="printReceipt(data.sales[${i}])" style="width:auto; padding:5px 10px;" title="Imprimer">🖨</button>
                     <button class="btn btn-whatsapp" onclick="sendReceiptWhatsApp(data.sales[${i}])" style="width:auto; padding:5px 10px;" title="Envoyer par WhatsApp">📱</button>
                     <button class="btn btn-sms" onclick="sendReceiptSMS(data.sales[${i}])" style="width:auto; padding:5px 10px;" title="Envoyer par SMS">✉️</button>
+                    ${canEditSales() ? `<button class="btn btn-warn" onclick="openEditSaleModal(${i})" style="width:auto; padding:5px 10px;" title="Modifier cette vente">✏️</button>` : ''}
                 </td>
             </tr>`;
         }).join('');
@@ -8707,6 +8747,166 @@ function openSaleActionModal(sale) {
 }
 function closeSaleActionModal() {
     document.getElementById('saleActionModal').classList.remove('open');
+}
+
+// ---------- Modification d'une vente déjà enregistrée ----------
+// editingSaleIndex : index dans data.sales de la vente en cours d'édition.
+// editingSaleItems : copie de travail des articles (pas encore appliquée à data.sales
+// tant que "Enregistrer" n'est pas cliqué), pour pouvoir annuler sans effet de bord.
+let editingSaleIndex = null;
+let editingSaleItems = null;
+
+function openEditSaleModal(saleIndex) {
+    if (!canEditSales()) return;
+    const sale = data.sales[saleIndex];
+    if (!sale) return;
+    // Sécurité pour les ventes créées avant l'introduction du système d'id (nécessaire à
+    // la fusion des données entre appareils) : on lui en attribue un maintenant.
+    if (!sale.id) sale.id = 'SALE' + new Date(sale.date).getTime() + '-' + Math.floor(Math.random() * 10000);
+    editingSaleIndex = saleIndex;
+    editingSaleItems = sale.items.map(it => ({...it}));
+    document.getElementById('editSaleModalSub').textContent =
+        `Vente du ${new Date(sale.date).toLocaleDateString('fr-FR')}${sale.clientName ? ' · ' + sale.clientName : ''}`;
+    document.getElementById('editSaleError').classList.remove('show');
+    populateEditSaleProductSelect();
+    renderEditSaleItems();
+    document.getElementById('editSaleModal').classList.add('open');
+}
+function closeEditSaleModal() {
+    document.getElementById('editSaleModal').classList.remove('open');
+    editingSaleIndex = null;
+    editingSaleItems = null;
+}
+function populateEditSaleProductSelect() {
+    const sel = document.getElementById('editSaleAddProduct');
+    if (!sel) return;
+    sel.innerHTML = data.products
+        .slice()
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .map(p => `<option value="${escapeHtml(p.code)}">${escapeHtml(p.name)} (stock : ${p.stock})</option>`)
+        .join('');
+}
+function renderEditSaleItems() {
+    const body = document.getElementById('editSaleItemsBody');
+    if (!body) return;
+    body.innerHTML = editingSaleItems.length === 0
+        ? '<tr class="empty-row"><td colspan="4" class="empty-msg">Aucun article — ajoutez-en un ci-dessous</td></tr>'
+        : editingSaleItems.map((it, idx) => `
+            <tr>
+                <td>${escapeHtml(it.name)}</td>
+                <td><input type="number" min="0" value="${it.qty}" style="width:60px;" onchange="updateEditingSaleItem(${idx}, 'qty', this.value)"></td>
+                <td><input type="number" min="0" value="${it.price}" style="width:90px;" onchange="updateEditingSaleItem(${idx}, 'price', this.value)"></td>
+                <td><button class="btn btn-danger" onclick="removeEditingSaleItem(${idx})" style="width:auto; padding:4px 8px;" title="Retirer">✕</button></td>
+            </tr>`).join('');
+    updateEditSaleTotal();
+}
+function updateEditingSaleItem(idx, field, value) {
+    const n = parseInt(value, 10);
+    if (isNaN(n) || n < 0) return;
+    editingSaleItems[idx][field] = n;
+    updateEditSaleTotal();
+}
+function removeEditingSaleItem(idx) {
+    editingSaleItems.splice(idx, 1);
+    renderEditSaleItems();
+}
+function addItemToEditingSale() {
+    const sel = document.getElementById('editSaleAddProduct');
+    const qtyInput = document.getElementById('editSaleAddQty');
+    const code = sel.value;
+    const qty = parseInt(qtyInput.value, 10);
+    if (!code || isNaN(qty) || qty <= 0) return;
+    const product = data.products.find(p => p.code === code);
+    if (!product) return;
+    const existing = editingSaleItems.find(it => it.code === code);
+    if (existing) {
+        existing.qty += qty;
+    } else {
+        editingSaleItems.push({code: product.code, name: product.name, price: product.price, qty});
+    }
+    qtyInput.value = 1;
+    renderEditSaleItems();
+}
+function updateEditSaleTotal() {
+    const total = editingSaleItems.reduce((s, it) => s + (it.price * it.qty), 0);
+    const el = document.getElementById('editSaleNewTotal');
+    if (el) el.textContent = formatGNF(total);
+}
+function saveEditedSale() {
+    if (editingSaleIndex === null) return;
+    const sale = data.sales[editingSaleIndex];
+    if (!sale) return;
+    const errBox = document.getElementById('editSaleError');
+    errBox.classList.remove('show');
+
+    // Vérifie que le stock disponible suffit pour les augmentations de quantité,
+    // en tenant compte du stock déjà "rendu" par la vente d'origine pour chaque article.
+    const oldByCode = {};
+    sale.items.forEach(it => { oldByCode[it.code] = (oldByCode[it.code] || 0) + it.qty; });
+    const newByCode = {};
+    editingSaleItems.forEach(it => { newByCode[it.code] = (newByCode[it.code] || 0) + it.qty; });
+
+    const allCodes = new Set([...Object.keys(oldByCode), ...Object.keys(newByCode)]);
+    for (const code of allCodes) {
+        const product = data.products.find(p => p.code === code);
+        if (!product) continue;
+        const oldQty = oldByCode[code] || 0;
+        const newQty = newByCode[code] || 0;
+        const delta = newQty - oldQty; // positif = on retire plus de stock qu'avant
+        if (delta > 0 && product.stock < delta) {
+            errBox.textContent = `Stock insuffisant pour "${product.name}" : ${product.stock} disponible(s), ${delta} supplémentaire(s) nécessaire(s).`;
+            errBox.classList.add('show');
+            return;
+        }
+    }
+
+    // Applique l'écart de stock pour chaque produit concerné, et journalise chaque
+    // ajustement pour garder une traçabilité complète (visible dans Mouvements).
+    allCodes.forEach((code) => {
+        const product = data.products.find(p => p.code === code);
+        if (!product) return;
+        const oldQty = oldByCode[code] || 0;
+        const newQty = newByCode[code] || 0;
+        const delta = newQty - oldQty;
+        if (delta === 0) return;
+        product.stock -= delta;
+        touchRecord(product);
+        logMovement({
+            code: product.code, name: product.name, lot: product.lot || '',
+            type: 'ajustement_stock',
+            qty: -delta,
+            stockAfter: product.stock,
+            ref: sale.id || '',
+            note: 'Modification de la vente du ' + new Date(sale.date).toLocaleDateString('fr-FR')
+        });
+    });
+
+    const newTotal = editingSaleItems.reduce((s, it) => s + (it.price * it.qty), 0);
+    const oldTotal = sale.total;
+
+    sale.items = editingSaleItems.map(it => ({...it}));
+    sale.total = newTotal;
+    // Si la vente n'était pas entièrement à crédit ni partielle, on considère le nouveau
+    // total comme intégralement payé (comptant) — cohérent avec l'état d'origine. Pour une
+    // vente à crédit ou partielle, on ajuste le solde restant par le même écart que le total,
+    // pour ne pas effacer un paiement déjà encaissé.
+    if (sale.paidOnCredit) {
+        sale.amountCredit = newTotal;
+        sale.amountPaid = 0;
+    } else if (sale.partialPayment) {
+        const diff = newTotal - oldTotal;
+        sale.amountCredit = Math.max(0, (sale.amountCredit || 0) + diff);
+    } else {
+        sale.amountPaid = newTotal;
+    }
+    touchRecord(sale);
+
+    closeEditSaleModal();
+    saveData();
+    renderReports();
+    try { renderStockTable(); } catch (e) {}
+    try { renderDashboard(); } catch (e) {}
+    showToast('Vente mise à jour avec succès.', 'success');
 }
 
 function printReceipt(sale) {
