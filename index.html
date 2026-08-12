@@ -2051,6 +2051,10 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12h8"/><path d="M12 8v8"/></svg>
             Finances
         </button>
+        <button class="sidebar-link sec-gestion" data-tab="17" onclick="openTab(17); closeSidebar();">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 3h13l3 3v15H4z"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="12" y2="16"/></svg>
+            Facturation
+        </button>
 
         <div class="sidebar-group-label">Intelligence Artificielle</div>
         <button class="sidebar-link sec-ia" data-tab="16" onclick="openTab(16); closeSidebar();">
@@ -2062,6 +2066,10 @@
         <button class="sidebar-link sec-systeme" data-tab="15" onclick="openTab(15); closeSidebar();">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
             Paramètres
+        </button>
+        <button class="sidebar-link sec-systeme" onclick="openShortcutsHelp(); closeSidebar();">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="6" y1="9" x2="6" y2="9.01"/><line x1="10" y1="9" x2="10" y2="9.01"/><line x1="14" y1="9" x2="14" y2="9.01"/><line x1="18" y1="9" x2="18" y2="9.01"/><line x1="6" y1="13" x2="18" y2="13"/></svg>
+            Raccourcis clavier
         </button>
     </nav>
     <div class="sidebar-scroll-hint" id="sidebarScrollHint">
@@ -3235,7 +3243,141 @@
     </div>
 </div>
 
-<!-- Modal de confirmation pour la réinitialisation production -->
+<div id="tab17" class="tab-content">
+    <div style="max-width: 1000px; margin: 0 auto;">
+        <h2 style="margin-bottom:4px;">🧾 Facturation</h2>
+        <p style="color:var(--text-muted); font-size:0.9em; margin-top:0;">
+            Factures officielles numérotées automatiquement (FAC-AAAA-0000). Génère une facture à partir d'une vente déjà enregistrée, ou crée une facture indépendante pour un client professionnel.
+        </p>
+
+        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px;">
+            <button class="btn btn-primary" style="width:auto;" onclick="openNewInvoiceModal()">+ Nouvelle facture</button>
+            <button class="btn" style="width:auto;" onclick="openInvoiceFromSalePicker()">🧾 Facturer une vente existante</button>
+        </div>
+
+        <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:14px;">
+            <input type="text" id="invoiceSearch" placeholder="Rechercher (n°, client)..." style="flex:1; min-width:200px;" oninput="renderInvoicesTable()">
+            <select id="invoiceStatusFilter" style="width:auto;" onchange="renderInvoicesTable()">
+                <option value="">Tous statuts</option>
+                <option value="payee">Payée</option>
+                <option value="partielle">Partielle</option>
+                <option value="impayee">Impayée</option>
+            </select>
+        </div>
+
+        <div style="overflow-x:auto;">
+            <table class="table" style="width:100%;">
+                <thead>
+                    <tr><th>N° Facture</th><th>Date</th><th>Client</th><th>Montant</th><th>Statut</th><th></th></tr>
+                </thead>
+                <tbody id="invoicesTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Sélecteur de vente à transformer en facture -->
+<div id="invoiceFromSaleModal" class="action-modal-overlay" onclick="if(event.target===this) closeInvoiceFromSalePicker();">
+    <div class="action-modal" style="max-width:520px; text-align:left;" onclick="event.stopPropagation()">
+        <h3>🧾 Facturer une vente</h3>
+        <p class="sub">Sélectionne la vente à transformer en facture officielle.</p>
+        <input type="text" id="invoiceFromSaleSearch" placeholder="Rechercher par client ou date..." style="margin-bottom:10px;" oninput="renderInvoiceFromSaleList()">
+        <div style="max-height:44vh; overflow-y:auto;" id="invoiceFromSaleList"></div>
+        <button class="action-modal-close" onclick="closeInvoiceFromSalePicker()">Annuler</button>
+    </div>
+</div>
+
+<!-- Création / édition d'une facture -->
+<div id="newInvoiceModal" class="action-modal-overlay" onclick="if(event.target===this) closeNewInvoiceModal();">
+    <div class="action-modal" style="max-width:600px; text-align:left;" onclick="event.stopPropagation()">
+        <h3 id="newInvoiceModalTitle">🧾 Nouvelle facture</h3>
+        <p class="sub" id="newInvoiceModalSub"></p>
+        <div class="auth-error" id="newInvoiceError"></div>
+
+        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px;">
+            <div style="flex:1; min-width:200px;">
+                <label style="display:block; font-size:0.8em; color:var(--text-muted); margin-bottom:4px;">Client (optionnel — sélection)</label>
+                <select id="invoiceClientSelect" onchange="applyInvoiceClientSelection()">
+                    <option value="">— Client occasionnel / libre —</option>
+                </select>
+            </div>
+        </div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:14px;">
+            <div style="flex:1; min-width:180px;">
+                <label style="display:block; font-size:0.8em; color:var(--text-muted); margin-bottom:4px;">Nom du client / entreprise</label>
+                <input type="text" id="invoiceClientName" placeholder="Ex: Clinique Sainte-Marie">
+            </div>
+            <div style="flex:1; min-width:150px;">
+                <label style="display:block; font-size:0.8em; color:var(--text-muted); margin-bottom:4px;">Téléphone</label>
+                <input type="text" id="invoiceClientPhone" placeholder="Ex: 628 00 00 00">
+            </div>
+        </div>
+
+        <div style="max-height:34vh; overflow-y:auto; margin:10px 0;">
+            <table class="table" style="width:100%;">
+                <thead><tr><th>Article</th><th style="width:70px;">Qté</th><th style="width:100px;">Prix (GNF)</th><th style="width:36px;"></th></tr></thead>
+                <tbody id="invoiceItemsBody"></tbody>
+            </table>
+        </div>
+        <div style="display:flex; gap:8px; align-items:flex-end; flex-wrap:wrap; margin-bottom:12px; padding-top:10px; border-top:1px solid var(--line);">
+            <div style="flex:1; min-width:160px;">
+                <label style="display:block; font-size:0.8em; color:var(--text-muted); margin-bottom:4px;">Ajouter un article</label>
+                <select id="invoiceAddProduct"></select>
+            </div>
+            <div style="width:80px;">
+                <label style="display:block; font-size:0.8em; color:var(--text-muted); margin-bottom:4px;">Qté</label>
+                <input type="number" id="invoiceAddQty" value="1" min="1" style="width:100%;">
+            </div>
+            <button class="btn btn-success" onclick="addItemToInvoiceDraft()" style="width:auto; padding:8px 14px;">+ Ajouter</button>
+        </div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px;">
+            <div style="flex:1; min-width:150px;">
+                <label style="display:block; font-size:0.8em; color:var(--text-muted); margin-bottom:4px;">Montant déjà payé (GNF)</label>
+                <input type="number" id="invoiceAmountPaid" value="0" min="0" onchange="updateInvoiceTotalPreview()">
+            </div>
+            <div style="flex:1; min-width:150px;">
+                <label style="display:block; font-size:0.8em; color:var(--text-muted); margin-bottom:4px;">Échéance de paiement</label>
+                <input type="date" id="invoiceDueDate">
+            </div>
+        </div>
+        <p style="text-align:right; font-weight:600; margin:0 0 14px;">Total : <span id="invoiceTotalPreview" class="mono">0 GNF</span></p>
+
+        <div class="action-modal-buttons">
+            <button class="btn btn-success" onclick="saveInvoiceDraft()">💾 Enregistrer la facture</button>
+        </div>
+        <button class="action-modal-close" onclick="closeNewInvoiceModal()">Annuler</button>
+    </div>
+</div>
+
+<!-- Actions sur une facture enregistrée -->
+<div id="invoiceActionModal" class="action-modal-overlay" onclick="if(event.target===this) closeInvoiceActionModal();">
+    <div class="action-modal" onclick="event.stopPropagation()">
+        <h3>🧾 Facture</h3>
+        <p class="sub" id="invoiceActionModalSub"></p>
+        <div class="action-modal-buttons">
+            <button class="btn btn-primary" id="invoiceActionPrintBtn">🖨 Imprimer la facture</button>
+            <button class="btn btn-whatsapp" id="invoiceActionWhatsappBtn">📱 Envoyer par WhatsApp</button>
+            <button class="btn" id="invoiceActionPayBtn">💰 Enregistrer un paiement</button>
+            <button class="btn btn-warn" id="invoiceActionEditBtn">✏️ Modifier</button>
+        </div>
+        <button class="action-modal-close" onclick="closeInvoiceActionModal()">Fermer</button>
+    </div>
+</div>
+
+<!-- Enregistrer un paiement partiel/total sur une facture -->
+<div id="invoicePaymentModal" class="action-modal-overlay" onclick="if(event.target===this) closeInvoicePaymentModal();">
+    <div class="action-modal" onclick="event.stopPropagation()">
+        <h3>💰 Enregistrer un paiement</h3>
+        <p class="sub" id="invoicePaymentModalSub"></p>
+        <div class="auth-error" id="invoicePaymentError"></div>
+        <label style="display:block; font-size:0.85em; color:var(--text-muted); margin-bottom:4px;">Montant reçu (GNF)</label>
+        <input type="number" id="invoicePaymentAmount" min="1">
+        <div class="action-modal-buttons" style="margin-top:14px;">
+            <button class="btn btn-success" onclick="confirmInvoicePayment()">Valider le paiement</button>
+        </div>
+        <button class="action-modal-close" onclick="closeInvoicePaymentModal()">Annuler</button>
+    </div>
+</div>
 <div id="resetProdModal" style="display:none; position:fixed; inset:0; z-index:600; background:rgba(0,0,0,0.6); align-items:center; justify-content:center; padding:20px;">
     <div style="background:var(--panel, #fff); border-radius:14px; padding:24px; max-width:440px; width:100%; border:1px solid var(--line);">
         <h3 style="margin-top:0; color:var(--danger);">⚠ Confirmer la réinitialisation</h3>
@@ -3311,6 +3453,28 @@
             <button class="btn btn-success" onclick="saveEditedSale()">💾 Enregistrer les modifications</button>
         </div>
         <button class="action-modal-close" onclick="closeEditSaleModal()">Annuler</button>
+    </div>
+</div>
+
+<!-- Modale d'aide : liste des raccourcis clavier disponibles -->
+<div id="shortcutsHelpModal" class="action-modal-overlay" onclick="if(event.target===this) closeShortcutsHelp();">
+    <div class="action-modal" style="max-width:520px; text-align:left;" onclick="event.stopPropagation()">
+        <h3>⌨️ Raccourcis clavier</h3>
+        <table class="table" style="width:100%; margin:10px 0;">
+            <tbody>
+                <tr><td class="mono">F1</td><td>Afficher cette aide</td></tr>
+                <tr><td class="mono">F2</td><td>Point de vente : focus recherche produit</td></tr>
+                <tr><td class="mono">F3</td><td>Stock : focus recherche produit</td></tr>
+                <tr><td class="mono">F4</td><td>Valider la vente en cours</td></tr>
+                <tr><td class="mono">F9</td><td>Ouvrir / fermer le menu</td></tr>
+                <tr><td class="mono">Ctrl + K</td><td>Focus recherche de la section active</td></tr>
+                <tr><td class="mono">Ctrl + Entrée</td><td>Valider la vente (depuis un champ)</td></tr>
+                <tr><td class="mono">+</td><td>Ajouter (produit / client / fournisseur / ordonnance selon la section)</td></tr>
+                <tr><td class="mono">Alt + 1…9, 0</td><td>Aller à Tableau de bord, Stock, Ventes, Rapports, Achats, Traçabilité, Produits, Périmés, Lots, Clients</td></tr>
+                <tr><td class="mono">Échap</td><td>Fermer la fenêtre / formulaire / menu ouvert</td></tr>
+            </tbody>
+        </table>
+        <button class="action-modal-close" onclick="closeShortcutsHelp()">Fermer</button>
     </div>
 </div>
 
@@ -3495,6 +3659,7 @@ const TAB_ROLES = {
     12: ['pdg', 'admin'],                      // Gardes
     13: ['pdg', 'admin'],                      // Alertes
     14: ['pdg'],                               // Finances (PDG uniquement)
+    17: ['pdg', 'admin'],                      // Facturation
     15: ['pdg', 'admin'],                      // Paramètres (accès à la page ; le contenu "Utilisateurs" est filtré en plus)
     16: ['pdg', 'admin', 'agent']               // Assistant IA
 };
@@ -3518,10 +3683,11 @@ const TAB_INFO = {
     13: { label: 'Alertes',         group: 'pharmacie', svg: '<path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>' },
     3:  { label: 'Rapports',        group: 'gestion',   svg: '<line x1="4" y1="20" x2="4" y2="12"/><line x1="12" y1="20" x2="12" y2="6"/><line x1="20" y1="20" x2="20" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/>' },
     14: { label: 'Finances',        group: 'gestion',   svg: '<circle cx="12" cy="12" r="9"/><path d="M8 12h8"/><path d="M12 8v8"/>' },
+    17: { label: 'Facturation',     group: 'gestion',   svg: '<path d="M4 3h13l3 3v15H4z"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="12" y2="16"/>' },
     15: { label: 'Paramètres',      group: 'systeme',   svg: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>' },
     16: { label: 'Assistant IA',    group: 'ia',        svg: '<path d="M12 2a4 4 0 0 1 4 4v1a4 4 0 0 1 0 8v1a4 4 0 0 1-8 0v-1a4 4 0 0 1 0-8V6a4 4 0 0 1 4-4z"/><path d="M9 9h.01"/><path d="M15 9h.01"/><path d="M9 15c.6.6 1.5 1 3 1s2.4-.4 3-1"/>' }
 };
-const TAB_ORDER = [0, 6, 1, 8, 7, 2, 11, 9, 4, 10, 12, 5, 13, 3, 14, 16, 15];
+const TAB_ORDER = [0, 6, 1, 8, 7, 2, 11, 9, 4, 10, 12, 5, 13, 3, 17, 14, 16, 15];
 const MAX_SHORTCUTS = 5;
 
 function renderShortcutBar(currentTab) {
@@ -4358,7 +4524,7 @@ function normalizeData(raw) {
     const base = {
         products: [], sales: [], commandes: [], movements: [], clients: [],
         ordonnances: [], suppliers: [], guardPartners: [], guardSchedule: [],
-        expenses: [], creditPayments: [], logo: ''
+        expenses: [], creditPayments: [], invoices: [], logo: ''
     };
     return Object.assign(base, raw || {});
 }
@@ -4377,7 +4543,8 @@ const MERGEABLE_COLLECTIONS = {
     guardPartners: 'id',
     guardSchedule: 'id',
     expenses: 'id',
-    creditPayments: 'id'
+    creditPayments: 'id',
+    invoices: 'id'
 };
 
 // Marque un enregistrement comme modifié maintenant, pour permettre la fusion
@@ -4652,6 +4819,7 @@ if (!Array.isArray(data.guardPartners)) data.guardPartners = [];
 if (!Array.isArray(data.guardSchedule)) data.guardSchedule = [];
 if (!Array.isArray(data.expenses)) data.expenses = [];
 if (!Array.isArray(data.creditPayments)) data.creditPayments = [];
+if (!Array.isArray(data.invoices)) data.invoices = [];
 if (typeof data.logo !== 'string') data.logo = '';
 if (!data.settings || typeof data.settings !== 'object') data.settings = {};
 if (!data.settings.pharmacy) data.settings.pharmacy = { nom: 'Diabaté & Frères Sarl', adresse: 'Grande gare routière, Siguiri, Guinée', telephone: '628 60 81 44', email: '', rccm: '' };
@@ -4997,6 +5165,7 @@ function openTab(n) {
     if (n === 14) renderFinances();
     if (n === 15) renderSettingsTab();
     if (n === 16) renderAITab();
+    if (n === 17) renderInvoicesTable();
 }
 
 // ---------- Accueil ----------
@@ -8909,6 +9078,427 @@ function saveEditedSale() {
     showToast('Vente mise à jour avec succès.', 'success');
 }
 
+// ============================================================
+// MODULE FACTURATION
+// Factures numérotées séquentiellement (FAC-AAAA-0000), générables depuis une vente
+// existante ou créées librement pour un client (particulier ou professionnel).
+// Prix nets, pas de gestion de TVA.
+// ============================================================
+
+// Génère le prochain numéro de facture pour l'année en cours. La séquence repart à 1
+// chaque nouvelle année civile et se base sur les factures déjà enregistrées (et non un
+// compteur en mémoire) pour rester correcte après une fusion multi-appareils ou un
+// rechargement de page.
+function getNextInvoiceNumber() {
+    const year = new Date().getFullYear();
+    const prefix = 'FAC-' + year + '-';
+    let maxSeq = 0;
+    (data.invoices || []).forEach((inv) => {
+        if (inv.number && inv.number.startsWith(prefix)) {
+            const seq = parseInt(inv.number.slice(prefix.length), 10);
+            if (!isNaN(seq) && seq > maxSeq) maxSeq = seq;
+        }
+    });
+    return prefix + String(maxSeq + 1).padStart(4, '0');
+}
+
+function invoiceStatus(inv) {
+    const paid = inv.amountPaid || 0;
+    if (paid >= inv.total) return 'payee';
+    if (paid > 0) return 'partielle';
+    return 'impayee';
+}
+function invoiceStatusLabel(status) {
+    return {payee: 'Payée', partielle: 'Partielle', impayee: 'Impayée'}[status] || status;
+}
+function invoiceStatusColor(status) {
+    return {payee: 'var(--ok, #2f8f4e)', partielle: 'var(--warn, #b97a3b)', impayee: 'var(--danger, #c0392b)'}[status] || '';
+}
+
+// ---------- Affichage de la liste des factures ----------
+function renderInvoicesTable() {
+    const body = document.getElementById('invoicesTableBody');
+    if (!body) return;
+    const q = (document.getElementById('invoiceSearch').value || '').toLowerCase().trim();
+    const statusFilter = document.getElementById('invoiceStatusFilter').value;
+    let list = (data.invoices || []).slice().sort((a, b) => new Date(b.date) - new Date(a.date));
+    if (q) {
+        list = list.filter(inv =>
+            (inv.number || '').toLowerCase().includes(q) ||
+            (inv.clientName || '').toLowerCase().includes(q));
+    }
+    if (statusFilter) list = list.filter(inv => invoiceStatus(inv) === statusFilter);
+
+    body.innerHTML = list.length === 0
+        ? '<tr class="empty-row"><td colspan="6" class="empty-msg">Aucune facture</td></tr>'
+        : list.map((inv) => {
+            const status = invoiceStatus(inv);
+            const idx = data.invoices.indexOf(inv);
+            return `
+            <tr>
+                <td class="mono">${escapeHtml(inv.number)}</td>
+                <td>${new Date(inv.date).toLocaleDateString('fr-FR')}</td>
+                <td>${escapeHtml(inv.clientName || 'Client occasionnel')}</td>
+                <td class="mono">${formatGNF(inv.total)}</td>
+                <td><span style="color:${invoiceStatusColor(status)}; font-weight:600;">${invoiceStatusLabel(status)}</span></td>
+                <td><button class="btn" onclick="openInvoiceActionModal(${idx})" style="width:auto; padding:5px 10px;">⋯</button></td>
+            </tr>`;
+        }).join('');
+}
+
+// ---------- Facture créée depuis une vente existante ----------
+function openInvoiceFromSalePicker() {
+    document.getElementById('invoiceFromSaleSearch').value = '';
+    renderInvoiceFromSaleList();
+    document.getElementById('invoiceFromSaleModal').classList.add('open');
+}
+function closeInvoiceFromSalePicker() {
+    document.getElementById('invoiceFromSaleModal').classList.remove('open');
+}
+function renderInvoiceFromSaleList() {
+    const container = document.getElementById('invoiceFromSaleList');
+    const q = (document.getElementById('invoiceFromSaleSearch').value || '').toLowerCase().trim();
+    const invoicedSaleIds = new Set((data.invoices || []).filter(inv => inv.saleId).map(inv => inv.saleId));
+    let list = data.sales.slice().sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 200);
+    if (q) {
+        list = list.filter(s =>
+            (s.clientName || '').toLowerCase().includes(q) ||
+            new Date(s.date).toLocaleDateString('fr-FR').includes(q));
+    }
+    container.innerHTML = list.length === 0
+        ? '<p class="empty-msg">Aucune vente trouvée</p>'
+        : list.map((s) => {
+            const alreadyInvoiced = s.id && invoicedSaleIds.has(s.id);
+            return `
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 4px; border-bottom:1px solid var(--line);">
+                <div>
+                    <div style="font-weight:600;">${new Date(s.date).toLocaleDateString('fr-FR')} — ${formatGNF(s.total)}</div>
+                    <div style="font-size:0.82em; color:var(--text-muted);">${escapeHtml(s.clientName || 'Client occasionnel')} · ${s.items.length} article(s)</div>
+                </div>
+                ${alreadyInvoiced
+                    ? `<span style="font-size:0.8em; color:var(--text-muted);">Déjà facturée</span>`
+                    : `<button class="btn btn-primary" style="width:auto; padding:6px 12px;" onclick="createInvoiceFromSale('${s.id}')">Facturer</button>`}
+            </div>`;
+        }).join('');
+}
+function createInvoiceFromSale(saleId) {
+    const sale = data.sales.find(s => s.id === saleId);
+    if (!sale) return;
+    closeInvoiceFromSalePicker();
+    openNewInvoiceModal(sale);
+}
+
+// ---------- Création / édition d'une facture ----------
+let editingInvoiceIndex = null; // null = nouvelle facture, sinon index dans data.invoices
+let invoiceDraftItems = [];
+
+function openNewInvoiceModal(fromSale, editIndex) {
+    document.getElementById('newInvoiceError').classList.remove('show');
+    populateInvoiceClientSelect();
+    populateInvoiceProductSelect();
+
+    if (editIndex !== undefined && editIndex !== null) {
+        // Édition d'une facture déjà enregistrée
+        const inv = data.invoices[editIndex];
+        editingInvoiceIndex = editIndex;
+        invoiceDraftItems = inv.items.map(it => ({...it}));
+        document.getElementById('newInvoiceModalTitle').textContent = '✏️ Modifier la facture';
+        document.getElementById('newInvoiceModalSub').textContent = inv.number;
+        document.getElementById('invoiceClientName').value = inv.clientName || '';
+        document.getElementById('invoiceClientPhone').value = inv.clientPhone || '';
+        document.getElementById('invoiceAmountPaid').value = inv.amountPaid || 0;
+        document.getElementById('invoiceDueDate').value = inv.dueDate || '';
+        document.getElementById('invoiceClientSelect').value = inv.clientId || '';
+    } else {
+        editingInvoiceIndex = null;
+        invoiceDraftItems = fromSale ? fromSale.items.map(it => ({...it})) : [];
+        document.getElementById('newInvoiceModalTitle').textContent = '🧾 Nouvelle facture';
+        document.getElementById('newInvoiceModalSub').textContent =
+            fromSale ? ('Depuis la vente du ' + new Date(fromSale.date).toLocaleDateString('fr-FR')) : getNextInvoiceNumber() + ' (numéro provisoire)';
+        document.getElementById('invoiceClientName').value = fromSale ? (fromSale.clientName || '') : '';
+        document.getElementById('invoiceClientPhone').value = '';
+        document.getElementById('invoiceAmountPaid').value = fromSale ? (fromSale.amountPaid || 0) : 0;
+        document.getElementById('invoiceDueDate').value = '';
+        document.getElementById('invoiceClientSelect').value = fromSale && fromSale.clientId ? fromSale.clientId : '';
+        newInvoiceSourceSale = fromSale || null;
+    }
+
+    renderInvoiceItems();
+    document.getElementById('newInvoiceModal').classList.add('open');
+}
+let newInvoiceSourceSale = null;
+function closeNewInvoiceModal() {
+    document.getElementById('newInvoiceModal').classList.remove('open');
+    editingInvoiceIndex = null;
+    invoiceDraftItems = [];
+    newInvoiceSourceSale = null;
+}
+function populateInvoiceClientSelect() {
+    const sel = document.getElementById('invoiceClientSelect');
+    if (!sel) return;
+    sel.innerHTML = '<option value="">— Client occasionnel / libre —</option>' +
+        data.clients.slice().sort((a, b) => a.name.localeCompare(b.name))
+            .map(c => `<option value="${escapeHtml(c.id)}">${escapeHtml(c.name)}</option>`).join('');
+}
+function applyInvoiceClientSelection() {
+    const sel = document.getElementById('invoiceClientSelect');
+    const client = data.clients.find(c => c.id === sel.value);
+    if (client) {
+        document.getElementById('invoiceClientName').value = client.name;
+        document.getElementById('invoiceClientPhone').value = client.phone || '';
+    }
+}
+function populateInvoiceProductSelect() {
+    const sel = document.getElementById('invoiceAddProduct');
+    if (!sel) return;
+    sel.innerHTML = data.products.slice().sort((a, b) => a.name.localeCompare(b.name))
+        .map(p => `<option value="${escapeHtml(p.code)}">${escapeHtml(p.name)}</option>`).join('');
+}
+function renderInvoiceItems() {
+    const body = document.getElementById('invoiceItemsBody');
+    body.innerHTML = invoiceDraftItems.length === 0
+        ? '<tr class="empty-row"><td colspan="4" class="empty-msg">Aucun article — ajoutez-en un ci-dessous</td></tr>'
+        : invoiceDraftItems.map((it, idx) => `
+            <tr>
+                <td>${escapeHtml(it.name)}</td>
+                <td><input type="number" min="0" value="${it.qty}" style="width:60px;" onchange="updateInvoiceDraftItem(${idx}, 'qty', this.value)"></td>
+                <td><input type="number" min="0" value="${it.price}" style="width:90px;" onchange="updateInvoiceDraftItem(${idx}, 'price', this.value)"></td>
+                <td><button class="btn btn-danger" onclick="removeInvoiceDraftItem(${idx})" style="width:auto; padding:4px 8px;" title="Retirer">✕</button></td>
+            </tr>`).join('');
+    updateInvoiceTotalPreview();
+}
+function updateInvoiceDraftItem(idx, field, value) {
+    const n = parseInt(value, 10);
+    if (isNaN(n) || n < 0) return;
+    invoiceDraftItems[idx][field] = n;
+    updateInvoiceTotalPreview();
+}
+function removeInvoiceDraftItem(idx) {
+    invoiceDraftItems.splice(idx, 1);
+    renderInvoiceItems();
+}
+function addItemToInvoiceDraft() {
+    const sel = document.getElementById('invoiceAddProduct');
+    const qtyInput = document.getElementById('invoiceAddQty');
+    const code = sel.value;
+    const qty = parseInt(qtyInput.value, 10);
+    if (!code || isNaN(qty) || qty <= 0) return;
+    const product = data.products.find(p => p.code === code);
+    if (!product) return;
+    const existing = invoiceDraftItems.find(it => it.code === code);
+    if (existing) existing.qty += qty;
+    else invoiceDraftItems.push({code: product.code, name: product.name, price: product.price, qty});
+    qtyInput.value = 1;
+    renderInvoiceItems();
+}
+function updateInvoiceTotalPreview() {
+    const total = invoiceDraftItems.reduce((s, it) => s + (it.price * it.qty), 0);
+    const el = document.getElementById('invoiceTotalPreview');
+    if (el) el.textContent = formatGNF(total);
+}
+function saveInvoiceDraft() {
+    const errBox = document.getElementById('newInvoiceError');
+    errBox.classList.remove('show');
+    if (invoiceDraftItems.length === 0) {
+        errBox.textContent = 'Ajoutez au moins un article à la facture.';
+        errBox.classList.add('show');
+        return;
+    }
+    const clientName = document.getElementById('invoiceClientName').value.trim();
+    const clientPhone = document.getElementById('invoiceClientPhone').value.trim();
+    const clientId = document.getElementById('invoiceClientSelect').value || null;
+    const amountPaid = Math.max(0, parseInt(document.getElementById('invoiceAmountPaid').value, 10) || 0);
+    const dueDate = document.getElementById('invoiceDueDate').value || '';
+    const total = invoiceDraftItems.reduce((s, it) => s + (it.price * it.qty), 0);
+
+    if (editingInvoiceIndex !== null) {
+        // Édition d'une facture existante : le numéro et la date d'origine sont conservés.
+        const inv = data.invoices[editingInvoiceIndex];
+        inv.items = invoiceDraftItems.map(it => ({...it}));
+        inv.total = total;
+        inv.clientName = clientName;
+        inv.clientPhone = clientPhone;
+        inv.clientId = clientId;
+        inv.amountPaid = amountPaid;
+        inv.dueDate = dueDate;
+        touchRecord(inv);
+    } else {
+        const invoice = {
+            id: 'INV' + Date.now() + '-' + Math.floor(Math.random() * 10000),
+            number: getNextInvoiceNumber(),
+            date: new Date().toISOString(),
+            items: invoiceDraftItems.map(it => ({...it})),
+            total,
+            clientId,
+            clientName,
+            clientPhone,
+            amountPaid,
+            dueDate,
+            saleId: newInvoiceSourceSale ? (newInvoiceSourceSale.id || null) : null
+        };
+        touchRecord(invoice);
+        if (!Array.isArray(data.invoices)) data.invoices = [];
+        data.invoices.push(invoice);
+    }
+
+    closeNewInvoiceModal();
+    saveData();
+    renderInvoicesTable();
+    showToast('Facture enregistrée avec succès.', 'success');
+}
+
+// ---------- Actions sur une facture (impression, paiement, WhatsApp, édition) ----------
+let currentInvoiceActionIndex = null;
+function openInvoiceActionModal(idx) {
+    const inv = data.invoices[idx];
+    if (!inv) return;
+    currentInvoiceActionIndex = idx;
+    const status = invoiceStatus(inv);
+    document.getElementById('invoiceActionModalSub').textContent =
+        `${inv.number} · ${escapeHtml(inv.clientName || 'Client occasionnel')} · ${formatGNF(inv.total)} · ${invoiceStatusLabel(status)}`;
+    document.getElementById('invoiceActionPrintBtn').onclick = () => printInvoice(inv);
+    document.getElementById('invoiceActionWhatsappBtn').onclick = () => sendInvoiceWhatsApp(inv);
+    document.getElementById('invoiceActionPayBtn').onclick = () => { closeInvoiceActionModal(); openInvoicePaymentModal(idx); };
+    document.getElementById('invoiceActionEditBtn').onclick = () => { closeInvoiceActionModal(); openNewInvoiceModal(null, idx); };
+    document.getElementById('invoiceActionModal').classList.add('open');
+}
+function closeInvoiceActionModal() {
+    document.getElementById('invoiceActionModal').classList.remove('open');
+}
+
+let payingInvoiceIndex = null;
+function openInvoicePaymentModal(idx) {
+    const inv = data.invoices[idx];
+    if (!inv) return;
+    payingInvoiceIndex = idx;
+    const remaining = inv.total - (inv.amountPaid || 0);
+    document.getElementById('invoicePaymentModalSub').textContent =
+        `${inv.number} — Reste à payer : ${formatGNF(remaining)}`;
+    document.getElementById('invoicePaymentAmount').value = remaining > 0 ? remaining : '';
+    document.getElementById('invoicePaymentError').classList.remove('show');
+    document.getElementById('invoicePaymentModal').classList.add('open');
+}
+function closeInvoicePaymentModal() {
+    document.getElementById('invoicePaymentModal').classList.remove('open');
+    payingInvoiceIndex = null;
+}
+function confirmInvoicePayment() {
+    const inv = data.invoices[payingInvoiceIndex];
+    if (!inv) return;
+    const amount = parseInt(document.getElementById('invoicePaymentAmount').value, 10);
+    const errBox = document.getElementById('invoicePaymentError');
+    const remaining = inv.total - (inv.amountPaid || 0);
+    if (isNaN(amount) || amount <= 0) {
+        errBox.textContent = 'Montant invalide.';
+        errBox.classList.add('show');
+        return;
+    }
+    if (amount > remaining) {
+        errBox.textContent = `Le montant dépasse le solde restant (${formatGNF(remaining)}).`;
+        errBox.classList.add('show');
+        return;
+    }
+    inv.amountPaid = (inv.amountPaid || 0) + amount;
+    touchRecord(inv);
+    closeInvoicePaymentModal();
+    saveData();
+    renderInvoicesTable();
+    showToast('Paiement enregistré.', 'success');
+}
+
+function printInvoice(inv) {
+    const p = data.settings.pharmacy || {};
+    const d = new Date(inv.date);
+    const itemsHtml = inv.items.map(i => `
+        <tr>
+            <td>${escapeHtml(i.name)}</td>
+            <td style="text-align:center;">${i.qty}</td>
+            <td style="text-align:right;">${formatGNF(i.price)}</td>
+            <td style="text-align:right;">${formatGNF(i.price * i.qty)}</td>
+        </tr>`).join('');
+    const remaining = inv.total - (inv.amountPaid || 0);
+
+    const invoiceHtml = `
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>${escapeHtml(inv.number)} — Diabaté et Frères Sarl</title>
+            <link rel="preconnect" href="https://fonts.googleapis.com">
+            <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Work+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+            <style>
+                @page { size: A4; margin: 16mm; }
+                * { box-sizing: border-box; }
+                body { font-family: 'Work Sans', Arial, sans-serif; color: #16261c; font-size: 13px; max-width: 720px; margin: 0 auto; }
+                .rule { height: 2px; background: linear-gradient(90deg, transparent, #d1852c 15%, #d1852c 85%, transparent); margin: 14px 0; }
+                .header { display:flex; justify-content:space-between; align-items:flex-start; }
+                h1 { font-family: 'Fraunces', serif; font-weight: 700; font-size: 24px; color: #0a3d22; margin: 0 0 4px; }
+                p { margin: 2px 0; }
+                p.tagline { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: #b97a3b; }
+                .doc-title { text-align:right; }
+                .doc-title h2 { font-family: 'Fraunces', serif; font-size: 20px; color:#0a3d22; margin:0; }
+                .doc-title p { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color:#4a5a50; }
+                .parties { display:flex; justify-content:space-between; margin: 18px 0; gap: 24px; }
+                .party h4 { margin:0 0 4px; font-size:11px; text-transform:uppercase; letter-spacing:0.08em; color:#6b7c71; }
+                .party p { font-size:13px; }
+                table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+                thead th { font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.05em; color: #0a3d22; text-align: left; border-bottom: 2px solid #0a3d22; padding: 6px 4px; }
+                td { padding: 7px 4px; font-size: 12.5px; font-variant-numeric: tabular-nums; border-bottom: 1px solid #eee; }
+                .totals { margin-top: 14px; margin-left:auto; width: 280px; }
+                .totals-row { display:flex; justify-content:space-between; padding: 5px 0; font-size: 13px; }
+                .totals-row.grand { font-family: 'Fraunces', serif; font-weight:700; font-size: 17px; color:#0a3d22; border-top: 2px solid #0a3d22; padding-top:8px; margin-top:4px; }
+                .totals-row.remaining { color:#c0392b; font-weight:600; }
+                .footer { margin-top: 40px; text-align: center; font-family: 'Fraunces', serif; font-style: italic; font-size: 13px; color: #0a3d22; }
+                .footer-sub { text-align: center; margin-top: 4px; font-size: 9.5px; color: #9a9a8c; }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <div>
+                    <h1>${escapeHtml(p.nom) || 'Diabaté &amp; Frères Sarl'}</h1>
+                    <p class="tagline">${escapeHtml(p.adresse) || 'Siguiri, Guinée'}</p>
+                    <p style="font-size:11.5px; color:#6b7c71;">${p.telephone ? 'Tél : ' + escapeHtml(p.telephone) : ''}${p.rccm ? ' · RCCM : ' + escapeHtml(p.rccm) : ''}</p>
+                </div>
+                <div class="doc-title">
+                    <h2>FACTURE</h2>
+                    <p>${escapeHtml(inv.number)}</p>
+                    <p>${d.toLocaleDateString('fr-FR')}</p>
+                </div>
+            </div>
+            <div class="rule"></div>
+            <div class="parties">
+                <div class="party">
+                    <h4>Facturé à</h4>
+                    <p><strong>${escapeHtml(inv.clientName) || 'Client occasionnel'}</strong></p>
+                    ${inv.clientPhone ? `<p>${escapeHtml(inv.clientPhone)}</p>` : ''}
+                </div>
+                ${inv.dueDate ? `<div class="party"><h4>Échéance</h4><p>${new Date(inv.dueDate).toLocaleDateString('fr-FR')}</p></div>` : ''}
+            </div>
+            <table>
+                <thead><tr><th>Article</th><th style="text-align:center;">Qté</th><th style="text-align:right;">P.U. (GNF)</th><th style="text-align:right;">Total (GNF)</th></tr></thead>
+                <tbody>${itemsHtml}</tbody>
+            </table>
+            <div class="totals">
+                <div class="totals-row grand"><span>TOTAL</span><span>${formatGNF(inv.total)}</span></div>
+                <div class="totals-row"><span>Montant payé</span><span>${formatGNF(inv.amountPaid || 0)}</span></div>
+                ${remaining > 0 ? `<div class="totals-row remaining"><span>Solde restant</span><span>${formatGNF(remaining)}</span></div>` : ''}
+            </div>
+            <p class="footer">Merci de votre confiance</p>
+            <p class="footer-sub">Diabaté &amp; Frères Sarl — Pharmacie</p>
+        </body>
+        </html>
+    `;
+    printHtmlDocument(invoiceHtml);
+}
+function sendInvoiceWhatsApp(inv) {
+    const phone = (inv.clientPhone || '').replace(/[^\d+]/g, '');
+    const remaining = inv.total - (inv.amountPaid || 0);
+    const text = `Facture ${inv.number}\nDiabaté & Frères Sarl\nDate : ${new Date(inv.date).toLocaleDateString('fr-FR')}\nClient : ${inv.clientName || 'Client occasionnel'}\nTotal : ${formatGNF(inv.total)}${remaining > 0 ? '\nSolde restant : ' + formatGNF(remaining) : '\n(Payée intégralement)'}\n\nMerci de votre confiance.`;
+    const url = phone
+        ? `https://wa.me/${phone.replace('+', '')}?text=${encodeURIComponent(text)}`
+        : `https://wa.me/?text=${encodeURIComponent(text)}`;
+    window.open(url, '_blank');
+}
+
 function printReceipt(sale) {
     const d = new Date(sale.date);
     const p = data.settings.pharmacy || {};
@@ -9044,9 +9634,128 @@ function closeImageLightbox() {
     document.getElementById('imageLightbox').classList.remove('open');
     document.getElementById('lightboxImg').src = '';
 }
+function openShortcutsHelp() {
+    const el = document.getElementById('shortcutsHelpModal');
+    if (el) el.classList.add('open');
+}
+function closeShortcutsHelp() {
+    const el = document.getElementById('shortcutsHelpModal');
+    if (el) el.classList.remove('open');
+}
+
+// ---------- Raccourcis clavier ----------
+// Pensés pour un usage au comptoir/clavier physique (vente rapide, navigation entre
+// sections, fermeture de modales) sans gêner la saisie normale dans les champs texte.
 document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') closeImageLightbox();
+    const active = document.activeElement;
+    const tag = active ? active.tagName : '';
+    const isTyping = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || (active && active.isContentEditable);
+
+    // Échap : ferme la modale ouverte la plus "récente" trouvée (vente, aperçu image,
+    // aide raccourcis), sinon le premier formulaire d'ajout/édition visible, sinon le
+    // menu latéral. Fonctionne même en train de taper (comportement standard d'Échap).
+    if (e.key === 'Escape') {
+        closeImageLightbox();
+        const shortcutsHelp = document.getElementById('shortcutsHelpModal');
+        if (shortcutsHelp && shortcutsHelp.classList.contains('open')) { closeShortcutsHelp(); return; }
+        const saleActionModal = document.getElementById('saleActionModal');
+        if (saleActionModal && saleActionModal.classList.contains('open')) { closeSaleActionModal(); return; }
+        const editSaleModal = document.getElementById('editSaleModal');
+        if (editSaleModal && editSaleModal.classList.contains('open')) { closeEditSaleModal(); return; }
+        const openForm = Array.from(document.querySelectorAll('[id$="Form"]'))
+            .find(el => window.getComputedStyle(el).display !== 'none');
+        if (openForm) { openForm.style.display = 'none'; return; }
+        const sidebar = document.getElementById('appSidebar');
+        if (sidebar && sidebar.classList.contains('open')) { closeSidebar(); return; }
+        return;
+    }
+
+    // F1 : affiche l'aide des raccourcis clavier (fonctionne même en cours de saisie,
+    // comme Échap, puisque ce n'est qu'une consultation sans effet de bord).
+    if (e.key === 'F1') {
+        e.preventDefault();
+        openShortcutsHelp();
+        return;
+    }
+
+    // Le reste des raccourcis ne se déclenche pas pendant une saisie de texte, pour ne
+    // pas interférer avec la frappe normale dans un champ (ex: taper "F2" dans un nom).
+    if (isTyping) {
+        // Exception : Entrée dans le champ code-barres/produit ajoute déjà l'article
+        // (géré séparément par onkeydown sur le champ). Ctrl+Entrée valide la vente
+        // directement depuis n'importe quel champ du point de vente.
+        if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+            const tab2 = document.getElementById('tab2');
+            if (tab2 && tab2.classList.contains('active')) { e.preventDefault(); validateSale(); }
+        }
+        return;
+    }
+
+    // F2 : focus sur la recherche produit du point de vente (code-barres / nom).
+    if (e.key === 'F2') {
+        e.preventDefault();
+        openTab(2);
+        const el = document.getElementById('barcode');
+        if (el) el.focus();
+        return;
+    }
+    // F3 : focus sur la recherche du Stock.
+    if (e.key === 'F3') {
+        e.preventDefault();
+        openTab(1);
+        const el = document.getElementById('search');
+        if (el) el.focus();
+        return;
+    }
+    // F4 : valide la vente en cours (équivalent au bouton "Valider la vente").
+    if (e.key === 'F4') {
+        e.preventDefault();
+        const tab2 = document.getElementById('tab2');
+        if (tab2 && tab2.classList.contains('active')) validateSale();
+        return;
+    }
+    // F9 : ouvre/ferme le menu latéral.
+    if (e.key === 'F9') {
+        e.preventDefault();
+        toggleSidebar();
+        return;
+    }
+    // Ctrl/Cmd + K : focus rapide sur le champ de recherche de l'onglet actif, quel qu'il
+    // soit (point de vente, stock, clients, fournisseurs, ordonnances, traçabilité...).
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        const activePanel = document.querySelector('.tab-content.active');
+        if (!activePanel) return;
+        const searchEl = activePanel.querySelector('input[id$="Search"], #search, #barcode');
+        if (searchEl) searchEl.focus();
+        return;
+    }
+    // Alt + 1..9 puis 0 : navigation directe vers les sections principales (correspond à
+    // l'ordre du menu : 1=Tableau de bord, 2=Stock, 3=Ventes, 4=Rapports, 5=Achats,
+    // 6=Traçabilité, 7=Produits, 8=Périmés, 9=Lots, 0=Clients).
+    if (e.altKey && /^[0-9]$/.test(e.key)) {
+        const map = {'1':0, '2':1, '3':2, '4':3, '5':4, '6':5, '7':6, '8':7, '9':8, '0':9};
+        if (map[e.key] !== undefined && canAccessTab(map[e.key])) {
+            e.preventDefault();
+            openTab(map[e.key]);
+        }
+        return;
+    }
+    // "+" ou "=" : ouvre le formulaire d'ajout adapté à la section active (Produit sur
+    // Stock/Produits, Client sur Clients, Fournisseur sur Fournisseurs, etc.).
+    if (e.key === '+' || e.key === '=') {
+        const activePanel = document.querySelector('.tab-content.active');
+        if (!activePanel) return;
+        const id = activePanel.id;
+        e.preventDefault();
+        if (id === 'tab1' || id === 'tab6') { if (typeof openAddProductForm === 'function') openAddProductForm(); }
+        else if (id === 'tab9') { if (typeof openAddClientForm === 'function') openAddClientForm(); }
+        else if (id === 'tab10') { if (typeof openAddSupplierForm === 'function') openAddSupplierForm(); }
+        else if (id === 'tab11') { if (typeof openAddOrdonnanceForm === 'function') openAddOrdonnanceForm(); }
+        return;
+    }
 });
+
 
 // ---------- Menu principal (sidebar) ----------
 function toggleSidebar(e) {
