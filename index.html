@@ -3478,11 +3478,126 @@
     </div>
 </div>
 
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js">
+
+// ============================================================
+// Network status monitoring
+// ============================================================
+window.addEventListener('online', () => {
+    console.log('✓ Back online');
+    setSyncStatus('online', 'Online');
+    showToast('Back online', 'success', 2000);
+});
+
+window.addEventListener('offline', () => {
+    console.log('✗ Went offline');
+    setSyncStatus('offline', 'Offline');
+    showToast('Working offline. Changes will sync when online.', 'warn', 3000);
+});
+
+</script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js">
+
+// ============================================================
+// Network status monitoring
+// ============================================================
+window.addEventListener('online', () => {
+    console.log('✓ Back online');
+    setSyncStatus('online', 'Online');
+    showToast('Back online', 'success', 2000);
+});
+
+window.addEventListener('offline', () => {
+    console.log('✗ Went offline');
+    setSyncStatus('offline', 'Offline');
+    showToast('Working offline. Changes will sync when online.', 'warn', 3000);
+});
+
+</script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js">
+
+// ============================================================
+// Network status monitoring
+// ============================================================
+window.addEventListener('online', () => {
+    console.log('✓ Back online');
+    setSyncStatus('online', 'Online');
+    showToast('Back online', 'success', 2000);
+});
+
+window.addEventListener('offline', () => {
+    console.log('✗ Went offline');
+    setSyncStatus('offline', 'Offline');
+    showToast('Working offline. Changes will sync when online.', 'warn', 3000);
+});
+
+</script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js">
+
+// ============================================================
+// Network status monitoring
+// ============================================================
+window.addEventListener('online', () => {
+    console.log('✓ Back online');
+    setSyncStatus('online', 'Online');
+    showToast('Back online', 'success', 2000);
+});
+
+window.addEventListener('offline', () => {
+    console.log('✗ Went offline');
+    setSyncStatus('offline', 'Offline');
+    showToast('Working offline. Changes will sync when online.', 'warn', 3000);
+});
+
+</script>
 <script>
+
+// ============================================================
+// PHASE 1 OPTIMIZATIONS - August 2026
+// Error handling + Performance monitoring
+// ============================================================
+
+/**
+ * Prevents single function crash from bringing down entire app
+ */
+const withErrorBoundary = (fn, funcName = 'Function') => {
+    return async (...args) => {
+        try {
+            return await fn(...args);
+        } catch (error) {
+            const msg = error?.message || String(error);
+            console.error(`[ErrorBoundary] ${funcName}:`, error);
+            showToast(`⚠ ${funcName} failed: ${msg}`, 'error', 5000);
+            return null;
+        }
+    };
+};
+
+/**
+ * Performance tracking - identifies slow operations
+ */
+const PerfMetrics = {
+    marks: {},
+    start(name) { this.marks[name] = performance.now(); },
+    end(name) {
+        if (!this.marks[name]) return 0;
+        const duration = performance.now() - this.marks[name];
+        console.log(`⏱ ${name}: ${duration.toFixed(2)}ms`);
+        if (duration > 500) console.warn(`🐌 SLOW: ${name} took ${duration.toFixed(0)}ms`);
+        delete this.marks[name];
+        return duration;
+    }
+};
+
+/**
+ * Make functions globally available
+ */
+window.PerfMetrics = PerfMetrics;
+window.withErrorBoundary = withErrorBoundary;
+
+console.log('✓ Phase 1 optimizations loaded');
+
+
 
 // ---------- Sécurité : échappement HTML (anti-XSS) ----------
 // Toute donnée saisie par un utilisateur (nom de produit, client, fournisseur,
@@ -9946,9 +10061,73 @@ if ('serviceWorker' in navigator) {
     });
     observer.observe(document.body, { childList: true, subtree: true });
 })();
+
+
+// ============================================================
+// Network status monitoring
+// ============================================================
+window.addEventListener('online', () => {
+    console.log('✓ Back online');
+    setSyncStatus('online', 'Online');
+    showToast('Back online', 'success', 2000);
+});
+
+window.addEventListener('offline', () => {
+    console.log('✗ Went offline');
+    setSyncStatus('offline', 'Offline');
+    showToast('Working offline. Changes will sync when online.', 'warn', 3000);
+});
+
 </script>
 
 <script>
+
+// ============================================================
+// PHASE 1 OPTIMIZATIONS - August 2026
+// Error handling + Performance monitoring
+// ============================================================
+
+/**
+ * Prevents single function crash from bringing down entire app
+ */
+const withErrorBoundary = (fn, funcName = 'Function') => {
+    return async (...args) => {
+        try {
+            return await fn(...args);
+        } catch (error) {
+            const msg = error?.message || String(error);
+            console.error(`[ErrorBoundary] ${funcName}:`, error);
+            showToast(`⚠ ${funcName} failed: ${msg}`, 'error', 5000);
+            return null;
+        }
+    };
+};
+
+/**
+ * Performance tracking - identifies slow operations
+ */
+const PerfMetrics = {
+    marks: {},
+    start(name) { this.marks[name] = performance.now(); },
+    end(name) {
+        if (!this.marks[name]) return 0;
+        const duration = performance.now() - this.marks[name];
+        console.log(`⏱ ${name}: ${duration.toFixed(2)}ms`);
+        if (duration > 500) console.warn(`🐌 SLOW: ${name} took ${duration.toFixed(0)}ms`);
+        delete this.marks[name];
+        return duration;
+    }
+};
+
+/**
+ * Make functions globally available
+ */
+window.PerfMetrics = PerfMetrics;
+window.withErrorBoundary = withErrorBoundary;
+
+console.log('✓ Phase 1 optimizations loaded');
+
+
 // ==================== Assistant IA (OpenAI) ====================
 // Clé API stockée uniquement en local (localStorage), jamais transmise ailleurs qu'à OpenAI.
 const OPENAI_CONFIG_KEY = 'diabate_pharma_openai_config_v1';
@@ -10178,6 +10357,23 @@ async function checkDrugInteractions() {
         btn.disabled = false; btn.textContent = '⚕ Vérifier les interactions';
     }
 }
+
+
+// ============================================================
+// Network status monitoring
+// ============================================================
+window.addEventListener('online', () => {
+    console.log('✓ Back online');
+    setSyncStatus('online', 'Online');
+    showToast('Back online', 'success', 2000);
+});
+
+window.addEventListener('offline', () => {
+    console.log('✗ Went offline');
+    setSyncStatus('offline', 'Offline');
+    showToast('Working offline. Changes will sync when online.', 'warn', 3000);
+});
+
 </script>
 </body>
 </html>
